@@ -13,8 +13,9 @@
 #define OPERATOR_MUL                   13
 #define OPERATOR_MOD                   14
 #define OPERATOR_NOT                   15
-#define TOKEN_TYPE_IDENTIFIER          16
-#define TOKEN_TYPE_VARIABLE            17
-#define OPERATOR_OPEN_PAREN            18
-#define OPERATOR_CLOSE_PAREN           19
-#define TOKEN_VARIABLE                 20
+#define OPERATOR_SEMI_COLON            16
+#define TOKEN_TYPE_IDENTIFIER          17
+#define TOKEN_TYPE_VARIABLE            18
+#define OPERATOR_OPEN_PAREN            19
+#define OPERATOR_CLOSE_PAREN           20
+#define OPERATOR_COMMA                 21

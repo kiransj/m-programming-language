@@ -2,13 +2,13 @@
 #define _TOKENIZER_H_
 
 #include <stdio.h>
-#include "grammer.h"
+
 extern unsigned int line_number;
 
 char* token_to_str(int token);
 typedef enum
 {
-	IDENTIFIER_UNKNOWN,
+	IDENTIFIER_TYPE_UNKNOWN,
 	IDENTIFIER_TYPE_NUMBER,
 	IDENTIFIER_TYPE_FLOAT,	
 	IDENTIFIER_TYPE_STRING,
@@ -31,10 +31,12 @@ typedef struct _Identifier
 		int 	argument_number;
 		int		register_number;
 	}u;
-}Identifier;
+}*Identifier;
 void Identifier_to_str(Identifier id, char * const buffer, const int size);
 
-void Varable_Destroy(Identifier t);
+
+Identifier Identifier_Create(void);
+void Identifier_Destroy(Identifier A);
 Identifier Identifier_Clone(Identifier A);
 Identifier Identifier_NewString(const char *str);
 Identifier Identifier_NewFloat(const double real);
@@ -51,8 +53,6 @@ YYSTYPE   yylval;
 extern FILE *yyin;
 
 int yylex(void);
-struct yy_buffer_state * yy_scan_string(const char *);
-void yy_delete_buffer(struct yy_buffer_state *);
-
+int yylex_destroy(void);
 #endif
 

@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include "tokenizer.h"
 
+#include "grammer.h"
 %}
 
 %%
@@ -31,7 +32,8 @@
 "&&"	{  return OPERATOR_AND;}
 "("		{  return OPERATOR_OPEN_PAREN;}
 ")"		{  return OPERATOR_CLOSE_PAREN;}
-
+";"		{  return OPERATOR_SEMI_COLON;}
+","		{  return OPERATOR_COMMA;}
 \n		{line_number++;}
 [\t ]*	;
 #[^\n]*	;
