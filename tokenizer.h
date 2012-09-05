@@ -53,8 +53,6 @@ YYSTYPE   yylval;
 extern FILE *yyin;
 
 int yylex(void);
-struct yy_buffer_state * yy_scan_string(const char *);
-void yy_delete_buffer(struct yy_buffer_state *);
-
+int yylex_destroy(void);
 #endif
 

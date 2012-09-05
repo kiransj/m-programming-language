@@ -1,5 +1,5 @@
 GCC=gcc
-CFLAGS = -g
+CFLAGS = -g -Wall
 
 LEMON:=lemon
 
@@ -28,13 +28,13 @@ $(OUTPUT): $(COMPILER_OBJECTS)
 %.o:%.l
 	@echo "compiling $^"
 	@flex --outfile=`basename $^ .l`.c $(LEXER_FILE)
-	@$(GCC) $(CFLAGS) -c `basename $^ .l`.c -o $@
+	@$(GCC) -g -c `basename $^ .l`.c -o $@
 	@rm `basename $^ .l`.c
 
 %.o:%.y
 	@echo "compiling $^"
 	@$(LEMON) -q $^
-	@$(GCC) $(CFLAGS) $(INCLUDES) -c `basename $^ .y`.c -o $@
+	@$(GCC) -g $(INCLUDES) -c `basename $^ .y`.c -o $@
 	@rm `basename $^ .y`.c
 
 %.o:%.c

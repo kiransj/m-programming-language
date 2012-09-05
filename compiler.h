@@ -10,12 +10,7 @@ typedef struct _Compiler
 }*Compiler;
 
 
-int Command(Compiler,int oper);
-void Command_Push(Compiler C, Identifier A);
-Identifier Command_function_call(Compiler c, Identifier A, int num_args);
-Identifier Command_Operation(Compiler, Identifier A, int oper, Identifier B);
-
-enum
+typedef enum
 {
 	SUB,
 	ADD,
@@ -31,8 +26,12 @@ enum
 	OR, 
 	AND,
 	EQU,
-	PUSH,
 	STMT_END,
-};
+}CompilerCmd;
+
+void Command(Compiler, CompilerCmd oper);
+void Command_FunctionArg(Compiler C, Identifier A, int pos);
+Identifier Command_function_call(Compiler c, Identifier A, int num_args);
+Identifier Command_Operation(Compiler, Identifier A, CompilerCmd oper, Identifier B);
 
 #endif

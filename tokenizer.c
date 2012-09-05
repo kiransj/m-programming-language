@@ -5,7 +5,6 @@
 
 void Identifier_to_str(Identifier id, char * const buffer, const int size)
 {
-	int count = 0;
 	switch(id->type)
 	{
 
