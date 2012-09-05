@@ -6,9 +6,11 @@ typedef struct _Compiler
 {
 	int line_number;
 	int error_flag;
-}Compiler;
+	int reg_num;
+}*Compiler;
 
 
-Identifier Command(Compiler, Identifier A, int oper, Identifier B);
+int Command(Compiler,int oper);
+Identifier Command_Operation(Compiler, Identifier A, int oper, Identifier B);
 
 #endif

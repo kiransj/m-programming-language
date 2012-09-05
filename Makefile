@@ -42,5 +42,5 @@ $(OUTPUT): $(COMPILER_OBJECTS)
 	@$(GCC) $(CFLAGS) $(INCLUDES) -c $^  -o $@
 
 clean:
-	@rm -f $(COMPILER_OBJECTS) $(OUTPUT)
+	@rm -f $(COMPILER_OBJECTS) $(OUTPUT) *core*
 

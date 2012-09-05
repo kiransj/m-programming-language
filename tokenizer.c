@@ -66,7 +66,7 @@ char* token_to_str(int token)
 {
 	switch(token)
 	{
-		case OPERATOR_EQU:			return "EQU";
+		case OPERATOR_EQU:			return "MOV";
 		case OPERATOR_AND:			return "AND";
 		case OPERATOR_OR:			return "OR";
 		case OPERATOR_CMP:			return "CMP";
@@ -249,7 +249,11 @@ void Identifier_Destroy(Identifier t)
 	char buf[100];
 	Identifier_to_str(t, buf, 100);
 	LOG_ERROR("deleting %s", buf);
-#endif	
+#endif
+	if(IS_NULL(t))
+	{
+		return;
+	}
 	if(t->type == IDENTIFIER_TYPE_VARIABLE)
 	{
 		Free(t->u.str);
