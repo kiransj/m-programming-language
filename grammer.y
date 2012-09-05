@@ -44,7 +44,7 @@ stmt ::= stmt simple_stmt.
 %type expr {Identifier}
 %destructor expr {Identifier_Destroy($$);}
 
-simple_stmt ::= expr OPERATOR_SEMI_COLON.
+simple_stmt ::= expr(A) OPERATOR_SEMI_COLON.			{Identifier_Destroy(A);}
 
 
 expr(A) ::= TOKEN_TYPE_IDENTIFIER(B).					{A = Identifier_Clone(B); Identifier_Destroy(B);}

@@ -31,10 +31,11 @@ typedef struct _Identifier
 		int 	argument_number;
 		int		register_number;
 	}u;
-}Identifier;
+}*Identifier;
 void Identifier_to_str(Identifier id, char * const buffer, const int size);
 
 
+Identifier Identifier_Create(void);
 void Identifier_Destroy(Identifier A);
 Identifier Identifier_Clone(Identifier A);
 Identifier Identifier_NewString(const char *str);
