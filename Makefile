@@ -1,29 +1,39 @@
 GCC=gcc
 CFLAGS = -g
 
-GRAMMER_FILE:=eval.y
-LEXER_FILE:=tokenizer.l
+LEMON:=lemon
 
-SOURCE := compile.c 
-COMPILER_OBJECTS := $(SOURCE:.c=.o)
+GRAMMER_FILE:=grammer.y
+LEXER_FILE:=lexer.l
+
+SOURCE := compiler.c 
+SOURCE += util.c
+SOURCE += tokenizer.c
+
+COMPILER_OBJECTS :=
 COMPILER_OBJECTS += $(GRAMMER_FILE:.y=.o)
 COMPILER_OBJECTS += $(LEXER_FILE:.l=.o)
+COMPILER_OBJECTS += $(SOURCE:.c=.o)
 
-INCLUDES:= -I. -I../
+INCLUDES:= -I. 
 
-all: $(LIBRARY_NAME)
+OUTPUT:=a.out
 
+all: $(OUTPUT)
+
+$(OUTPUT): $(COMPILER_OBJECTS)
+	@$(GCC) -o $(OUTPUT) $(CFLAGS) $(INCLUDES) $(COMPILER_OBJECTS)
 
 %.o:%.l
 	@echo "compiling $^"
-	@flex --outfile=`basename $^ .l`.c tokenizer.l
+	@flex --outfile=`basename $^ .l`.c $(LEXER_FILE)
 	@$(GCC) $(CFLAGS) -c `basename $^ .l`.c -o $@
 	@rm `basename $^ .l`.c
 
 %.o:%.y
 	@echo "compiling $^"
-	@./lemon.out -q $^
-	@gcc $(CFLAGS) $(INCLUDES) -c `basename $^ .y`.c -o $@
+	@$(LEMON) -q $^
+	@$(GCC) $(CFLAGS) $(INCLUDES) -c `basename $^ .y`.c -o $@
 	@rm `basename $^ .y`.c
 
 %.o:%.c
@@ -31,4 +41,4 @@ all: $(LIBRARY_NAME)
 	@$(GCC) $(CFLAGS) $(INCLUDES) -c $^  -o $@
 	
 clean:
-	@rm -f $(LEMON_OUTPUT) $(COMPILER_OBJECTS) $(LIBRARY_NAME) 
+	@rm -f $(COMPILER_OBJECTS) $(OUTPUT) 

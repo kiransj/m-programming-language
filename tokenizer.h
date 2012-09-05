@@ -1,12 +1,11 @@
 #ifndef _TOKENIZER_H_
 #define _TOKENIZER_H_
 
+#include <stdio.h>
 extern unsigned int line_number;
 typedef enum
 {
-	OPERATOR_SET,
-	OPERATOR_ADDEQ,
-	OPERATOR_SUBEQ,
+	OPERATOR_EQU,
 	OPERATOR_AND,
 	OPERATOR_OR,
 	OPERATOR_CMP,
@@ -20,7 +19,6 @@ typedef enum
 	OPERATOR_DIV,
 	OPERATOR_MUL,
 	OPERATOR_MOD,
-	OPERATOR_POW,
 	OPERATOR_NOT,
 	OPERATOR_SEMI_COLON,
 	OPERATOR_COMMA,	
@@ -41,7 +39,7 @@ typedef enum
 	KEYWORD_UNKNOWN,
 
 	TOKEN_TYPE_INDENTIFIER, /*Used for Integer, float, string*/
-	TOKEN_TYPE_Variable,
+	TOKEN_TYPE_VARIABLE,
 }TokenType;
 
 typedef enum
@@ -51,7 +49,8 @@ typedef enum
 	IDENTIFIER_TYPE_FLOAT,	
 	IDENTIFIER_TYPE_STRING,
 	IDENTIFIER_TYPE_ARGUMENT,
-	IDENTIFIER_TYPE_Variable,
+	IDENTIFIER_TYPE_VARIABLE,
+	IDENTIFIER_TYPE_REGISTER,
 }IdentifierType;
 
 typedef struct _Identifier
@@ -63,7 +62,8 @@ typedef struct _Identifier
 		char 	*variable_name;
 		double 	real;
 		int 	number;
-		int 	argument_number
+		int 	argument_number;
+		int		register_number;
 	}u;
 }Identifier;
 
@@ -73,4 +73,18 @@ Identifier Identifier_NewFloat(const double real);
 Identifier Identifier_NewArgument(const int argument_number);
 Identifier Identifier_NewVariable(const char *variable_name);
 Identifier Identifier_NewInteger(const int number);
+
+#ifndef YYSTYPE
+#define YYSTYPE Identifier 
 #endif
+
+YYSTYPE   yylval;
+
+extern FILE *yyin;
+
+int yylex(void);
+struct yy_buffer_state * yy_scan_string(const char *);
+void yy_delete_buffer(struct yy_buffer_state *);
+
+#endif
+

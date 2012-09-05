@@ -1,7 +1,7 @@
 %{
 #include <string.h>
 #include <stdlib.h>
-#include "tokenzier.h"
+#include "tokenizer.h"
 
 %}
 
@@ -26,16 +26,14 @@
 \"[^\"]*\"			   { yylval = Identifier_NewString(yytext); 			return TOKEN_TYPE_INDENTIFIER;}
 [a-zA-Z_][a-zA-Z_0-9]* { yylval = Identifier_NewVariable(yytext); 		  	return TOKEN_TYPE_VARIABLE;}
 
-"+="	{  return OPERATOR_ADDEQ;}
-"-="	{  return OPERATOR_SUBEQ;}
+
 "+"		{  return OPERATOR_ADD;}
 "-"		{  return OPERATOR_SUB;}
 "*"		{  return OPERATOR_MUL;}
 "/"		{  return OPERATOR_DIV;}
 ">"		{  return OPERATOR_GTH;}
 "<"		{  return OPERATOR_LTH;}
-"="		{  return OPERATOR_SET;}
-"^"	 	{  return OPERATOR_POW;}
+":="	{  return OPERATOR_EQU;}
 "!"		{  return OPERATOR_NOT;}
 "%"		{  return OPERATOR_MOD;}
 ">="	{  return OPERATOR_GTE;}
