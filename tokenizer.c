@@ -1,6 +1,7 @@
 #include <string.h>
 #include "tokenizer.h"
 #include "util.h"
+#include "compiler.h"
 
 void Identifier_to_str(Identifier id, char * const buffer, const int size)
 {
@@ -62,28 +63,6 @@ char* IdentifierType_str(IdentifierType type)
 	return "NULL";
 }
 
-char* token_to_str(int token)
-{
-	switch(token)
-	{
-		case OPERATOR_EQU:			return "MOV";
-		case OPERATOR_AND:			return "AND";
-		case OPERATOR_OR:			return "OR";
-		case OPERATOR_CMP:			return "CMP";
-		case OPERATOR_NEQ:			return "NEQ";
-		case OPERATOR_GTH:			return "GTH";								
-		case OPERATOR_GTE:			return "GTE";
-		case OPERATOR_LTH:			return "LTH";
-		case OPERATOR_LTE:			return "LTE";
-		case OPERATOR_ADD:			return "ADD";
-		case OPERATOR_SUB:			return "SUB";
-		case OPERATOR_DIV:			return "DIV";
-		case OPERATOR_MUL:			return "MUL";
-		case OPERATOR_MOD:			return "MOD";
-		case OPERATOR_NOT:			return "NOT";
-		default:					return "NULL";
-	}
-}
 
 Identifier Identifier_NewString(const char *str)
 {

@@ -1,0 +1,2 @@
+b:=fun(a, "kiran");
+c:=b+a;

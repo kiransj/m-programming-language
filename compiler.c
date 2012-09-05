@@ -4,41 +4,77 @@
 #include <malloc.h>
 
 #include "compiler.h"
-#include "tokenizer.h"
 #include "util.h"
-
-#include "grammer.h"
-
 
 
 unsigned int line_number;
 
+char* token_to_str(int token)
+{
+	switch(token)
+	{
+		case EQU:			return "MOV";
+		case AND:			return "AND";
+		case OR:			return "OR";
+		case CMP:			return "CMP";
+		case NEQ:			return "NEQ";
+		case GTH:			return "GTH";								
+		case GTE:			return "GTE";
+		case LTH:			return "LTH";
+		case LTE:			return "LTE";
+		case ADD:			return "ADD";
+		case SUB:			return "SUB";
+		case DIV:			return "DIV";
+		case MUL:			return "MUL";
+		case MOD:			return "MOD";
+		default:			return "NULL";
+	}
+}
+
+
 int Command(Compiler c, int oper)
 {
-	if(oper == OPERATOR_SEMI_COLON)
+	if(oper == STMT_END)
 	{
 		c->reg_num = 0;
 	}
 }
 
+void Command_Push(Compiler C, Identifier A)
+{
+	char buf1[64];
+	Identifier_to_str(A, buf1, 64);
+	LOG_INFO_NL("PUSH %s", buf1);
+	Identifier_Destroy(A);
+	return ;
+}
+Identifier Command_function_call(Compiler c, Identifier A, int num_args)
+{
+	char buf1[64], buf2[64];
+	Identifier res = Identifier_NewRegister(c->reg_num++);
+	Identifier_to_str(res, buf2, 64);
+	LOG_INFO_NL("CALL %s %d %s", A->u.variable_name, num_args, buf2);
+	Identifier_Destroy(A);
+	return res;
+}
 Identifier Command_Operation(Compiler c, Identifier A, int oper, Identifier B)
 {
 	switch(oper)
 	{
-		case	OPERATOR_SUB:
-		case	OPERATOR_ADD:
-		case	OPERATOR_MUL:
-		case	OPERATOR_DIV:
-		case	OPERATOR_MOD:
-		case	OPERATOR_GTH:
-		case	OPERATOR_LTH:
-		case	OPERATOR_GTE:
-		case	OPERATOR_LTE:
-		case	OPERATOR_CMP:
-		case	OPERATOR_NEQ:
-		case	OPERATOR_OR: 
-		case	OPERATOR_EQU: 
-		case	OPERATOR_AND:
+		case	SUB:
+		case	ADD:
+		case	MUL:
+		case	DIV:
+		case	MOD:
+		case	GTH:
+		case	LTH:
+		case	GTE:
+		case	LTE:
+		case	CMP:
+		case	NEQ:
+		case	OR: 
+		case	EQU: 
+		case	AND:
 			{
 				char buf1[64], buf2[64], buf3[64];
 				Identifier res = Identifier_NewRegister(c->reg_num++);
@@ -86,7 +122,7 @@ int main(int argc, char *argv[])
 			fprintf(stderr, "stopping parsing due to syntax error\n");
 			break;
 		}
-	}	
+	}
 	Parse(pParser, 0, yylval, c);
 	ParseFree(pParser, Free);
 	Free(c);

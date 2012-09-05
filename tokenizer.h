@@ -2,7 +2,7 @@
 #define _TOKENIZER_H_
 
 #include <stdio.h>
-#include "grammer.h"
+
 extern unsigned int line_number;
 
 char* token_to_str(int token);
