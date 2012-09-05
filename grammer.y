@@ -1,7 +1,8 @@
 %token_type {Identifier}
 %default_type {Identifier}
 
-%token_destructor  {  Indentifier_Destroy($$); }
+%extra_argument {Compiler compiler}
+/*%token_destructor  {  Indentifier_Destroy($$); }*/
 
 %include {
 #include <stdio.h>
@@ -12,7 +13,6 @@
 #include "util.h"
 }
 
-%extra_argument {Compiler compiler}
 /*
 	Set each OPERATORator priority. The priority is in increasing order.
 	So the Priority of OPERATOR_ADD is more than OPERATOR_CMP.
@@ -41,10 +41,14 @@ all ::= stmt.
 stmt ::= .
 stmt ::= stmt simple_stmt.
 
+%type expr {Identifier}
+%destructor expr {Identifier_Destroy($$);}
+
 simple_stmt ::= expr OPERATOR_SEMI_COLON.
 
-expr(A) ::= TOKEN_TYPE_IDENTIFIER(B).					{A = Identifier_Clone(B); }
-expr(A) ::= TOKEN_TYPE_VARIABLE(B).						{A = Identifier_Clone(B); }
+
+expr(A) ::= TOKEN_TYPE_IDENTIFIER(B).					{A = Identifier_Clone(B); Identifier_Destroy(B);}
+expr(A) ::= TOKEN_TYPE_VARIABLE(B).						{A = Identifier_Clone(B); Identifier_Destroy(B);}
 
 expr(A) ::= expr(B) OPERATOR_SUB   expr(C).		{A = Command(compiler, B, OPERATOR_SUB, C);}
 expr(A) ::= expr(B) OPERATOR_ADD   expr(C).		{A = Command(compiler, B, OPERATOR_ADD, C);}

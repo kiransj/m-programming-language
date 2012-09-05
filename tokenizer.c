@@ -39,7 +39,7 @@ void Identifier_to_str(Identifier id, char * const buffer, const int size)
 				break;
 			}
 
-		case IDENTIFIER_UNKNOWN: 		
+		case IDENTIFIER_TYPE_UNKNOWN: 		
 		default: 
 			strcpy(buffer, "unknown"); 
 			return;
@@ -50,7 +50,7 @@ char* IdentifierType_str(IdentifierType type)
 {
 	switch(type)
 	{
-		case IDENTIFIER_UNKNOWN: 		return "unknown";
+		case IDENTIFIER_TYPE_UNKNOWN:	return "unknown";
 		case IDENTIFIER_TYPE_NUMBER:	return "int";
 		case IDENTIFIER_TYPE_FLOAT:		return "float";
 		case IDENTIFIER_TYPE_STRING:	return "string";
@@ -188,9 +188,11 @@ Identifier Identifier_Clone(Identifier a)
 	return i;
 
 }
-
-void Indentifier_Destroy(Identifier t)
+void Identifier_Destroy(Identifier t)
 {
+	char buf[100];
+	Identifier_to_str(t, buf, 100);
+	LOG_INFO("delete %s", buf);
 	if(t.type == IDENTIFIER_TYPE_VARIABLE)
 	{
 		Free(t.u.str);
@@ -198,6 +200,10 @@ void Indentifier_Destroy(Identifier t)
 	else if(t.type == IDENTIFIER_TYPE_STRING)
 	{
 		Free(t.u.variable_name);
+	}
+	else if(t.type == IDENTIFIER_TYPE_UNKNOWN)
+	{
+		abort();
 	}
 	memset(&t, 0, sizeof(struct _Identifier));
 	return;

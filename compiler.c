@@ -22,6 +22,8 @@ Identifier Command(Compiler c, Identifier A, int oper, Identifier B)
 	Identifier_to_str(A, buf1, 100);
 	Identifier_to_str(B, buf2, 100);
 	Identifier_to_str(res, buf3, 100);
+	Identifier_Destroy(A);
+	Identifier_Destroy(B);
 	LOG_INFO_NL("%s = %s %s %s", buf3, buf1, token_to_str(oper), buf2);
 	return res;
 }
