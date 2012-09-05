@@ -31,7 +31,7 @@
 "&&"	{  return OPERATOR_AND;}
 "("		{  return OPERATOR_OPEN_PAREN;}
 ")"		{  return OPERATOR_CLOSE_PAREN;}
-
+";"		{  return OPERATOR_SEMI_COLON;}
 \n		{line_number++;}
 [\t ]*	;
 #[^\n]*	;

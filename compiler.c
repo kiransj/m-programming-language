@@ -10,12 +10,13 @@
 #include "grammer.h"
 
 
-int reg_num = 0;
+
 unsigned int line_number;
 
 
 Identifier Command(Compiler c, Identifier A, int oper, Identifier B)
 {
+	static int reg_num = 0;
 	char buf1[100], buf2[100], buf3[100];
 	Identifier res = Identifier_NewRegister(reg_num++);
 	Identifier_to_str(A, buf1, 100);

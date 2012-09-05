@@ -36,7 +36,13 @@
    fprintf(stderr, "Syntax error on line %d !!!\n", compiler.line_number);
 }
 
-all ::= expr.
+all ::= stmt.
+
+stmt ::= .
+stmt ::= stmt simple_stmt.
+
+simple_stmt ::= expr OPERATOR_SEMI_COLON.
+
 expr(A) ::= TOKEN_TYPE_IDENTIFIER(B).					{A = Identifier_Clone(B); }
 expr(A) ::= TOKEN_TYPE_VARIABLE(B).						{A = Identifier_Clone(B); }
 
@@ -57,4 +63,5 @@ expr(A) ::= expr(B) OPERATOR_AND   expr(C).		{A = Command(compiler, B, OPERATOR_
 expr(A) ::= OPERATOR_OPEN_PAREN  expr(B) OPERATOR_CLOSE_PAREN.
 
 
-expr(A) ::= TOKEN_VARIABLE(B) OPERATOR_EQU   expr(C).
+expr(A) ::= TOKEN_TYPE_VARIABLE(B) OPERATOR_EQU   expr(C).	{ A = Command(compiler, B, OPERATOR_EQU, C);}
+
