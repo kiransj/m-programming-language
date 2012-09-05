@@ -96,7 +96,7 @@ Identifier Identifier_NewString(const char *str)
 	else
 	{
 		LOG_ERROR("Malloc(%d) failed", strlen(str)+1);
-		i.type = IDENTIFIER_TYPE_STRING;
+		i.type = IDENTIFIER_TYPE_UNKNOWN;
 	}
 	return i;
 }
@@ -113,7 +113,7 @@ Identifier Identifier_NewVariable(const char *variable_name)
 	else
 	{
 		LOG_ERROR("Malloc(%d) failed", strlen(variable_name)+1);
-		i.type = IDENTIFIER_TYPE_STRING;
+		i.type = IDENTIFIER_TYPE_UNKNOWN;
 	}
 	return i;
 }
@@ -181,6 +181,7 @@ Identifier Identifier_Clone(Identifier a)
 			}
 		default:
 			{
+				abort();
 				memset(&i, 0, sizeof(struct _Identifier));
 				break;
 			}
@@ -192,7 +193,6 @@ void Identifier_Destroy(Identifier t)
 {
 	char buf[100];
 	Identifier_to_str(t, buf, 100);
-	LOG_INFO("delete %s", buf);
 	if(t.type == IDENTIFIER_TYPE_VARIABLE)
 	{
 		Free(t.u.str);
