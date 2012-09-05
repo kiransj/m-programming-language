@@ -6,7 +6,7 @@ LEMON:=lemon
 GRAMMER_FILE:=grammer.y
 LEXER_FILE:=lexer.l
 
-SOURCE := compiler.c 
+SOURCE := compiler.c
 SOURCE += util.c
 SOURCE += tokenizer.c
 
@@ -15,13 +15,14 @@ COMPILER_OBJECTS += $(GRAMMER_FILE:.y=.o)
 COMPILER_OBJECTS += $(LEXER_FILE:.l=.o)
 COMPILER_OBJECTS += $(SOURCE:.c=.o)
 
-INCLUDES:= -I. 
+INCLUDES:= -I.
 
 OUTPUT:=a.out
 
 all: $(OUTPUT)
 
 $(OUTPUT): $(COMPILER_OBJECTS)
+	@echo "building $(OUTPUT)"
 	@$(GCC) -o $(OUTPUT) $(CFLAGS) $(INCLUDES) $(COMPILER_OBJECTS)
 
 %.o:%.l
@@ -39,6 +40,7 @@ $(OUTPUT): $(COMPILER_OBJECTS)
 %.o:%.c
 	@echo "compiling $^"
 	@$(GCC) $(CFLAGS) $(INCLUDES) -c $^  -o $@
-	
+
 clean:
-	@rm -f $(COMPILER_OBJECTS) $(OUTPUT) 
+	@rm -f $(COMPILER_OBJECTS) $(OUTPUT)
+

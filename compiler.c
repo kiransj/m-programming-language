@@ -9,49 +9,20 @@
 
 #include "grammer.h"
 
+
+int reg_num = 0;
 unsigned int line_number;
 
-int lexer_to_grammer(TokenType rv)
-{
-	switch(rv)
-	{
-		case	OPERATOR_EQU:			return OPER_EQU;
-		case	OPERATOR_AND:			return OPER_AND;	
-		case	OPERATOR_OR:			return OPER_OR;
-		case	OPERATOR_CMP:			return OPER_CMP;
-		case	OPERATOR_NEQ:			return OPER_NEQ;
-		case	OPERATOR_GTH:			return OPER_GTH;
-		case	OPERATOR_GTE:			return OPER_GTE;
-		case	OPERATOR_LTH:			return OPER_LTH;
-		case	OPERATOR_LTE:			return OPER_LTE;
-		case	OPERATOR_ADD:			return OPER_ADD;
-		case	OPERATOR_SUB:			return OPER_SUB;
-		case	OPERATOR_DIV:			return OPER_DIV;
-		case	OPERATOR_MUL:			return OPER_MUL;
-		case	OPERATOR_MOD:			return OPER_MOD;
-		case	OPERATOR_NOT:			return OPER_NOT;
-#if 0										
-		case	OPERATOR_SEMI_COLON:	return OPER_SEMI_COLON;
-		case	OPERATOR_COMMA:			return OPER_COMMA;
-		case	OPERATOR_OPEN_PAREN:	return OPER_OPEN_PAREN;
-		case	OPERATOR_CLOSE_PAREN:	return OPER_CLOSE_PAREN;
 
-		case	KEYWORD_ENDIF:			return KW_ENDIF;
-		case	KEYWORD_IF:				return KW_IF;
-		case	KEYWORD_WHILE:			return KW_WHILE;
-		case	KEYWORD_ENDWHILE:		return KW_ENDWHILE;
-		case	KEYWORD_RETURN:			return KW_RETURN;
-		case	KEYWORD_ENDFUNCTION:	return KW_ENDFUNCTION;
-		case	KEYWORD_VAR:			return KW_RETURN;
-		case	KEYWORD_FUNCTION:		return KW_FUNCTION;
-		case	KEYWORD_INT:			return KW_INT;
-		case	KEYWORD_FLOAT:			return KW_FLOAT;
-		case	KEYWORD_STRING:			return KW_STRING;
-		case	KEYWORD_UNKNOWN:		return KW_UNKNOWN;
-		case	TOKEN_TYPE_INDENTIFIER: return TOKEN_IDENTIFIER;										
-		case	TOKEN_TYPE_VARIABLE:	return TOKEN_VARIABLE;
-#endif										
-	}
+Identifier Command(Compiler c, Identifier A, int oper, Identifier B)
+{
+	char buf1[100], buf2[100], buf3[100];
+	Identifier res = Identifier_NewRegister(reg_num++);
+	Identifier_to_str(A, buf1, 100);
+	Identifier_to_str(B, buf2, 100);
+	Identifier_to_str(res, buf3, 100);
+	LOG_INFO_NL("%s = %s %s %s", buf3, buf1, token_to_str(oper), buf2);
+	return res;
 }
 
 int main(int argc, char *argv[])
@@ -77,7 +48,7 @@ int main(int argc, char *argv[])
 	while((yv=yylex()) != 0)
 	{
 		c.line_number = line_number;
-		Parse(pParser, lexer_to_grammer(yv), yylval, c);
+		Parse(pParser, yv, yylval, c);
 		if(c.error_flag == 1)
 		{
 			fprintf(stderr, "stopping parsing due to syntax error\n");

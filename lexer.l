@@ -6,24 +6,11 @@
 %}
 
 %%
-"unknown"		{   return KEYWORD_UNKNOWN;}
-"string"		{   return KEYWORD_STRING;}
-"int"			{   return KEYWORD_INT;}
-"real"			{   return KEYWORD_FLOAT;}
 
-"var"			{   return KEYWORD_VAR;}
-"return"		{   return KEYWORD_RETURN;}
-"while"	   		{   return KEYWORD_WHILE; }
-"endwhile"  	{   return KEYWORD_ENDWHILE;}
-"if"	   		{   return KEYWORD_IF; }
-"endif"  		{   return KEYWORD_ENDIF;}
-"function"  	{   return KEYWORD_FUNCTION;}
-"endfunction"   {   return KEYWORD_ENDFUNCTION;}
-
-\$[0-9]+			   { yylval = Identifier_NewArgument(atoi(&yytext[1])); return TOKEN_TYPE_INDENTIFIER;}
-[0-9]+				   { yylval = Identifier_NewInteger(atoi(yytext)); 	  	return TOKEN_TYPE_INDENTIFIER;}
-[0-9]*\.[0-9]+		   { yylval = Identifier_NewFloat(atof(yytext)); 		return TOKEN_TYPE_INDENTIFIER;}
-\"[^\"]*\"			   { yylval = Identifier_NewString(yytext); 			return TOKEN_TYPE_INDENTIFIER;}
+\$[0-9]+			   { yylval = Identifier_NewArgument(atoi(&yytext[1])); return TOKEN_TYPE_IDENTIFIER;}
+[0-9]+				   { yylval = Identifier_NewInteger(atoi(yytext)); 	  	return TOKEN_TYPE_IDENTIFIER;}
+[0-9]*\.[0-9]+		   { yylval = Identifier_NewFloat(atof(yytext)); 		return TOKEN_TYPE_IDENTIFIER;}
+\"[^\"]*\"			   { yylval = Identifier_NewString(yytext); 			return TOKEN_TYPE_IDENTIFIER;}
 [a-zA-Z_][a-zA-Z_0-9]* { yylval = Identifier_NewVariable(yytext); 		  	return TOKEN_TYPE_VARIABLE;}
 
 
@@ -42,8 +29,6 @@
 "!="	{  return OPERATOR_NEQ;}
 "||" 	{  return OPERATOR_OR; }
 "&&"	{  return OPERATOR_AND;}
-";"		{  return OPERATOR_SEMI_COLON;}
-","		{  return OPERATOR_COMMA;}
 "("		{  return OPERATOR_OPEN_PAREN;}
 ")"		{  return OPERATOR_CLOSE_PAREN;}
 
