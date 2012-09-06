@@ -21,3 +21,5 @@
 #define OPERATOR_COMMA                 21
 #define KEYWORD_ENDIF                  22
 #define KEYWORD_IF                     23
+#define KEYWORD_WHILE                  24
+#define KEYWORD_ENDWHILE               25

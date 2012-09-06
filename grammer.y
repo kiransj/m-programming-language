@@ -41,6 +41,7 @@ all ::= stmt.
 stmt ::= .
 stmt ::= stmt simple_stmt.
 stmt ::= stmt condition_stmt.
+stmt ::= stmt loop_stmt.
 
 stmt_end	::= OPERATOR_SEMI_COLON.					{Command(compiler, STMT_END);}
 simple_stmt ::= expr(A) stmt_end.						{Identifier_Destroy(A);}
@@ -77,8 +78,20 @@ argument_list(A) ::= .                              				{ A=0;}
 argument_list(A) ::= expr(B).                              			{ A=1; 	 Command_FunctionArg(compiler, B, A);} 
 argument_list(A) ::= argument_list(B) OPERATOR_COMMA expr(C).       { A=B+1; Command_FunctionArg(compiler, C, A);}
 
-end_if_condition 	::= KEYWORD_ENDIF.													{Command_ConditionStmt(compiler, STMT_ENDIF, NULL);} 
-if_condition	 	::= KEYWORD_IF OPERATOR_OPEN_PAREN expr(A) OPERATOR_CLOSE_PAREN.	{Command_ConditionStmt(compiler, STMT_IF, A);}
-if_condition_block	::= if_condition stmt end_if_condition. 
+%type start_if_condition {int}
+
+end_if_condition 	 ::= KEYWORD_ENDIF.													 
+start_if_condition(A)::= KEYWORD_IF OPERATOR_OPEN_PAREN expr(B) OPERATOR_CLOSE_PAREN.	{A=Command_ConditionStmt(compiler, STMT_IF, B, 0);}
+if_condition_block	 ::= start_if_condition(A) stmt end_if_condition. 					{Command_ConditionStmt(compiler, STMT_ENDIF, NULL, A);}
 
 condition_stmt ::= if_condition_block.
+
+%type start_while_loop			{int}
+%type while_condition_block		{int}
+
+start_while_loop(A)			::= KEYWORD_WHILE.															{A=Command_LoopStmt(compiler, STMT_START_WHILE, NULL, 0);}
+end_while_loop				::= KEYWORD_ENDWHILE.
+while_condition_block(A)	::= start_while_loop(B) OPERATOR_OPEN_PAREN expr(C) OPERATOR_CLOSE_PAREN. 	{A=B;Command_LoopStmt(compiler, STMT_WHILE_COND, C, B);} 
+while_loop_block			::= while_condition_block(B) stmt end_while_loop.							{Command_LoopStmt(compiler, STMT_END_WHILE, NULL, B);}
+
+loop_stmt ::= while_loop_block.

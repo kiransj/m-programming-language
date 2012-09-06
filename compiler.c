@@ -42,22 +42,46 @@ void Command(Compiler c, CompilerCmd oper)
 	}
 }
 
-void Command_ConditionStmt(Compiler c, CompilerCmd cmd, Identifier A)
+int Command_LoopStmt(Compiler c, CompilerCmd cmd, Identifier A, int label_number)
+{
+	if(STMT_START_WHILE == cmd)
+	{		
+		int label_number = c->label_number++;
+		LOG_INFO_NL("LABEL_%d:", label_number);
+		return c->label_number++;
+	}
+	else if(STMT_WHILE_COND == cmd)
+	{
+		char buf1[64];
+		Identifier_to_str(A, buf1, 64);
+		LOG_INFO_NL("JZ %s, %d", buf1, label_number);
+		return label_number;
+	}
+	else if(STMT_END_WHILE == cmd)
+	{
+		LOG_INFO_NL("JUMP %d", label_number-1);
+		LOG_INFO_NL("LABEL_%d:", label_number);
+	}
+	return 0;
+}
+
+int Command_ConditionStmt(Compiler c, CompilerCmd cmd, Identifier A, int label_number)
 {
 	char buf1[64];
 	
 	if(STMT_IF == cmd)
 	{
+		int label_number = c->label_number++;
 		Identifier_to_str(A, buf1, 64);
-		LOG_INFO_NL("JZ %s, %d", buf1, c->label_number);
-		c->label_stack[++c->label_top] = c->label_number++;
-		Identifier_Destroy(A);
+		LOG_INFO_NL("JZ %s, %d", buf1,label_number);
+		Identifier_Destroy(A); 
+		return label_number;
 	}
 	else if(STMT_ENDIF == cmd)
 	{
-		LOG_INFO_NL("LABEL %d", c->label_stack[c->label_top--]);
+		LOG_INFO_NL("LABEL_%d:", label_number);
 	}	
-	return;
+	return 0;
 }
 
 void Command_FunctionArg(Compiler C, Identifier A, int pos)
@@ -73,7 +97,7 @@ Identifier Command_function_call(Compiler c, Identifier A, int num_args)
 	char buf2[64];
 	Identifier res = Identifier_NewRegister(c->reg_num++);
 	Identifier_to_str(res, buf2, 64);
-	LOG_INFO_NL("CALL %s %d %s", A->u.variable_name, num_args, buf2);
+	LOG_INFO_NL("CALL %s, %d, %s", A->u.variable_name, num_args, buf2);
 	Identifier_Destroy(A);
 	return res;
 }
@@ -103,12 +127,12 @@ Identifier Command_Operation(Compiler c, Identifier A, CompilerCmd oper, Identif
 				Identifier_to_str(res, buf3, 64);
 				Identifier_Destroy(A);
 				Identifier_Destroy(B);
-				LOG_INFO_NL("%s %s %s %s", token_to_str(oper), buf1, buf2, buf3);
+				LOG_INFO_NL("%s %s, %s, %s", token_to_str(oper), buf1, buf2, buf3);
 				return res;
 			}
 			break;
 	default: break;			
-	}	
+	}
 	return NULL;
 }
 
@@ -136,7 +160,7 @@ int main(int argc, char *argv[])
 	}
 
 	memset(c, 0, sizeof(Compiler));
-	c->label_top = -1;
+	c->label_number = 1;
 	pParser = (void*)ParseAlloc(Malloc);
 	while((yv=yylex()) != 0)
 	{

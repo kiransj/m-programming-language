@@ -32,6 +32,7 @@ typedef struct _Identifier
 		int		register_number;
 	}u;
 }*Identifier;
+
 void Identifier_to_str(Identifier id, char * const buffer, const int size);
 
 

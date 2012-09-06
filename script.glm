@@ -1,7 +1,11 @@
-width:=get_width();
-heigth:=get_height();
-if(width > (2*height))
-	stretch:=1;
-endif
 screen_resolution:=(width+height)*bits_per_pixel;
-
+while(width > height)
+	width := width - 1;
+	if(width > (2*height))
+		stretch:=1;
+		if(height > 1000)
+			stretch:=2;
+		endif
+	endif
+endwhile
+width := width * 2;
