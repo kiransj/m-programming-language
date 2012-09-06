@@ -2,7 +2,7 @@
 #include "executable.h"
 
 
-static ByteCode ByteCode_CreateTmp(void)
+static ByteCode ByteCode_Create(void)
 {
 	ByteCode bc;
 	bc = (ByteCode)Malloc(sizeof(struct _ByteCode));
@@ -16,7 +16,13 @@ static ByteCode ByteCode_CreateTmp(void)
 	}
 	return bc;
 }
-
+static void ByteCode_Destroy(ByteCode bc)
+{
+	if(!IS_NULL(bc->A)) Identifier_Destroy(bc->A);
+	if(!IS_NULL(bc->B)) Identifier_Destroy(bc->B);
+	if(!IS_NULL(bc->C)) Identifier_Destroy(bc->C);
+	Free(bc);
+}
 
 Executable Executable_Create(void)
 {
@@ -35,10 +41,10 @@ Executable Executable_Create(void)
 		}
 		memset(exe->label_list, 0, sizeof(unsigned int) * exe->label_size);
 
-		exe->first = exe->last = ByteCode_CreateTmp();
+		exe->first = exe->last = ByteCode_Create();
 		if(IS_NULL(exe->first))
 		{
-			LOG_ERROR("ByteCode_CreateTmp() failed");
+			LOG_ERROR("ByteCode_Create() failed");
 			Free(exe);
 			return NULL;
 		}
@@ -50,14 +56,39 @@ Executable Executable_Create(void)
 	return exe;
 }
 
-
-STATUS Executable_AddCmd(Executable exe, CompilerCmd cmd, Identifier A, Identifier B, Identifier C, int number)
+void Executable_Destroy(Executable exe)
 {
-	ByteCode bc = ByteCode_CreateTmp();
+	ByteCode tmp = exe->first, tmp1;
+	while(!IS_NULL(tmp))
+	{
+		tmp1 = tmp->next;
+		ByteCode_Destroy(tmp);
+		tmp = tmp1;
+	}
+	if(!IS_NULL(exe->label_list)) Free(exe->label_list);
+	Free(exe);
+}
+
+STATUS Executable_AddCmd(Executable exe, CompilerCmd cmd, Identifier a, Identifier b, Identifier c, int number)
+{
+	Identifier A, B, C;
+	ByteCode bc = ByteCode_Create();
 	if(IS_NULL(bc))
 	{
-		LOG_ERROR("ByteCode_CreateTmp() failed");
+		LOG_ERROR("ByteCode_Create() failed");
 		return STATUS_FAILURE;
+	}
+	if(!IS_NULL(a))
+	{
+		A=Identifier_Clone(a);
+	}
+	if(!IS_NULL(b))
+	{
+		B=Identifier_Clone(b);
+	}
+	if(!IS_NULL(c))
+	{
+		C=Identifier_Clone(c);
 	}
 	switch(cmd)
 	{
@@ -102,8 +133,17 @@ STATUS Executable_AddCmd(Executable exe, CompilerCmd cmd, Identifier A, Identifi
 				bc->u.num_arguments = number;
 				break;
 			}
+		case ARGUMENT:
+			{
+				bc->cmd = ARGUMENT;
+				bc->A = A;
+				bc->u.argument_pos = number;
+				break;
+			}
 		case LABEL:
 			{
+				Free(bc);
+				bc = NULL;
 				exe->label_list[exe->label_index++] = (unsigned int)exe->last;
 				if(exe->label_index == exe->label_size)
 				{
@@ -121,6 +161,11 @@ STATUS Executable_AddCmd(Executable exe, CompilerCmd cmd, Identifier A, Identifi
 		default:
 			LOG_ERROR("unhandled cmd %u, aborting...", cmd);
 			abort();
+	}
+	if(!IS_NULL(bc))
+	{
+		exe->last->next = bc;
+		exe->last = bc;
 	}
 	return STATUS_SUCCESS;
 }

@@ -36,6 +36,7 @@ typedef enum
 	JZ,
 	CALL,
 	LABEL,
+	ARGUMENT,
 
 	STMT_END,
 	STMT_IF,

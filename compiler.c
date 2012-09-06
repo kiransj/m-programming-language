@@ -32,7 +32,6 @@ char* token_to_str(int token)
 	}
 }
 
-
 void Command(Compiler c, CompilerCmd oper)
 {
 	if(oper == STMT_END)
@@ -45,65 +44,91 @@ void Command(Compiler c, CompilerCmd oper)
 
 int Command_LoopStmt(Compiler c, CompilerCmd cmd, Identifier A, int label_number)
 {
+	int return_value=  0;
+	char buf1[64];
+	Executable exe = (Executable)c->priv_data;
 	if(STMT_START_WHILE == cmd)
 	{		
 		int label_number = c->label_number++;
 		LOG_INFO_NL("LABEL_%d:", label_number);
-		return c->label_number++;
+		Executable_AddCmd(exe, LABEL, NULL, NULL, NULL, label_number);
+		return_value = c->label_number++;
 	}
 	else if(STMT_WHILE_COND == cmd)
-	{
-		char buf1[64];
+	{		
 		Identifier_to_str(A, buf1, 64);
 		LOG_INFO_NL("JZ %s, %d", buf1, label_number);
-		return label_number;
+		Executable_AddCmd(exe, JZ, A, NULL, NULL, label_number);
+		return_value= label_number;
 	}
 	else if(STMT_END_WHILE == cmd)
 	{
-		LOG_INFO_NL("JUMP %d", label_number-1);
+		LOG_INFO_NL("JUMP %d", label_number-1);		
 		LOG_INFO_NL("LABEL_%d:", label_number);
+
+		Executable_AddCmd(exe, JUMP, NULL, NULL, NULL, label_number);
+		Executable_AddCmd(exe, LABEL, NULL, NULL, NULL, label_number);
 	}
-	return 0;
+	if(!IS_NULL(A))
+	{
+		Identifier_Destroy(A);
+	}
+	return return_value;
 }
 
 int Command_ConditionStmt(Compiler c, CompilerCmd cmd, Identifier A, int label_number)
 {
 	char buf1[64];
-	
+	Executable exe = (Executable)c->priv_data;
 	if(STMT_IF == cmd)
 	{
 		int label_number = c->label_number++;
 		Identifier_to_str(A, buf1, 64);
 		LOG_INFO_NL("JZ %s, %d", buf1,label_number);
-		Identifier_Destroy(A); 
+		Executable_AddCmd(exe, JZ, A, NULL, NULL, label_number);
+
+		Identifier_Destroy(A);
 		return label_number;
 	}
 	else if(STMT_ENDIF == cmd)
 	{
 		LOG_INFO_NL("LABEL_%d:", label_number);
+		Executable_AddCmd(exe, LABEL, NULL, NULL, NULL, label_number);
 	}	
 	return 0;
 }
 
-void Command_FunctionArg(Compiler C, Identifier A, int pos)
+void Command_FunctionArg(Compiler c, Identifier A, int pos)
 {
 	char buf1[64];
+	Executable exe = (Executable)c->priv_data;
 	Identifier_to_str(A, buf1, 64);
 	LOG_INFO_NL("ARG[%d] %s", pos, buf1);
+	Executable_AddCmd(exe, ARGUMENT, A, NULL, NULL, pos);
 	Identifier_Destroy(A);
 	return ;
 }
 Identifier Command_function_call(Compiler c, Identifier A, int num_args)
 {
 	char buf2[64];
+	Executable exe = (Executable)c->priv_data;
 	Identifier res = Identifier_NewRegister(c->reg_num++);
+	if(IS_NULL(res))
+	{
+		LOG_ERROR("Identifier_NewRegister() failed");
+		c->error_flag = 1;
+		return NULL;
+	}
+
 	Identifier_to_str(res, buf2, 64);
 	LOG_INFO_NL("CALL %s, %d, %s", A->u.variable_name, num_args, buf2);
+	Executable_AddCmd(exe, CALL, A, NULL, NULL, num_args);
 	Identifier_Destroy(A);
 	return res;
 }
 Identifier Command_Operation(Compiler c, Identifier A, CompilerCmd oper, Identifier B)
 {
+	Executable exe = (Executable)c->priv_data;
 	switch(oper)
 	{
 		case	SUB:
@@ -123,16 +148,25 @@ Identifier Command_Operation(Compiler c, Identifier A, CompilerCmd oper, Identif
 			{
 				char buf1[64], buf2[64], buf3[64];
 				Identifier res = Identifier_NewRegister(c->reg_num++);
+				if(IS_NULL(res))
+				{
+					LOG_ERROR("Identifier_NewRegister() failed");
+					c->error_flag = 1;
+					return NULL;
+				}			
 				Identifier_to_str(A, buf1, 64);
 				Identifier_to_str(B, buf2, 64);
 				Identifier_to_str(res, buf3, 64);
+				Executable_AddCmd(exe, oper, A, B, res, 0);				
+				LOG_INFO_NL("%s %s, %s, %s", token_to_str(oper), buf1, buf2, buf3);
+
 				Identifier_Destroy(A);
 				Identifier_Destroy(B);
-				LOG_INFO_NL("%s %s, %s, %s", token_to_str(oper), buf1, buf2, buf3);
 				return res;
 			}
 			break;
-	default: break;			
+		default: 
+			break;
 	}
 	return NULL;
 }
@@ -188,6 +222,7 @@ int main(int argc, char *argv[])
 	Parse(pParser, 0, yylval, c);
 	ParseFree(pParser, Free);
 	Free(c);
+	Executable_Destroy(exe);
 	fclose(yyin);
 	yylex_destroy();
 	return 0;

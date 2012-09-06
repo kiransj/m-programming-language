@@ -15,12 +15,10 @@ struct _ByteCode
 	{
 		int label_number;
 		int num_arguments;
+		int	argument_pos;
 	}u;
 	ByteCode next;
 };
-
-ByteCode ByteCode_Create(CompilerCmd cmd, Identifier A, Identifier B, Identifier C, int number);
-void 	 ByteCode_Destroy(CompilerCmd cmd);
 
 struct _Executable;
 typedef struct _Executable *Executable;
@@ -30,11 +28,14 @@ struct _Executable
 
 	unsigned int num_regs;
 	Identifier	 *regs;
+	unsigned int num_args;
+	Identifier	 *args;
 
 	unsigned int label_size, label_index;
 	unsigned int *label_list;
 };
 
 Executable Executable_Create(void);
+void Executable_Destroy(Executable exe);
 STATUS Executable_AddCmd(Executable exe, CompilerCmd cmd, Identifier A, Identifier B, Identifier C, int number);
 #endif

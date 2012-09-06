@@ -202,6 +202,7 @@ Identifier Identifier_Clone(Identifier a)
 			}
 		default:
 			{
+				LOG_ERROR("unkown type %u", a->type);
 				abort();
 				break;
 			}
