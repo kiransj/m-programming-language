@@ -45,6 +45,7 @@ typedef struct _ExecutionContext
 	ByteCode	 	cur_ptr;
 }*ExecutionContext;
 
+void ExecutionContext_Destroy(ExecutionContext ec);
 ExecutionContext ExecutionContext_Create(ByteCode cur_ptr);
 
 typedef struct _Executable

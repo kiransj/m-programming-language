@@ -45,7 +45,6 @@ void Execute_Gth(Identifier A, Identifier B, Identifier C)
 {
 	int answer = 0;
 	answer = A->u.number > B->u.number;
-	LOG_INFO("A>B = %d", answer);
 	Identifier_SetInt(C, answer);
 }
 void Execute_Lth(Identifier A, Identifier B, Identifier C)
@@ -89,7 +88,7 @@ void Execute_Jz(Executable exe, Identifier A, int label_number)
 {
 	if(A->u.number == 0)
 	{
-		LOG_INFO("label_%d address is %#x", label_number, exe->label_list[label_number]);
+	//	LOG_INFO("label_%d address is %#x", label_number, exe->label_list[label_number]);
 		exe->ec->cur_ptr = (ByteCode)exe->label_list[label_number];
 	}
 }
@@ -109,71 +108,59 @@ STATUS ExecutionContext_Execute(Executable exe)
 		switch(ec->cur_ptr->cmd)
 		{
 			case MUL:
-					LOG_INFO("MUL");
 					Execute_Mul(GetIdentifier(exe, ec->cur_ptr->A), 
 								GetIdentifier(exe, ec->cur_ptr->B), 
 								GetIdentifier(exe, ec->cur_ptr->C));
 					break;
 			case ADD:
-					LOG_INFO("ADD");
 					Execute_Add(GetIdentifier(exe, ec->cur_ptr->A), 
 								GetIdentifier(exe, ec->cur_ptr->B), 
 								GetIdentifier(exe, ec->cur_ptr->C));
 					break;
 			case SUB:
-					LOG_INFO("SUB");
 					Execute_Sub(GetIdentifier(exe, ec->cur_ptr->A), 
 								GetIdentifier(exe, ec->cur_ptr->B), 
 								GetIdentifier(exe, ec->cur_ptr->C));
 					break;				
 			case GTH:
-					LOG_INFO("GTH");
 					Execute_Gth(GetIdentifier(exe, ec->cur_ptr->A), 
 								GetIdentifier(exe, ec->cur_ptr->B), 
 								GetIdentifier(exe, ec->cur_ptr->C));
 					break;
 			case LTH:
-					LOG_INFO("LTH");
 					Execute_Lth(GetIdentifier(exe, ec->cur_ptr->A), 
 								GetIdentifier(exe, ec->cur_ptr->B), 
 								GetIdentifier(exe, ec->cur_ptr->C));				
 					break;			
 			case GTE:
-					LOG_INFO("GTE");
 					Execute_Gte(GetIdentifier(exe, ec->cur_ptr->A), 
 								GetIdentifier(exe, ec->cur_ptr->B), 
 								GetIdentifier(exe, ec->cur_ptr->C));
 					break;
 			case LTE:
-					LOG_INFO("LTE");
 					Execute_Lte(GetIdentifier(exe, ec->cur_ptr->A), 
 								GetIdentifier(exe, ec->cur_ptr->B), 
 								GetIdentifier(exe, ec->cur_ptr->C));
 					break;
 			case CMP:
-					LOG_INFO("CMP");
 					Execute_Cmp(GetIdentifier(exe, ec->cur_ptr->A), 
 								GetIdentifier(exe, ec->cur_ptr->B), 
 								GetIdentifier(exe, ec->cur_ptr->C));
 					break;
 			case NEQ:
-					LOG_INFO("NEQ");
 					Execute_Neq(GetIdentifier(exe, ec->cur_ptr->A), 
 								GetIdentifier(exe, ec->cur_ptr->B), 
 								GetIdentifier(exe, ec->cur_ptr->C));					
 					break;					
 			case EQU:
-					LOG_INFO("EQU");
 					Execute_Equ(GetIdentifier(exe, ec->cur_ptr->A), 
 								GetIdentifier(exe, ec->cur_ptr->B), 
 								GetIdentifier(exe, ec->cur_ptr->C));
 					break;
 			case JZ:
-					LOG_INFO("JZ");
 					Execute_Jz(exe, GetIdentifier(exe, ec->cur_ptr->A), ec->cur_ptr->u.label_number);
 					break;
 			case JUMP:
-					LOG_INFO("JUMP %d", ec->cur_ptr->u.label_number);
 					Execute_Jump(exe, ec->cur_ptr->u.label_number);
 					break;				
 			default:
@@ -183,9 +170,22 @@ STATUS ExecutionContext_Execute(Executable exe)
 		}
 		ec->cur_ptr = ec->cur_ptr->next;
 	}
+	ExecutionContext_Destroy(ec);
+	exe->ec = NULL;
 	return STATUS_SUCCESS;
 }
 
+void ExecutionContext_Destroy(ExecutionContext ec)
+{
+	int i;
+	for(i = 0; i < ec->num_regs; i++)
+	{
+		Identifier_Destroy(ec->regs[i]);
+	}
+	Free(ec->regs);
+	VariableList_Destroy(ec->local_variables);
+	Free(ec);
+}
 ExecutionContext ExecutionContext_Create(ByteCode cur_ptr)
 {
 	ExecutionContext ec = NULL;
@@ -212,7 +212,7 @@ ExecutionContext ExecutionContext_Create(ByteCode cur_ptr)
 		memset(ec->regs, 0, sizeof(struct _Identifier) * ec->num_regs);
 		for(i =0 ; i < ec->num_regs; i++)
 		{
-			ec->regs[i] = Identifier_Create();
+			ec->regs[i] = Identifier_NewInteger(0);
 		}
 
 		ec->local_variables = VariableList_Create("\0");
@@ -246,15 +246,17 @@ VariableList VariableList_Create(const char *variable_name)
 void VariableList_Destroy(VariableList vl)
 {
 	VariableList tmp_vl;
-	
 	while(!IS_NULL(vl))
 	{
 		tmp_vl = vl->next;
-		if(strlen(vl->variable_name) != 0) Free(vl->variable_name);
-		Identifier_Destroy(vl->id);
+		if(!IS_NULL(vl->variable_name) && strlen(vl->variable_name) != 0) 
+		{
+			Free(vl->variable_name);
+			Identifier_Destroy(vl->id);
+		}
 		Free(vl);
 		vl = tmp_vl;
-	}	
+	}
 }
 Identifier  VariableList_FindVariable(VariableList vl, const char *variable_name)
 {
@@ -272,10 +274,10 @@ Identifier  VariableList_FindVariable(VariableList vl, const char *variable_name
 		tmp_vl = VariableList_Create(variable_name);
 		if(!IS_NULL(tmp_vl))
 		{
-			tmp_vl->id = Identifier_Create();
+			tmp_vl->id = Identifier_NewInteger(0);
 			tmp_vl->next = NULL;
 			tmp_vl->variable_name = (char*)Malloc(strlen(variable_name)+1);
-			memcpy(tmp_vl->variable_name, variable_name, strlen(variable_name)+1);
+			memcpy(tmp_vl->variable_name, variable_name, strlen(variable_name));
 			vl->next = tmp_vl;
 		}
 		else
@@ -313,10 +315,10 @@ Identifier  VariableList_FindVariable(VariableList vl, const char *variable_name
 		tmp_vl = VariableList_Create(variable_name);
 		if(!IS_NULL(tmp_vl))
 		{
-			tmp_vl->id = Identifier_Create();
+			tmp_vl->id = Identifier_NewInteger(0);
 			tmp_vl->next = NULL;
 			tmp_vl->variable_name = (char*)Malloc(strlen(variable_name)+1);
-			memcpy(tmp_vl->variable_name, variable_name, strlen(variable_name)+1);
+			memcpy(tmp_vl->variable_name, variable_name, strlen(variable_name));
 			if(flag == 1)
 			{
 				tmp1_vl->next = tmp_vl;
