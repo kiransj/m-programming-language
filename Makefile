@@ -1,6 +1,6 @@
 GCC=gcc
-CFLAGS = -g -Wall
-
+CFLAGS := -g 
+WARNINGS:= -Wall
 LEMON:=lemon
 
 GRAMMER_FILE:=grammer.y
@@ -28,7 +28,7 @@ $(OUTPUT): $(COMPILER_OBJECTS)
 %.o:%.l
 	@echo "compiling $^"
 	@flex --outfile=`basename $^ .l`.c $(LEXER_FILE)
-	@$(GCC) -g -c `basename $^ .l`.c -o $@
+	@$(GCC) $(CFLAGS) -c `basename $^ .l`.c -o $@
 	@rm `basename $^ .l`.c
 
 %.o:%.y
@@ -39,7 +39,7 @@ $(OUTPUT): $(COMPILER_OBJECTS)
 
 %.o:%.c
 	@echo "compiling $^"
-	@$(GCC) $(CFLAGS) $(INCLUDES) -c $^  -o $@
+	@$(GCC) $(CFLAGS) $(WARNINGS) $(INCLUDES) -c $^  -o $@
 
 clean:
 	@rm -f $(COMPILER_OBJECTS) $(OUTPUT) *core*

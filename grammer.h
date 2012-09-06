@@ -19,3 +19,5 @@
 #define OPERATOR_OPEN_PAREN            19
 #define OPERATOR_CLOSE_PAREN           20
 #define OPERATOR_COMMA                 21
+#define KEYWORD_ENDIF                  22
+#define KEYWORD_IF                     23

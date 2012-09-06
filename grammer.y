@@ -8,7 +8,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "grammer.h"
 #include "tokenizer.h"
 #include "compiler.h"
 #include "util.h"
@@ -41,9 +40,11 @@ all ::= stmt.
 
 stmt ::= .
 stmt ::= stmt simple_stmt.
+stmt ::= stmt condition_stmt.
 
 stmt_end	::= OPERATOR_SEMI_COLON.					{Command(compiler, STMT_END);}
 simple_stmt ::= expr(A) stmt_end.						{Identifier_Destroy(A);}
+
 
 expr(A) ::= TOKEN_TYPE_IDENTIFIER(B).					{A = Identifier_Clone(B); Identifier_Destroy(B);}
 expr(A) ::= TOKEN_TYPE_VARIABLE(B).						{A = Identifier_Clone(B); Identifier_Destroy(B);}
@@ -75,3 +76,9 @@ function_call(A) ::= TOKEN_TYPE_VARIABLE(B) OPERATOR_OPEN_PAREN  argument_list(C
 argument_list(A) ::= .                              				{ A=0;} 
 argument_list(A) ::= expr(B).                              			{ A=1; 	 Command_FunctionArg(compiler, B, A);} 
 argument_list(A) ::= argument_list(B) OPERATOR_COMMA expr(C).       { A=B+1; Command_FunctionArg(compiler, C, A);}
+
+end_if_condition 	::= KEYWORD_ENDIF.													{Command_ConditionStmt(compiler, STMT_ENDIF, NULL);} 
+if_condition	 	::= KEYWORD_IF OPERATOR_OPEN_PAREN expr(A) OPERATOR_CLOSE_PAREN.	{Command_ConditionStmt(compiler, STMT_IF, A);}
+if_condition_block	::= if_condition stmt end_if_condition. 
+
+condition_stmt ::= if_condition_block.

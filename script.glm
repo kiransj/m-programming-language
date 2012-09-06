@@ -1,2 +1,7 @@
-b:=fun(a+b,b+c*d+i*j);
-c:=b+a;
+width:=get_width();
+heigth:=get_height();
+if(width > (2*height))
+	stretch:=1;
+endif
+screen_resolution:=(width+height)*bits_per_pixel;
+

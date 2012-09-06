@@ -36,8 +36,28 @@ void Command(Compiler c, CompilerCmd oper)
 {
 	if(oper == STMT_END)
 	{
+		if(c->reg_num > c->max_num_reg)
+			c->max_num_reg = c->reg_num;
 		c->reg_num = 0;
 	}
+}
+
+void Command_ConditionStmt(Compiler c, CompilerCmd cmd, Identifier A)
+{
+	char buf1[64];
+	
+	if(STMT_IF == cmd)
+	{
+		Identifier_to_str(A, buf1, 64);
+		LOG_INFO_NL("JZ %s, %d", buf1, c->label_number);
+		c->label_stack[++c->label_top] = c->label_number++;
+		Identifier_Destroy(A);
+	}
+	else if(STMT_ENDIF == cmd)
+	{
+		LOG_INFO_NL("LABEL %d", c->label_stack[c->label_top--]);
+	}	
+	return;
 }
 
 void Command_FunctionArg(Compiler C, Identifier A, int pos)
@@ -116,6 +136,7 @@ int main(int argc, char *argv[])
 	}
 
 	memset(c, 0, sizeof(Compiler));
+	c->label_top = -1;
 	pParser = (void*)ParseAlloc(Malloc);
 	while((yv=yylex()) != 0)
 	{
@@ -127,6 +148,7 @@ int main(int argc, char *argv[])
 			break;
 		}
 	}
+	LOG_INFO_NL("max number of regs required : %d", c->max_num_reg);
 	Parse(pParser, 0, yylval, c);
 	ParseFree(pParser, Free);
 	Free(c);

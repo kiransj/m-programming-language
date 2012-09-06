@@ -8,6 +8,9 @@
 
 %%
 
+"if"				   { return KEYWORD_IF;}
+"endif"				   { return KEYWORD_ENDIF;}
+
 \$[0-9]+			   { yylval = Identifier_NewArgument(atoi(&yytext[1])); return TOKEN_TYPE_IDENTIFIER;}
 [0-9]+				   { yylval = Identifier_NewInteger(atoi(yytext)); 	  	return TOKEN_TYPE_IDENTIFIER;}
 [0-9]*\.[0-9]+		   { yylval = Identifier_NewFloat(atof(yytext)); 		return TOKEN_TYPE_IDENTIFIER;}
