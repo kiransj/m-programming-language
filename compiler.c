@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <malloc.h>
 
+#include "executable.h"
 #include "compiler.h"
 #include "util.h"
 
@@ -38,7 +39,7 @@ void Command(Compiler c, CompilerCmd oper)
 	{
 		if(c->reg_num > c->max_num_reg)
 			c->max_num_reg = c->reg_num;
-		c->reg_num = 0;
+		c->reg_num = 1;
 	}
 }
 
@@ -144,6 +145,7 @@ int main(int argc, char *argv[])
 	int yv;
 	void *pParser;
 	Compiler c;
+	Executable exe;
 
 	c = (Compiler)Malloc(sizeof(struct _Compiler));
 	if(argc == 1)
@@ -152,6 +154,18 @@ int main(int argc, char *argv[])
 		return 1;
 	}
 
+	memset(c, 0, sizeof(Compiler));
+	c->label_number = 1;
+	c->reg_num = 1;
+	exe = Executable_Create();
+	if(IS_NULL(exe))
+	{
+		LOG_ERROR("Executable_Create() failed");
+		Free(c);
+		return 1;
+	}
+	c->priv_data = (void*)exe;
+
 	yyin = fopen(argv[1], "r");
 	if(NULL == yyin)
 	{
@@ -159,8 +173,6 @@ int main(int argc, char *argv[])
 		return 1;
 	}
 
-	memset(c, 0, sizeof(Compiler));
-	c->label_number = 1;
 	pParser = (void*)ParseAlloc(Malloc);
 	while((yv=yylex()) != 0)
 	{

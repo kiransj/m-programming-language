@@ -9,6 +9,7 @@ LEXER_FILE:=lexer.l
 SOURCE := compiler.c
 SOURCE += util.c
 SOURCE += tokenizer.c
+SOURCE += executable.c
 
 COMPILER_OBJECTS :=
 COMPILER_OBJECTS += $(GRAMMER_FILE:.y=.o)

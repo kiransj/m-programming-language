@@ -2,18 +2,21 @@
 #define __COMPILER_H_
 
 #include "tokenizer.h"
+
+
 typedef struct _Compiler 
 {
 	int line_number;
 	int error_flag;
 	int reg_num, max_num_reg;
-
 	int label_number;
+	void *priv_data;
 }*Compiler;
 
 
 typedef enum
 {
+	UNDEF,
 	SUB,
 	ADD,
 	MUL,
@@ -28,8 +31,13 @@ typedef enum
 	OR, 
 	AND,
 	EQU,
+
+	JUMP,
+	JZ,
+	CALL,
+	LABEL,
+
 	STMT_END,
-	
 	STMT_IF,
 	STMT_ENDIF,
 	STMT_WHILE_COND,

@@ -1,3 +1,4 @@
+width:=get_width(context);
 screen_resolution:=(width+height)*bits_per_pixel;
 while(width > height)
 	width := width - 1;
