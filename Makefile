@@ -10,6 +10,7 @@ SOURCE := compiler.c
 SOURCE += util.c
 SOURCE += tokenizer.c
 SOURCE += executable.c
+SOURCE += execute_context.c
 
 COMPILER_OBJECTS :=
 COMPILER_OBJECTS += $(GRAMMER_FILE:.y=.o)

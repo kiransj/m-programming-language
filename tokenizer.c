@@ -219,6 +219,10 @@ Identifier Identifier_Create(void)
 	{
 		LOG_ERROR("Malloc() failed");
 	}
+	else
+	{
+		memset(id, 0, sizeof(struct _Identifier));
+	}
 	return id;
 }
 

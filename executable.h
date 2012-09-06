@@ -20,20 +20,42 @@ struct _ByteCode
 	ByteCode next;
 };
 
-struct _Executable;
-typedef struct _Executable *Executable;
-struct _Executable
+typedef struct _variablelist
 {
-	ByteCode 	first, last;			
+	char *variable_name;
+	Identifier id;
+	struct _variablelist *next;
+}*VariableList;
 
+
+VariableList VariableList_Create(const char *var_name);
+void 		 VariableList_Destroy(VariableList);
+Identifier   VariableList_FindVariable(VariableList, const char *variable_name);
+
+typedef struct _ExecutionContext
+{
 	unsigned int num_regs;
-	Identifier	 *regs;
-	unsigned int num_args;
-	Identifier	 *args;
+	Identifier	 regs;
 
+	unsigned int num_args;
+	Identifier	 args;
+
+	VariableList	local_variables;	
+
+	ByteCode	 	cur_ptr;
+}*ExecutionContext;
+
+ExecutionContext ExecutionContext_Create(ByteCode cur_ptr);
+
+typedef struct _Executable
+{
+	ByteCode 	first, last;
 	unsigned int label_size, label_index;
 	unsigned int *label_list;
-};
+
+	/*Initialized during RunTime*/
+	ExecutionContext ec;
+}*Executable;
 
 Executable Executable_Create(void);
 void Executable_Destroy(Executable exe);

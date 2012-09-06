@@ -1,12 +1,7 @@
-width:=get_width(context);
-screen_resolution:=(width+height)*bits_per_pixel;
-while(width > height)
-	width := width - 1;
-	if(width > (2*height))
-		stretch:=1;
-		if(height > 1000)
-			stretch:=2;
-		endif
-	endif
+n:=10;
+sum:=0;
+while(n > 0)
+	sum:=sum+n;
+	n:=n-1;
 endwhile
-width := width * 2;
+sum:=sum;
