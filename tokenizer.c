@@ -210,6 +210,26 @@ Identifier Identifier_Clone(Identifier a)
 	return i;
 
 }
+void Identifier_SetInt(Identifier a, int num)
+{
+	if(a->type == IDENTIFIER_TYPE_STRING)
+		Free(a->u.str);
+	if(a->type == IDENTIFIER_TYPE_VARIABLE)
+		Free(a->u.variable_name);
+
+	a->type = IDENTIFIER_TYPE_NUMBER;
+	a->u.number = num;
+}
+
+void Identifier_SetFloat(Identifier a, double num)
+{
+	if(a->type == IDENTIFIER_TYPE_STRING)
+		Free(a->u.str);
+	if(a->type == IDENTIFIER_TYPE_VARIABLE)
+		Free(a->u.variable_name);
+	a->type = IDENTIFIER_TYPE_FLOAT;
+	a->u.real = num;
+}
 
 Identifier Identifier_Create(void)
 {

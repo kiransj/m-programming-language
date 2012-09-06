@@ -143,11 +143,10 @@ STATUS Executable_AddCmd(Executable exe, CompilerCmd cmd, Identifier a, Identifi
 		case LABEL:
 			{
 				Free(bc);
-				bc = NULL;
-				exe->label_list[exe->label_index++] = (unsigned int)exe->last;
-				if(exe->label_index == exe->label_size)
+				bc = NULL;				
+				if(number >= exe->label_size)
 				{
-					exe->label_size += 25;
+					exe->label_size = number;
 					exe->label_list = (unsigned int *)ReAlloc(exe->label_list, sizeof(unsigned int) * exe->label_size);
 					if(IS_NULL(exe->label_list))
 					{
@@ -156,6 +155,7 @@ STATUS Executable_AddCmd(Executable exe, CompilerCmd cmd, Identifier a, Identifi
 						return STATUS_FAILURE;
 					}
 				}
+				exe->label_list[number] = (unsigned int)exe->last;
 				break;
 			}
 		default:

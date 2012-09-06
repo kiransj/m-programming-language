@@ -66,7 +66,7 @@ int Command_LoopStmt(Compiler c, CompilerCmd cmd, Identifier A, int label_number
 		LOG_INFO_NL("JUMP %d", label_number-1);		
 		LOG_INFO_NL("LABEL_%d:", label_number);
 
-		Executable_AddCmd(exe, JUMP, NULL, NULL, NULL, label_number);
+		Executable_AddCmd(exe, JUMP, NULL, NULL, NULL, label_number-1);
 		Executable_AddCmd(exe, LABEL, NULL, NULL, NULL, label_number);
 	}
 	if(!IS_NULL(A))
@@ -221,6 +221,7 @@ int main(int argc, char *argv[])
 	LOG_INFO_NL("max number of regs required : %d", c->max_num_reg);
 	Parse(pParser, 0, yylval, c);
 	ParseFree(pParser, Free);
+	ExecutionContext_Execute(exe);
 	Free(c);
 	Executable_Destroy(exe);
 	fclose(yyin);

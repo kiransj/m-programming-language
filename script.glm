@@ -1,7 +1,12 @@
 n:=10;
-sum:=0;
+sum:=1;
 while(n > 0)
-	sum:=sum+n;
-	n:=n-1;
+	sum:=sum*n;
+	if(n > 1)
+		n:=n-1;
+	endif
+	if(n == 1)
+		n := 0;
+	endif
 endwhile
 sum:=sum;

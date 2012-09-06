@@ -45,6 +45,10 @@ Identifier Identifier_NewArgument(const int argument_number);
 Identifier Identifier_NewVariable(const char *variable_name);
 Identifier Identifier_NewInteger(const int number);
 Identifier Identifier_NewRegister(const int number);
+
+
+void Identifier_SetInt(Identifier a, int num);
+void Identifier_SetFloat(Identifier a, double num);
 #ifndef YYSTYPE
 #define YYSTYPE Identifier 
 #endif

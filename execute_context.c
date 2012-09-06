@@ -1,6 +1,104 @@
 #include <string.h>
 #include "executable.h"
 
+Identifier GetIdentifier(Executable exe, Identifier A)
+{
+	switch(A->type)
+	{
+		case IDENTIFIER_TYPE_FLOAT:
+		case IDENTIFIER_TYPE_STRING:
+		case IDENTIFIER_TYPE_NUMBER:
+				return A;
+
+		case IDENTIFIER_TYPE_REGISTER:
+				return exe->ec->regs[A->u.argument_number]; 
+
+		case IDENTIFIER_TYPE_VARIABLE:
+				return VariableList_FindVariable(exe->ec->local_variables, A->u.variable_name);
+
+		case IDENTIFIER_TYPE_ARGUMENT:
+		case IDENTIFIER_TYPE_UNKNOWN:
+				abort();
+	}
+	return NULL;
+}
+
+void Execute_Mul(Identifier A, Identifier B, Identifier C)  
+{
+	int answer = 0;
+	answer = A->u.number * B->u.number;
+	Identifier_SetInt(C, answer);
+}
+void Execute_Add(Identifier A, Identifier B, Identifier C)  
+{
+	int answer = 0;
+	answer = A->u.number + B->u.number;
+	Identifier_SetInt(C, answer);
+}
+void Execute_Sub(Identifier A, Identifier B, Identifier C)  
+{
+	int answer = 0;
+	answer = A->u.number - B->u.number;
+	Identifier_SetInt(C, answer);
+}
+void Execute_Gth(Identifier A, Identifier B, Identifier C)
+{
+	int answer = 0;
+	answer = A->u.number > B->u.number;
+	LOG_INFO("A>B = %d", answer);
+	Identifier_SetInt(C, answer);
+}
+void Execute_Lth(Identifier A, Identifier B, Identifier C)
+{
+	int answer = 0;
+	answer = A->u.number < B->u.number;
+	Identifier_SetInt(C, answer);
+}
+void Execute_Gte(Identifier A, Identifier B, Identifier C)
+{
+	int answer = 0;
+	answer = A->u.number >= B->u.number;	
+	Identifier_SetInt(C, answer);
+}
+void Execute_Lte(Identifier A, Identifier B, Identifier C)
+{
+	int answer = 0;
+	answer = A->u.number <= B->u.number;
+	Identifier_SetInt(C, answer);
+}
+void Execute_Cmp(Identifier A, Identifier B, Identifier C)
+{
+	int answer = 0;
+	answer = A->u.number == B->u.number;
+	Identifier_SetInt(C, answer);
+}
+void Execute_Neq(Identifier A, Identifier B, Identifier C)
+{
+	int answer = 0;
+	answer = A->u.number == B->u.number;
+	Identifier_SetInt(C, answer);
+}
+void Execute_Equ(Identifier A, Identifier B, Identifier C)
+{
+	Identifier_SetInt(A, B->u.number);
+	Identifier_SetInt(C, B->u.number);
+	LOG_INFO_NL("Value = %u", B->u.number);
+}
+
+void Execute_Jz(Executable exe, Identifier A, int label_number)
+{
+	if(A->u.number == 0)
+	{
+		LOG_INFO("label_%d address is %#x", label_number, exe->label_list[label_number]);
+		exe->ec->cur_ptr = (ByteCode)exe->label_list[label_number];
+	}
+}
+
+void Execute_Jump(Executable exe, int label_number)
+{
+	exe->ec->cur_ptr = (ByteCode)exe->label_list[label_number];
+}
+
 STATUS ExecutionContext_Execute(Executable exe)
 {
 	ExecutionContext ec;
@@ -8,7 +106,82 @@ STATUS ExecutionContext_Execute(Executable exe)
 	
 	while(!IS_NULL(ec->cur_ptr))
 	{
-
+		switch(ec->cur_ptr->cmd)
+		{
+			case MUL:
+					LOG_INFO("MUL");
+					Execute_Mul(GetIdentifier(exe, ec->cur_ptr->A), 
+								GetIdentifier(exe, ec->cur_ptr->B), 
+								GetIdentifier(exe, ec->cur_ptr->C));
+					break;
+			case ADD:
+					LOG_INFO("ADD");
+					Execute_Add(GetIdentifier(exe, ec->cur_ptr->A), 
+								GetIdentifier(exe, ec->cur_ptr->B), 
+								GetIdentifier(exe, ec->cur_ptr->C));
+					break;
+			case SUB:
+					LOG_INFO("SUB");
+					Execute_Sub(GetIdentifier(exe, ec->cur_ptr->A), 
+								GetIdentifier(exe, ec->cur_ptr->B), 
+								GetIdentifier(exe, ec->cur_ptr->C));
+					break;				
+			case GTH:
+					LOG_INFO("GTH");
+					Execute_Gth(GetIdentifier(exe, ec->cur_ptr->A), 
+								GetIdentifier(exe, ec->cur_ptr->B), 
+								GetIdentifier(exe, ec->cur_ptr->C));
+					break;
+			case LTH:
+					LOG_INFO("LTH");
+					Execute_Lth(GetIdentifier(exe, ec->cur_ptr->A), 
+								GetIdentifier(exe, ec->cur_ptr->B), 
+								GetIdentifier(exe, ec->cur_ptr->C));				
+					break;			
+			case GTE:
+					LOG_INFO("GTE");
+					Execute_Gte(GetIdentifier(exe, ec->cur_ptr->A), 
+								GetIdentifier(exe, ec->cur_ptr->B), 
+								GetIdentifier(exe, ec->cur_ptr->C));
+					break;
+			case LTE:
+					LOG_INFO("LTE");
+					Execute_Lte(GetIdentifier(exe, ec->cur_ptr->A), 
+								GetIdentifier(exe, ec->cur_ptr->B), 
+								GetIdentifier(exe, ec->cur_ptr->C));
+					break;
+			case CMP:
+					LOG_INFO("CMP");
+					Execute_Cmp(GetIdentifier(exe, ec->cur_ptr->A), 
+								GetIdentifier(exe, ec->cur_ptr->B), 
+								GetIdentifier(exe, ec->cur_ptr->C));
+					break;
+			case NEQ:
+					LOG_INFO("NEQ");
+					Execute_Neq(GetIdentifier(exe, ec->cur_ptr->A), 
+								GetIdentifier(exe, ec->cur_ptr->B), 
+								GetIdentifier(exe, ec->cur_ptr->C));					
+					break;					
+			case EQU:
+					LOG_INFO("EQU");
+					Execute_Equ(GetIdentifier(exe, ec->cur_ptr->A), 
+								GetIdentifier(exe, ec->cur_ptr->B), 
+								GetIdentifier(exe, ec->cur_ptr->C));
+					break;
+			case JZ:
+					LOG_INFO("JZ");
+					Execute_Jz(exe, GetIdentifier(exe, ec->cur_ptr->A), ec->cur_ptr->u.label_number);
+					break;
+			case JUMP:
+					LOG_INFO("JUMP %d", ec->cur_ptr->u.label_number);
+					Execute_Jump(exe, ec->cur_ptr->u.label_number);
+					break;				
+			default:
+					LOG_ERROR("CMD %u not found", ec->cur_ptr->cmd);
+					abort();
+					break;
+		}
+		ec->cur_ptr = ec->cur_ptr->next;
 	}
 	return STATUS_SUCCESS;
 }
@@ -18,6 +191,7 @@ ExecutionContext ExecutionContext_Create(ByteCode cur_ptr)
 	ExecutionContext ec = NULL;
 	if(!IS_NULL(cur_ptr))
 	{
+		int i = 0;
 		ec = (ExecutionContext)Malloc(sizeof(struct _ExecutionContext));
 		if(IS_NULL(ec))
 		{
@@ -28,7 +202,7 @@ ExecutionContext ExecutionContext_Create(ByteCode cur_ptr)
 		ec->cur_ptr = cur_ptr;
 
 		ec->num_regs = 25;
-		ec->regs = (Identifier)Malloc(sizeof(struct _Identifier) * ec->num_regs);
+		ec->regs = (Identifier*)Malloc(sizeof(struct _Identifier) * ec->num_regs);
 		if(IS_NULL(ec->regs))
 		{
 			LOG_ERROR("Malloc(%u) failed", sizeof(struct _Identifier) * ec->num_regs);
@@ -36,6 +210,10 @@ ExecutionContext ExecutionContext_Create(ByteCode cur_ptr)
 			return NULL;
 		}
 		memset(ec->regs, 0, sizeof(struct _Identifier) * ec->num_regs);
+		for(i =0 ; i < ec->num_regs; i++)
+		{
+			ec->regs[i] = Identifier_Create();
+		}
 
 		ec->local_variables = VariableList_Create("\0");
 		if(IS_NULL(ec->local_variables))

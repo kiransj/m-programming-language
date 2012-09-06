@@ -35,10 +35,10 @@ Identifier   VariableList_FindVariable(VariableList, const char *variable_name);
 typedef struct _ExecutionContext
 {
 	unsigned int num_regs;
-	Identifier	 regs;
+	Identifier	 *regs;
 
 	unsigned int num_args;
-	Identifier	 args;
+	Identifier	 *args;
 
 	VariableList	local_variables;	
 
@@ -60,4 +60,7 @@ typedef struct _Executable
 Executable Executable_Create(void);
 void Executable_Destroy(Executable exe);
 STATUS Executable_AddCmd(Executable exe, CompilerCmd cmd, Identifier A, Identifier B, Identifier C, int number);
+
+
+STATUS ExecutionContext_Execute(Executable exe);
 #endif
