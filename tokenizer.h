@@ -39,12 +39,18 @@ void Identifier_to_str(Identifier id, char * const buffer, const int size);
 Identifier Identifier_Create(void);
 void Identifier_Destroy(Identifier A);
 Identifier Identifier_Clone(Identifier A);
+void Identifier_Copy(Identifier src, Identifier dest);
+
 Identifier Identifier_NewString(const char *str);
 Identifier Identifier_NewFloat(const double real);
 Identifier Identifier_NewArgument(const int argument_number);
 Identifier Identifier_NewVariable(const char *variable_name);
 Identifier Identifier_NewInteger(const int number);
 Identifier Identifier_NewRegister(const int number);
+
+void Identifier_SetInt(Identifier a, int num);
+void Identifier_SetFloat(Identifier a, double num);
+void Identifier_SetString(Identifier a, char *str);
 
 typedef struct _IdentifierStack
 {
@@ -57,8 +63,6 @@ Identifier IdentifierStack_Pop(IdentifierStack);
 STATUS IdentifierStack_Push(IdentifierStack, Identifier);
 void IdentifierStack_Destroy(IdentifierStack is);
 
-void Identifier_SetInt(Identifier a, int num);
-void Identifier_SetFloat(Identifier a, double num);
 #ifndef YYSTYPE
 #define YYSTYPE Identifier 
 #endif

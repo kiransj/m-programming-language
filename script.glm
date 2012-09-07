@@ -6,5 +6,6 @@ while(n <= fact)
 	printf("fact(",n,") = ", sum);
 	n:=n+1;
 endwhile
-
 printf("Factorial of ", fact, " is " , sum);
+sum:=max(10, 12, 9)*10;
+printf("max:=", sum);

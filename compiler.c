@@ -10,6 +10,11 @@
 
 unsigned int line_number;
 
+#ifdef LOG_INFO_NL
+#undef LOG_INFO_NL
+#define LOG_INFO_NL(format, args...) 
+#endif
+
 char* token_to_str(int token)
 {
 	switch(token)
@@ -122,7 +127,7 @@ Identifier Command_function_call(Compiler c, Identifier A, int num_args)
 
 	Identifier_to_str(res, buf2, 64);
 	LOG_INFO_NL("CALL %s, %d, %s", A->u.variable_name, num_args, buf2);
-	Executable_AddCmd(exe, CALL, A, NULL, NULL, num_args);
+	Executable_AddCmd(exe, CALL, A, NULL, res, num_args);
 	Identifier_Destroy(A);
 	return res;
 }
@@ -171,32 +176,6 @@ Identifier Command_Operation(Compiler c, Identifier A, CompilerCmd oper, Identif
 	return NULL;
 }
 
-
-Identifier Function_Printf(Identifier *args, int num_args)
-{
-	int i;
-	for(i = 1; i <= num_args; i++)
-	{
-		switch(args[i]->type)
-		{
-			case IDENTIFIER_TYPE_NUMBER:
-					printf("%d", args[i]->u.number);
-					break;
-			case IDENTIFIER_TYPE_FLOAT:
-					printf("%lf", args[i]->u.real);
-					break;				
-			case IDENTIFIER_TYPE_STRING:
-					printf("%s", args[i]->u.str);
-					break;
-			default:
-					printf("unknown id type '%d'", args[i]->type);
-					abort();
-		}
-	}
-	printf("\n");
-	return NULL;
-}
-
 void* ParseAlloc(void *(*)(size_t));
 void* ParseFree(void*, void (*)(void *));
 void Parse(void*, int, Identifier, Compiler);
@@ -224,8 +203,9 @@ int main(int argc, char *argv[])
 		Free(c);
 		return 1;
 	}
-	Executable_AddNativeFunction(exe, "printf", Function_Printf);
-	c->priv_data = (void*)exe;
+
+	c->priv_data = (void*)exe;	
+	Register_Native_Functions(exe);
 
 	yyin = fopen(argv[1], "r");
 	if(NULL == yyin)
