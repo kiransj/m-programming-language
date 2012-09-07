@@ -82,7 +82,6 @@ void Execute_Equ(Identifier A, Identifier B, Identifier C)
 {
 	Identifier_SetInt(A, B->u.number);
 	Identifier_SetInt(C, B->u.number);
-	LOG_INFO_NL("Value = %u", B->u.number);
 }
 
 void Execute_Jz(Executable exe, Identifier A, int label_number)
@@ -103,7 +102,6 @@ void Execute_Call(Executable exe, const char *fun_name, int num_args)
 {
 	int i;
 	FunctionList func;
-	LOG_ERROR("call function '%s' with num args %d", fun_name, num_args);
 	func = FunctionList_FindFunction(exe->func_list, fun_name);
 	if(IS_NULL(func))
 	{
@@ -124,7 +122,7 @@ void Execute_Call(Executable exe, const char *fun_name, int num_args)
 	exe->ec->args = (Identifier*)Malloc(sizeof(Identifier) * exe->ec->num_args);
 
 	exe->ec->args[0] = Identifier_NewInteger(num_args);
-	for(i = num_args; i != 1; i--)
+	for(i = num_args; i != 0; i--)
 	{
 		exe->ec->args[i] = GetIdentifier(exe, IdentifierStack_Pop(exe->is));
 	}

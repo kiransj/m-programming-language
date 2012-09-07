@@ -174,9 +174,27 @@ Identifier Command_Operation(Compiler c, Identifier A, CompilerCmd oper, Identif
 
 Identifier Function_Printf(Identifier *args, int num_args)
 {
-	Identifier i = NULL;
-	LOG_INFO("number of arguments passed : %d", num_args);
-	return i;
+	int i;
+	for(i = 1; i <= num_args; i++)
+	{
+		switch(args[i]->type)
+		{
+			case IDENTIFIER_TYPE_NUMBER:
+					printf("%d", args[i]->u.number);
+					break;
+			case IDENTIFIER_TYPE_FLOAT:
+					printf("%lf", args[i]->u.real);
+					break;				
+			case IDENTIFIER_TYPE_STRING:
+					printf("%s", args[i]->u.str);
+					break;
+			default:
+					printf("unknown id type '%d'", args[i]->type);
+					abort();
+		}
+	}
+	printf("\n");
+	return NULL;
 }
 
 void* ParseAlloc(void *(*)(size_t));

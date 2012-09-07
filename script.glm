@@ -1,12 +1,10 @@
-n:=10;
+fact:=5;
+n:=1;
 sum:=1;
-while(n > 0)
+while(n <= fact)
 	sum:=sum*n;
-	n:=n-1;
+	printf("fact(",n,") = ", sum);
+	n:=n+1;
 endwhile
-sum:=sum;
-if(sum<1000)	
-	sum:=1000;
-endif
 
-printf("Sum is $", sum);
+printf("Factorial of ", fact, " is " , sum);
