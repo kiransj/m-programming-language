@@ -2,9 +2,9 @@ This code is simple programming lanuage named M.
 
 
 The feature of the lanuage are
-1. variable						:= Currently variable declaration is not supported.
-2. conditions stmts				:= Completed
-3. loops.						:= Completed
+1. variable						:= Variable are declared using 'var' keyword. Every variable used should be declared 
+2. conditions stmts				:= current on if(expr) ... endif is supported. 'else' is not supported
+3. loops.						:= while(expr) ... endwhile is supported
 4. Calling C functions from M.	:= Completed
 4. functions.					:= In progress.
 5. global variables.			:= In progress.
