@@ -36,7 +36,8 @@ typedef enum
 	JZ,
 	CALL,
 	LABEL,
-	ARGUMENT,
+	PUSH,
+
 
 	STMT_END,
 	STMT_IF,
@@ -47,7 +48,7 @@ typedef enum
 }CompilerCmd;
 
 void Command(Compiler, CompilerCmd oper);
-void Command_FunctionArg(Compiler C, Identifier A, int pos);
+void Command_FunctionArg(Compiler C, Identifier A);
 int  Command_ConditionStmt(Compiler c, CompilerCmd cmd, Identifier A, int label_number);
 int Command_LoopStmt(Compiler c, CompilerCmd cmd, Identifier A, int label_number);
 

@@ -45,15 +45,69 @@ Executable Executable_Create(void)
 		if(IS_NULL(exe->first))
 		{
 			LOG_ERROR("ByteCode_Create() failed");
+			Free(exe->label_list);
 			Free(exe);
 			return NULL;
 		}
+
+		exe->is = IdentifierStack_Create();
+		if(IS_NULL(exe->is))
+		{
+			LOG_ERROR("IdentifierStack_Create() failed");
+			Free(exe->first);
+			Free(exe->label_list);
+			Free(exe);
+			return NULL;
+		}
+
+		exe->ec_top = -1;
+		exe->ec_size = 25;
+		exe->ec_list = (ExecutionContext*)Malloc(sizeof(ExecutionContext) * exe->ec_size);
+		if(IS_NULL(exe->ec_list))
+		{
+			LOG_ERROR("Malloc failed to create ExecutionContextList");
+			Free(exe->first);
+			Free(exe->label_list);
+			IdentifierStack_Destroy(exe->is);
+			Free(exe);
+			return NULL;
+		}
+
+		exe->func_list = FunctionList_Create();
+		if(IS_NULL(exe->func_list))
+		{
+			LOG_ERROR("Malloc failed to create ExecutionContextList");
+			Free(exe->first);
+			Free(exe->label_list);
+			IdentifierStack_Destroy(exe->is);
+			Free(exe->ec_list);
+			Free(exe);
+			return NULL;
+		}	
 	}
 	else
 	{
 		LOG_ERROR("Malloc(%u) failed", sizeof(struct _Executable));
 	}
 	return exe;
+}
+
+STATUS Executable_AddNativeFunction(Executable exe, const char *func_name,  NativeFunction nf)
+{
+	return	FunctionList_AddNativeFunction(exe->func_list, func_name, nf);
+}
+
+STATUS Executable_GrowExecutionContext(Executable exe)
+{
+	exe->ec_size += 25;
+	exe->ec_list = (ExecutionContext*)ReAlloc(exe->ec_list, sizeof(ExecutionContext) * exe->ec_size);
+	if(IS_NULL(exe->ec_list))
+	{
+		LOG_ERROR("ReAlloc failed. Unable to grow ExecutionContextList");
+		return STATUS_FAILURE;
+	}
+	memset(&exe->ec_list[exe->ec_size-25], 0, sizeof(ExecutionContext) * (exe->ec_size - 25));
+	return STATUS_SUCCESS;
 }
 
 void Executable_Destroy(Executable exe)
@@ -66,6 +120,9 @@ void Executable_Destroy(Executable exe)
 		tmp = tmp1;
 	}
 	if(!IS_NULL(exe->label_list)) Free(exe->label_list);
+	if(!IS_NULL(exe->is)) IdentifierStack_Destroy(exe->is);
+	if(!IS_NULL(exe->ec_list)) Free(exe->ec_list);
+	if(!IS_NULL(exe->func_list)) FunctionList_Destroy(exe->func_list);
 	Free(exe);
 }
 
@@ -133,13 +190,6 @@ STATUS Executable_AddCmd(Executable exe, CompilerCmd cmd, Identifier a, Identifi
 				bc->u.num_arguments = number;
 				break;
 			}
-		case ARGUMENT:
-			{
-				bc->cmd = ARGUMENT;
-				bc->A = A;
-				bc->u.argument_pos = number;
-				break;
-			}
 		case LABEL:
 			{
 				Free(bc);
@@ -156,6 +206,12 @@ STATUS Executable_AddCmd(Executable exe, CompilerCmd cmd, Identifier a, Identifi
 					}
 				}
 				exe->label_list[number] = (unsigned int)exe->last;
+				break;
+			}
+		case PUSH:
+			{
+				bc->cmd = PUSH;
+				bc->A = A;
 				break;
 			}
 		default:

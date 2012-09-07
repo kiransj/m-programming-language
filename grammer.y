@@ -75,8 +75,8 @@ expr(A) ::= TOKEN_TYPE_VARIABLE(B) OPERATOR_EQU   expr(C).	{ A = Command_Operati
 function_call(A) ::= TOKEN_TYPE_VARIABLE(B) OPERATOR_OPEN_PAREN  argument_list(C)	OPERATOR_CLOSE_PAREN.			{A = Command_function_call(compiler, B, C);}
 
 argument_list(A) ::= .                              				{ A=0;} 
-argument_list(A) ::= expr(B).                              			{ A=1; 	 Command_FunctionArg(compiler, B, A);} 
-argument_list(A) ::= argument_list(B) OPERATOR_COMMA expr(C).       { A=B+1; Command_FunctionArg(compiler, C, A);}
+argument_list(A) ::= expr(B).                              			{ A=1; 	 Command_FunctionArg(compiler, B);} 
+argument_list(A) ::= argument_list(B) OPERATOR_COMMA expr(C).       { A=B+1; Command_FunctionArg(compiler, C);}
 
 %type start_if_condition {int}
 

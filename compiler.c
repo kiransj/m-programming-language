@@ -98,13 +98,13 @@ int Command_ConditionStmt(Compiler c, CompilerCmd cmd, Identifier A, int label_n
 	return 0;
 }
 
-void Command_FunctionArg(Compiler c, Identifier A, int pos)
+void Command_FunctionArg(Compiler c, Identifier A)
 {
 	char buf1[64];
 	Executable exe = (Executable)c->priv_data;
 	Identifier_to_str(A, buf1, 64);
-	LOG_INFO_NL("ARG[%d] %s", pos, buf1);
-	Executable_AddCmd(exe, ARGUMENT, A, NULL, NULL, pos);
+	LOG_INFO_NL("PUSH %s", buf1);
+	Executable_AddCmd(exe, PUSH, A, NULL, NULL, 0);
 	Identifier_Destroy(A);
 	return ;
 }
@@ -171,6 +171,32 @@ Identifier Command_Operation(Compiler c, Identifier A, CompilerCmd oper, Identif
 	return NULL;
 }
 
+
+Identifier Function_Printf(Identifier *args, int num_args)
+{
+	int i;
+	for(i = 1; i <= num_args; i++)
+	{
+		switch(args[i]->type)
+		{
+			case IDENTIFIER_TYPE_NUMBER:
+					printf("%d", args[i]->u.number);
+					break;
+			case IDENTIFIER_TYPE_FLOAT:
+					printf("%lf", args[i]->u.real);
+					break;				
+			case IDENTIFIER_TYPE_STRING:
+					printf("%s", args[i]->u.str);
+					break;
+			default:
+					printf("unknown id type '%d'", args[i]->type);
+					abort();
+		}
+	}
+	printf("\n");
+	return NULL;
+}
+
 void* ParseAlloc(void *(*)(size_t));
 void* ParseFree(void*, void (*)(void *));
 void Parse(void*, int, Identifier, Compiler);
@@ -198,6 +224,7 @@ int main(int argc, char *argv[])
 		Free(c);
 		return 1;
 	}
+	Executable_AddNativeFunction(exe, "printf", Function_Printf);
 	c->priv_data = (void*)exe;
 
 	yyin = fopen(argv[1], "r");

@@ -16,8 +16,9 @@
 \$[0-9]+			   { yylval = Identifier_NewArgument(atoi(&yytext[1])); return TOKEN_TYPE_IDENTIFIER;}
 [0-9]+				   { yylval = Identifier_NewInteger(atoi(yytext)); 	  	return TOKEN_TYPE_IDENTIFIER;}
 [0-9]*\.[0-9]+		   { yylval = Identifier_NewFloat(atof(yytext)); 		return TOKEN_TYPE_IDENTIFIER;}
-\"[^\"]*\"			   { yylval = Identifier_NewString(yytext); 			return TOKEN_TYPE_IDENTIFIER;}
 [a-zA-Z_][a-zA-Z_0-9]* { yylval = Identifier_NewVariable(yytext); 		  	return TOKEN_TYPE_VARIABLE;}
+
+\"[^\"]*\"			   { yytext[strlen(yytext)-1]='\0';	yylval = Identifier_NewString(&yytext[1]); 			return TOKEN_TYPE_IDENTIFIER;}
 
 
 "+"		{  return OPERATOR_ADD;}
