@@ -11,9 +11,11 @@
 unsigned int line_number;
 
 /*Comment the below code to print the byte code*/
+#if 0
 #ifdef LOG_INFO_NL
 #undef LOG_INFO_NL
 #define LOG_INFO_NL(format, args...) 
+#endif
 #endif
 
 char* token_to_str(int token)
@@ -111,6 +113,18 @@ void Command_FunctionArg(Compiler c, Identifier A)
 	Identifier_to_str(A, buf1, 64);
 	LOG_INFO_NL("PUSH %s", buf1);
 	Executable_AddCmd(exe, PUSH, A, NULL, NULL, 0);
+	Identifier_Destroy(A);
+	return ;
+}
+
+
+void Command_VariableDecl(Compiler c, Identifier A)
+{
+	char buf1[64];
+	Executable exe = (Executable)c->priv_data;
+	Identifier_to_str(A, buf1, 64);
+	LOG_INFO_NL("VAR %s", buf1);
+	Executable_AddCmd(exe, VAR, A, NULL, NULL, 0);
 	Identifier_Destroy(A);
 	return ;
 }

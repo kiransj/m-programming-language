@@ -23,3 +23,4 @@
 #define KEYWORD_IF                     23
 #define KEYWORD_WHILE                  24
 #define KEYWORD_ENDWHILE               25
+#define KEYWORD_VAR                    26
