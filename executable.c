@@ -187,6 +187,7 @@ STATUS Executable_AddCmd(Executable exe, CompilerCmd cmd, Identifier a, Identifi
 			{
 				bc->cmd = CALL;
 				bc->A = A;
+				bc->C = C;
 				bc->u.num_arguments = number;
 				break;
 			}

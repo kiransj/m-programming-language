@@ -208,7 +208,35 @@ Identifier Identifier_Clone(Identifier a)
 			}
 	}
 	return i;
+}
 
+void Identifier_Copy(Identifier src, Identifier dest)
+{
+	switch(src->type)
+	{
+		case IDENTIFIER_TYPE_STRING:
+			{
+				Identifier_SetString(dest, src->u.str);
+				break;
+			}
+		case IDENTIFIER_TYPE_NUMBER:
+			{
+				Identifier_SetInt(dest, src->u.number);
+				break;
+			}
+		case IDENTIFIER_TYPE_FLOAT:
+			{
+				Identifier_SetFloat(dest, src->u.real);
+				break;
+			}
+		default:
+			{
+				LOG_ERROR("unkown type %u", src->type);
+				abort();
+				break;
+			}
+	}
+	return;
 }
 void Identifier_SetInt(Identifier a, int num)
 {
@@ -220,7 +248,17 @@ void Identifier_SetInt(Identifier a, int num)
 	a->type = IDENTIFIER_TYPE_NUMBER;
 	a->u.number = num;
 }
+void Identifier_SetString(Identifier a, char *str)
+{
+	if(a->type == IDENTIFIER_TYPE_STRING)
+		Free(a->u.str);
+	if(a->type == IDENTIFIER_TYPE_VARIABLE)
+		Free(a->u.variable_name);
 
+	a->type = IDENTIFIER_TYPE_STRING;
+	a->u.str = (char*)Malloc(strlen(str)+1);
+	strcpy(a->u.str, str);
+}
 void Identifier_SetFloat(Identifier a, double num)
 {
 	if(a->type == IDENTIFIER_TYPE_STRING)

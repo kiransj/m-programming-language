@@ -3,8 +3,9 @@ n:=1;
 sum:=1;
 while(n <= fact)
 	sum:=sum*n;
-	printf("fact(",n,") = ", sum);
+	output("fact(",n,") = ", sum);
 	n:=n+1;
 endwhile
-
-printf("Factorial of ", fact, " is " , sum);
+Output("Factorial of ", fact, " is " , sum);
+sum:=max(10, 12, 9)*10;
+output("max:=", sum);

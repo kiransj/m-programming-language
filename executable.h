@@ -49,8 +49,6 @@ typedef struct _ExecutionContext
 ExecutionContext ExecutionContext_Create(ByteCode cur_ptr);
 void ExecutionContext_Destroy(ExecutionContext ec);
 
-
-
 typedef struct _Executable
 {
 	ByteCode 		first, last;
@@ -73,4 +71,7 @@ STATUS Executable_AddCmd(Executable exe, CompilerCmd cmd, Identifier A, Identifi
 STATUS Executable_AddNativeFunction(Executable exe, const char *func_name, NativeFunction nf);
 
 STATUS ExecutionContext_Execute(Executable exe);
+
+
+void Register_Native_Functions(Executable exe);
 #endif

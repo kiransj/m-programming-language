@@ -33,7 +33,7 @@ STATUS FunctionList_AddLocalFunction(FunctionList fl, const char *func_name, con
 	}
 	while(tmp->next != NULL)
 	{
-		if(strcasecmp(tmp->func_name, func_name) == 0)
+		if(!IS_NULL(tmp->func_name) && strcasecmp(tmp->func_name, func_name) == 0)
 		{
 			LOG_ERROR("function name '%s' already exists", func_name);
 			return STATUS_FAILURE;
@@ -67,7 +67,7 @@ STATUS FunctionList_AddNativeFunction(FunctionList fl, const char *func_name, Na
 	}
 	while(tmp->next != NULL)
 	{
-		if(strcasecmp(tmp->func_name, func_name) == 0)
+		if(!IS_NULL(tmp->func_name) && strcasecmp(tmp->func_name, func_name) == 0)
 		{
 			LOG_ERROR("function name '%s' already exists", func_name);
 			return STATUS_FAILURE;

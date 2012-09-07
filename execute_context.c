@@ -98,7 +98,7 @@ void Execute_Jump(Executable exe, int label_number)
 	exe->ec->cur_ptr = (ByteCode)exe->label_list[label_number];
 }
 
-void Execute_Call(Executable exe, const char *fun_name, int num_args)
+void Execute_Call(Executable exe, const char *fun_name, int num_args, Identifier result)
 {
 	int i;
 	FunctionList func;
@@ -129,10 +129,20 @@ void Execute_Call(Executable exe, const char *fun_name, int num_args)
 
 	if(func->type == FUNCTION_TYPE_NATIVE)
 	{
-		(*func->u.nFunc)(exe->ec->args, num_args);
+		Identifier r;
+		r = (*func->u.nFunc)(exe->ec->args, num_args);
 		ExecutionContext_Destroy(exe->ec);
 		exe->ec_top--;
 		exe->ec = exe->ec_list[exe->ec_top];
+		if(!IS_NULL(r))
+		{
+			Identifier_Copy(r,	result);
+			Identifier_Destroy(r);
+		}
+		else
+		{
+			Identifier_SetInt(result, 0);
+		}
 	}
 }
 STATUS ExecutionContext_Execute(Executable exe)
@@ -212,7 +222,7 @@ STATUS ExecutionContext_Execute(Executable exe)
 					break;
 			case CALL:
 					{
-						Execute_Call(exe,  exe->ec->cur_ptr->A->u.str, exe->ec->cur_ptr->u.num_arguments);						
+						Execute_Call(exe,  exe->ec->cur_ptr->A->u.str, exe->ec->cur_ptr->u.num_arguments, GetIdentifier(exe, exe->ec->cur_ptr->C));
 						break;
 					}
 			default:
