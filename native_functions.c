@@ -1,6 +1,6 @@
 #include "util.h"
 #include "executable.h"
-Identifier Function_Printf(Identifier *args, int num_args)
+Identifier Function_Output(Identifier *args, int num_args)
 {
 	int i;
 	for(i = 1; i <= num_args; i++)
@@ -53,6 +53,6 @@ Identifier Function_Max(Identifier *args, int num_args)
 
 void Register_Native_Functions(Executable exe)
 {
-	Executable_AddNativeFunction(exe, "printf", Function_Printf);
+	Executable_AddNativeFunction(exe, "output", Function_Output);
 	Executable_AddNativeFunction(exe, "max", Function_Max);
 }

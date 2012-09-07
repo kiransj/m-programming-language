@@ -10,6 +10,7 @@
 
 unsigned int line_number;
 
+/*Comment the below code to print the byte code*/
 #ifdef LOG_INFO_NL
 #undef LOG_INFO_NL
 #define LOG_INFO_NL(format, args...) 
