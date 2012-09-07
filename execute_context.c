@@ -15,7 +15,15 @@ Identifier GetIdentifier(Executable exe, Identifier A)
 				return exe->ec->regs[A->u.argument_number]; 
 
 		case IDENTIFIER_TYPE_VARIABLE:
-				return VariableList_FindVariable(exe->ec->local_variables, A->u.variable_name);
+				{
+					Identifier v = VariableList_FindVariable(exe->ec->local_variables, A->u.variable_name);
+					if(IS_NULL(v))
+					{
+						LOG_ERROR("VariableList_FindVariable('%s') failed hence stoping execution", A->u.variable_name);
+						exe->error_flag = 1;
+					}
+					return v;
+				}
 
 		case IDENTIFIER_TYPE_ARGUMENT:
 		case IDENTIFIER_TYPE_UNKNOWN:
@@ -26,66 +34,93 @@ Identifier GetIdentifier(Executable exe, Identifier A)
 
 void Execute_Mul(Identifier A, Identifier B, Identifier C)  
 {
-	int answer = 0;
+	int answer = 0;	
+
+	if(IS_NULL(A) || IS_NULL(B) || IS_NULL(C)) return;
+
 	answer = A->u.number * B->u.number;
 	Identifier_SetInt(C, answer);
 }
 void Execute_Add(Identifier A, Identifier B, Identifier C)  
 {
 	int answer = 0;
+
+	if(IS_NULL(A) || IS_NULL(B) || IS_NULL(C)) return;
+
 	answer = A->u.number + B->u.number;
 	Identifier_SetInt(C, answer);
 }
 void Execute_Sub(Identifier A, Identifier B, Identifier C)  
 {
 	int answer = 0;
+
+	if(IS_NULL(A) || IS_NULL(B) || IS_NULL(C)) return;
+
 	answer = A->u.number - B->u.number;
 	Identifier_SetInt(C, answer);
 }
 void Execute_Gth(Identifier A, Identifier B, Identifier C)
 {
 	int answer = 0;
+
+	if(IS_NULL(A) || IS_NULL(B) || IS_NULL(C)) return;
+
 	answer = A->u.number > B->u.number;
 	Identifier_SetInt(C, answer);
 }
 void Execute_Lth(Identifier A, Identifier B, Identifier C)
 {
 	int answer = 0;
+
+	if(IS_NULL(A) || IS_NULL(B) || IS_NULL(C)) return;
+
 	answer = A->u.number < B->u.number;
 	Identifier_SetInt(C, answer);
 }
 void Execute_Gte(Identifier A, Identifier B, Identifier C)
 {
 	int answer = 0;
+
+
+	if(IS_NULL(A) || IS_NULL(B) || IS_NULL(C)) return;
 	answer = A->u.number >= B->u.number;	
 	Identifier_SetInt(C, answer);
 }
 void Execute_Lte(Identifier A, Identifier B, Identifier C)
 {
 	int answer = 0;
+
+	if(IS_NULL(A) || IS_NULL(B) || IS_NULL(C)) return;
 	answer = A->u.number <= B->u.number;
 	Identifier_SetInt(C, answer);
 }
 void Execute_Cmp(Identifier A, Identifier B, Identifier C)
 {
 	int answer = 0;
+	
+	if(IS_NULL(A) || IS_NULL(B) || IS_NULL(C)) return;
 	answer = A->u.number == B->u.number;
 	Identifier_SetInt(C, answer);
 }
 void Execute_Neq(Identifier A, Identifier B, Identifier C)
 {
 	int answer = 0;
+	
+	if(IS_NULL(A) || IS_NULL(B) || IS_NULL(C)) return;
 	answer = A->u.number == B->u.number;
 	Identifier_SetInt(C, answer);
 }
 void Execute_Equ(Identifier A, Identifier B, Identifier C)
 {
+	
+	if(IS_NULL(A) || IS_NULL(B) || IS_NULL(C)) return;
 	Identifier_SetInt(A, B->u.number);
 	Identifier_SetInt(C, B->u.number);
 }
 
 void Execute_Jz(Executable exe, Identifier A, int label_number)
 {
+	if(IS_NULL(A)) return;
 	if(A->u.number == 0)
 	{
 	//	LOG_INFO("label_%d address is %#x", label_number, exe->label_list[label_number]);
@@ -157,7 +192,7 @@ STATUS ExecutionContext_Execute(Executable exe)
 	}
 	exe->ec = exe->ec_list[++exe->ec_top] = ExecutionContext_Create(exe->first->next);
 	
-	while(!IS_NULL(exe->ec->cur_ptr))
+	while(!IS_NULL(exe->ec->cur_ptr) && (exe->error_flag == 0))
 	{
 		switch(exe->ec->cur_ptr->cmd)
 		{
@@ -230,6 +265,7 @@ STATUS ExecutionContext_Execute(Executable exe)
 						if(STATUS_SUCCESS != VariableList_AddVariable(exe->ec->local_variables, exe->ec->cur_ptr->A->u.variable_name))
 						{
 							LOG_ERROR("VariableList_AddVariable(%s) failed", exe->ec->cur_ptr->A->u.variable_name);
+							exe->error_flag = 1;
 							goto SCRIPT_ERROR;
 						}
 						break;

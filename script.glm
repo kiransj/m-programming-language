@@ -7,6 +7,10 @@ while(n <= fact)
 	output("fact(",n,") = ", sum);
 	n:=n+1;
 endwhile
-Output("Factorial of ", fact, " is " , sum);
-sum:=max(10, 12, 9)*10;
-output("max:=", sum);
+
+Output(fact, "! is " , sum);
+sum:=max(10, 12, 9);
+output("max(10, 12, 9):=", sum);
+if(sum > 0)
+	output("sum is > 0");
+endif
