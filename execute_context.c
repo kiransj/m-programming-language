@@ -15,7 +15,15 @@ Identifier GetIdentifier(Executable exe, Identifier A)
 				return exe->ec->regs[A->u.argument_number]; 
 
 		case IDENTIFIER_TYPE_VARIABLE:
-				return VariableList_FindVariable(exe->ec->local_variables, A->u.variable_name);
+				{
+					Identifier v = VariableList_FindVariable(exe->ec->local_variables, A->u.variable_name);
+					if(IS_NULL(v))
+					{
+						LOG_ERROR("VariableList_FindVariable('%s') failed hence stoping execution", A->u.variable_name);
+						exe->error_flag = 1;
+					}
+					return v;
+				}
 
 		case IDENTIFIER_TYPE_ARGUMENT:
 		case IDENTIFIER_TYPE_UNKNOWN:
@@ -26,66 +34,93 @@ Identifier GetIdentifier(Executable exe, Identifier A)
 
 void Execute_Mul(Identifier A, Identifier B, Identifier C)  
 {
-	int answer = 0;
+	int answer = 0;	
+
+	if(IS_NULL(A) || IS_NULL(B) || IS_NULL(C)) return;
+
 	answer = A->u.number * B->u.number;
 	Identifier_SetInt(C, answer);
 }
 void Execute_Add(Identifier A, Identifier B, Identifier C)  
 {
 	int answer = 0;
+
+	if(IS_NULL(A) || IS_NULL(B) || IS_NULL(C)) return;
+
 	answer = A->u.number + B->u.number;
 	Identifier_SetInt(C, answer);
 }
 void Execute_Sub(Identifier A, Identifier B, Identifier C)  
 {
 	int answer = 0;
+
+	if(IS_NULL(A) || IS_NULL(B) || IS_NULL(C)) return;
+
 	answer = A->u.number - B->u.number;
 	Identifier_SetInt(C, answer);
 }
 void Execute_Gth(Identifier A, Identifier B, Identifier C)
 {
 	int answer = 0;
+
+	if(IS_NULL(A) || IS_NULL(B) || IS_NULL(C)) return;
+
 	answer = A->u.number > B->u.number;
 	Identifier_SetInt(C, answer);
 }
 void Execute_Lth(Identifier A, Identifier B, Identifier C)
 {
 	int answer = 0;
+
+	if(IS_NULL(A) || IS_NULL(B) || IS_NULL(C)) return;
+
 	answer = A->u.number < B->u.number;
 	Identifier_SetInt(C, answer);
 }
 void Execute_Gte(Identifier A, Identifier B, Identifier C)
 {
 	int answer = 0;
+
+
+	if(IS_NULL(A) || IS_NULL(B) || IS_NULL(C)) return;
 	answer = A->u.number >= B->u.number;	
 	Identifier_SetInt(C, answer);
 }
 void Execute_Lte(Identifier A, Identifier B, Identifier C)
 {
 	int answer = 0;
+
+	if(IS_NULL(A) || IS_NULL(B) || IS_NULL(C)) return;
 	answer = A->u.number <= B->u.number;
 	Identifier_SetInt(C, answer);
 }
 void Execute_Cmp(Identifier A, Identifier B, Identifier C)
 {
 	int answer = 0;
+	
+	if(IS_NULL(A) || IS_NULL(B) || IS_NULL(C)) return;
 	answer = A->u.number == B->u.number;
 	Identifier_SetInt(C, answer);
 }
 void Execute_Neq(Identifier A, Identifier B, Identifier C)
 {
 	int answer = 0;
+	
+	if(IS_NULL(A) || IS_NULL(B) || IS_NULL(C)) return;
 	answer = A->u.number == B->u.number;
 	Identifier_SetInt(C, answer);
 }
 void Execute_Equ(Identifier A, Identifier B, Identifier C)
 {
+	
+	if(IS_NULL(A) || IS_NULL(B) || IS_NULL(C)) return;
 	Identifier_SetInt(A, B->u.number);
 	Identifier_SetInt(C, B->u.number);
 }
 
 void Execute_Jz(Executable exe, Identifier A, int label_number)
 {
+	if(IS_NULL(A)) return;
 	if(A->u.number == 0)
 	{
 	//	LOG_INFO("label_%d address is %#x", label_number, exe->label_list[label_number]);
@@ -157,7 +192,7 @@ STATUS ExecutionContext_Execute(Executable exe)
 	}
 	exe->ec = exe->ec_list[++exe->ec_top] = ExecutionContext_Create(exe->first->next);
 	
-	while(!IS_NULL(exe->ec->cur_ptr))
+	while(!IS_NULL(exe->ec->cur_ptr) && (exe->error_flag == 0))
 	{
 		switch(exe->ec->cur_ptr->cmd)
 		{
@@ -225,6 +260,16 @@ STATUS ExecutionContext_Execute(Executable exe)
 						Execute_Call(exe,  exe->ec->cur_ptr->A->u.str, exe->ec->cur_ptr->u.num_arguments, GetIdentifier(exe, exe->ec->cur_ptr->C));
 						break;
 					}
+			case VAR:
+					{
+						if(STATUS_SUCCESS != VariableList_AddVariable(exe->ec->local_variables, exe->ec->cur_ptr->A->u.variable_name))
+						{
+							LOG_ERROR("VariableList_AddVariable(%s) failed", exe->ec->cur_ptr->A->u.variable_name);
+							exe->error_flag = 1;
+							goto SCRIPT_ERROR;
+						}
+						break;
+					}
 			default:
 					LOG_ERROR("CMD %u not found", exe->ec->cur_ptr->cmd);
 					abort();
@@ -236,6 +281,7 @@ STATUS ExecutionContext_Execute(Executable exe)
 		}
 		exe->ec->cur_ptr = exe->ec->cur_ptr->next;
 	}
+SCRIPT_ERROR:
 	ExecutionContext_Destroy(exe->ec);
 	exe->ec_top--;
 	exe->ec = NULL;
@@ -341,20 +387,8 @@ Identifier  VariableList_FindVariable(VariableList vl, const char *variable_name
 
 	if(IS_NULL(tmp_vl))
 	{
-		tmp_vl = VariableList_Create(variable_name);
-		if(!IS_NULL(tmp_vl))
-		{
-			tmp_vl->id = Identifier_NewInteger(0);
-			tmp_vl->next = NULL;
-			tmp_vl->variable_name = (char*)Malloc(strlen(variable_name)+1);
-			memcpy(tmp_vl->variable_name, variable_name, strlen(variable_name));
-			vl->next = tmp_vl;
-		}
-		else
-		{
-			LOG_ERROR("VariableList_Create() Failed");
-			return NULL;
-		}
+		LOG_ERROR("Variable('%s') not found", variable_name);
+		return NULL;
 	}
 
 	flag = 1;
@@ -380,31 +414,77 @@ Identifier  VariableList_FindVariable(VariableList vl, const char *variable_name
 	{
 		return tmp_vl->id;
 	}
-	else
+	LOG_ERROR("Variable('%s') not found", variable_name);
+	return NULL;
+}
+
+STATUS VariableList_AddVariable(VariableList vl, const char *variable_name)
+{
+	int flag;
+	VariableList new_var = vl->next, tmp1_vl;
+
+	if(strlen(variable_name) < 1)
 	{
-		tmp_vl = VariableList_Create(variable_name);
-		if(!IS_NULL(tmp_vl))
+		LOG_ERROR("variable_name is of size 0");
+		return STATUS_FAILURE;
+	}
+
+	if(IS_NULL(new_var))
+	{
+		new_var = VariableList_Create(variable_name);
+		if(!IS_NULL(new_var))
 		{
-			tmp_vl->id = Identifier_NewInteger(0);
-			tmp_vl->next = NULL;
-			tmp_vl->variable_name = (char*)Malloc(strlen(variable_name)+1);
-			memcpy(tmp_vl->variable_name, variable_name, strlen(variable_name));
-			if(flag == 1)
-			{
-				tmp1_vl->next = tmp_vl;
-			}
-			else if(flag == 2)
-			{
-				tmp_vl->next = tmp1_vl->next;
-				tmp1_vl->next = tmp_vl;
-			}
-			return tmp_vl->id;
+			new_var->id = Identifier_NewInteger(0);
+			new_var->next = NULL;
+			new_var->variable_name = (char*)Malloc(strlen(variable_name)+1);
+			memcpy(new_var->variable_name, variable_name, strlen(variable_name));
+			vl->next = new_var;
+			return STATUS_SUCCESS;
 		}
 		else
 		{
 			LOG_ERROR("VariableList_Create() Failed");
-			return NULL;
+			return STATUS_FAILURE;
 		}
 	}
-	return NULL;
+
+	flag = 1;
+	do
+	{
+		int tmp = strcasecmp(new_var->variable_name, variable_name);
+		if(tmp > 0)
+		{
+			flag = 2;
+			break;
+		}
+		else if(tmp == 0)
+		{
+			LOG_ERROR("variable with name '%s' already declared", variable_name);
+			return STATUS_FAILURE;
+		}
+		tmp1_vl = new_var;
+		new_var = new_var->next;
+	}
+	while(!IS_NULL(new_var));
+
+	new_var = VariableList_Create(variable_name);
+	if(!IS_NULL(new_var))
+	{
+		new_var->id = Identifier_NewInteger(0);
+		new_var->next = NULL;
+		new_var->variable_name = (char*)Malloc(strlen(variable_name)+1);
+		memcpy(new_var->variable_name, variable_name, strlen(variable_name));
+		if(flag == 1)
+		{
+			tmp1_vl->next = new_var;
+		}
+		else if(flag == 2)
+		{
+			new_var->next = tmp1_vl->next;
+			tmp1_vl->next = new_var;
+		}
+		return STATUS_SUCCESS;
+	}
+	LOG_ERROR("VariableList_Create() Failed");
+	return STATUS_FAILURE;
 }

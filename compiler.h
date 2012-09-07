@@ -37,6 +37,7 @@ typedef enum
 	CALL,
 	LABEL,
 	PUSH,
+	VAR,
 
 
 	STMT_END,
@@ -49,6 +50,8 @@ typedef enum
 
 void Command(Compiler, CompilerCmd oper);
 void Command_FunctionArg(Compiler C, Identifier A);
+void Command_VariableDecl(Compiler, Identifier);
+
 int  Command_ConditionStmt(Compiler c, CompilerCmd cmd, Identifier A, int label_number);
 int Command_LoopStmt(Compiler c, CompilerCmd cmd, Identifier A, int label_number);
 

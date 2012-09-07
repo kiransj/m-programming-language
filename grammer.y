@@ -84,6 +84,7 @@ stmt ::= .
 stmt ::= stmt simple_stmt.
 stmt ::= stmt condition_stmt.
 stmt ::= stmt loop_stmt.
+stmt ::= stmt variable_declaration.
 
 /*
 	STMT end operator is defined by SEMI COLON
@@ -210,3 +211,10 @@ while_condition_block(A)	::= start_while_loop(B) OPERATOR_OPEN_PAREN expr(C) OPE
 while_loop_block			::= while_condition_block(B) stmt end_while_loop.							{Command_LoopStmt(compiler, STMT_END_WHILE, NULL, B);}
 
 loop_stmt ::= while_loop_block.
+
+/*
+	Variable Declation list
+*/
+variable_declaration ::= KEYWORD_VAR variable_list stmt_end.           
+variable_list ::= TOKEN_TYPE_VARIABLE(B).                               { Command_VariableDecl(compiler, B);} 
+variable_list ::= variable_list OPERATOR_COMMA  TOKEN_TYPE_VARIABLE(B). { Command_VariableDecl(compiler, B);}

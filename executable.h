@@ -31,6 +31,7 @@ typedef struct _variablelist
 
 VariableList VariableList_Create(const char *var_name);
 void 		 VariableList_Destroy(VariableList);
+STATUS 		 VariableList_AddVariable(VariableList vl, const char *variable_name);
 Identifier   VariableList_FindVariable(VariableList, const char *variable_name);
 
 typedef struct _ExecutionContext
@@ -61,6 +62,7 @@ typedef struct _Executable
 	ExecutionContext 	ec;
 	int 				ec_size, ec_top;
 	ExecutionContext 	*ec_list;
+	int					error_flag;
 }*Executable;
 
 Executable Executable_Create(void);

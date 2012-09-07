@@ -215,6 +215,12 @@ STATUS Executable_AddCmd(Executable exe, CompilerCmd cmd, Identifier a, Identifi
 				bc->A = A;
 				break;
 			}
+		case VAR:
+			{
+				bc->cmd = VAR;
+				bc->A = A;
+				break;
+			}
 		default:
 			LOG_ERROR("unhandled cmd %u, aborting...", cmd);
 			abort();
