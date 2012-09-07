@@ -3,6 +3,7 @@
 
 #include "compiler.h"
 #include "tokenizer.h"
+#include "function.h"
 #include "util.h"
 
 struct _ByteCode;
@@ -45,23 +46,31 @@ typedef struct _ExecutionContext
 	ByteCode	 	cur_ptr;
 }*ExecutionContext;
 
-void ExecutionContext_Destroy(ExecutionContext ec);
 ExecutionContext ExecutionContext_Create(ByteCode cur_ptr);
+void ExecutionContext_Destroy(ExecutionContext ec);
+
+
 
 typedef struct _Executable
 {
-	ByteCode 	first, last;
-	unsigned int label_size, label_index;
-	unsigned int *label_list;
-
-	/*Initialized during RunTime*/
-	ExecutionContext ec;
+	ByteCode 		first, last;
+	unsigned int 	label_size, label_index;
+	unsigned int   *label_list;
+	FunctionList	func_list;	
+	
+	IdentifierStack		is;
+	/*Initialized during RunTime*/	
+	ExecutionContext 	ec;
+	int 				ec_size, ec_top;
+	ExecutionContext 	*ec_list;
 }*Executable;
 
 Executable Executable_Create(void);
 void Executable_Destroy(Executable exe);
+STATUS Executable_GrowExecutionContext(Executable exe);
 STATUS Executable_AddCmd(Executable exe, CompilerCmd cmd, Identifier A, Identifier B, Identifier C, int number);
 
+STATUS Executable_AddNativeFunction(Executable exe, const char *func_name, NativeFunction nf);
 
 STATUS ExecutionContext_Execute(Executable exe);
 #endif

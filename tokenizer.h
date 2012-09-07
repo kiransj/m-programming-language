@@ -2,7 +2,7 @@
 #define _TOKENIZER_H_
 
 #include <stdio.h>
-
+#include "util.h"
 extern unsigned int line_number;
 
 char* token_to_str(int token);
@@ -46,6 +46,16 @@ Identifier Identifier_NewVariable(const char *variable_name);
 Identifier Identifier_NewInteger(const int number);
 Identifier Identifier_NewRegister(const int number);
 
+typedef struct _IdentifierStack
+{
+	Identifier *list;
+	int top, size;
+}*IdentifierStack;
+
+IdentifierStack IdentifierStack_Create(void);
+Identifier IdentifierStack_Pop(IdentifierStack);
+STATUS IdentifierStack_Push(IdentifierStack, Identifier);
+void IdentifierStack_Destroy(IdentifierStack is);
 
 void Identifier_SetInt(Identifier a, int num);
 void Identifier_SetFloat(Identifier a, double num);

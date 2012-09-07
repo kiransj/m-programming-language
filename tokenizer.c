@@ -248,11 +248,6 @@ Identifier Identifier_Create(void)
 
 void Identifier_Destroy(Identifier t)
 {
-#if 0
-	char buf[100];
-	Identifier_to_str(t, buf, 100);
-	LOG_ERROR("deleting %s", buf);
-#endif
 	if(IS_NULL(t))
 	{
 		return;
@@ -272,4 +267,79 @@ void Identifier_Destroy(Identifier t)
 	memset(t, 0, sizeof(struct _Identifier));
 	Free(t);
 	return;
+}
+
+
+IdentifierStack IdentifierStack_Create(void)
+{
+	IdentifierStack is = (IdentifierStack)Malloc(sizeof(struct _IdentifierStack));
+	if(IS_NULL(is))
+	{
+		LOG_ERROR("Malloc(%u) failed", sizeof(struct _IdentifierStack));
+		return NULL;
+	}
+	is->size = 25;
+	is->top = -1;
+	is->list = (Identifier*)Malloc(sizeof(Identifier) * is->size);
+	if(IS_NULL(is->list))
+	{
+		LOG_ERROR("Malloc(%u) failed", sizeof(Identifier) * is->size);
+		Free(is);
+		return NULL;
+	}
+	memset(is->list, 0, sizeof(Identifier) * is->size);
+	return is;
+}
+
+
+STATUS IdentifierStack_Push(IdentifierStack is, Identifier A)
+{
+	if(is->top == (is->size-1))
+	{
+		is->size += 25;
+		is->list = (Identifier*)ReAlloc(is->list, sizeof(Identifier) * is->size);
+		if(IS_NULL(is->list))
+		{
+			LOG_ERROR("ReAlloc(%u) failed", sizeof(Identifier) * is->size);
+			return STATUS_FAILURE;
+		}
+		memset(&is->list[is->size - 25], 0, sizeof(Identifier) * (is->size-25));
+	}
+	++is->top;
+	is->list[is->top] = Identifier_Clone(A);
+	if(IS_NULL(is->list[is->top]))
+	{
+		return STATUS_FAILURE;
+	}
+	return STATUS_SUCCESS;
+}
+
+Identifier IdentifierStack_Pop(IdentifierStack is)
+{
+	Identifier d = NULL;
+	if(is->top < 0)
+	{
+		LOG_ERROR("Stack_POp() failed as stack is empty");
+		return NULL;
+	}
+	if(!IS_NULL(is->list[is->top]))
+	{
+		d = Identifier_Clone(is->list[is->top]);
+		Identifier_Destroy(is->list[is->top]);
+		is->list[is->top] = NULL;
+		is->top--;
+	}
+	return d;
+}
+
+void IdentifierStack_Destroy(IdentifierStack is)
+{
+	int i = 0;
+	for(i = 0; i <= is->top; i++)
+	{
+		if(!IS_NULL(is->list[i]))
+			Identifier_Destroy(is->list[i]);
+	}
+	Free(is->list);
+	Free(is);
 }

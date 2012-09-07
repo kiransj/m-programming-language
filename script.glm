@@ -5,3 +5,8 @@ while(n > 0)
 	n:=n-1;
 endwhile
 sum:=sum;
+if(sum<1000)	
+	sum:=1000;
+endif
+
+printf("Sum is $", sum);
