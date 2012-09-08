@@ -224,7 +224,7 @@ variable_list ::= variable_list OPERATOR_COMMA  variable_decl.
 
 	1. var a, b; 					Here the variables are not initialized.
 	2. var a := 10, b := a+10;		Here the variable are initialzed.
-	4. var a, b=10, c=20;			Here some are initialzed and some are not.
+	4. var a, b:=10, c:=20;			Here some are initialzed and some are not.
 */
 
 variable_decl ::= TOKEN_TYPE_VARIABLE(B).                               { Command_VariableDecl(compiler, B, NULL);}
