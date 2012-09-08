@@ -1,6 +1,19 @@
 #include <string.h>
+#include <stdarg.h>
 #include "function.h"
 #include "executable.h"
+
+
+void RaiseException(Executable exe, char *format, ...)
+{
+	va_list ap;
+	char buffer[1024];
+	LOG_ERROR("Exception Raised near line %d", exe->ec->cur_ptr->line_number);
+	va_start(ap, format);
+	vsnprintf(buffer, 1024, format, ap);
+	LOG_ERROR("%s", buffer);
+	exe->error_flag = 1;
+}
 
 Identifier GetIdentifier(Executable exe, Identifier A)
 {
@@ -12,15 +25,15 @@ Identifier GetIdentifier(Executable exe, Identifier A)
 				return A;
 
 		case IDENTIFIER_TYPE_REGISTER:
-				return exe->ec->regs[A->u.argument_number]; 
+				return exe->ec->regs[A->u.argument_number];
 
 		case IDENTIFIER_TYPE_VARIABLE:
 				{
 					Identifier v = VariableList_FindVariable(exe->ec->local_variables, A->u.variable_name);
 					if(IS_NULL(v))
 					{
-						LOG_ERROR("VariableList_FindVariable('%s') failed hence stoping execution", A->u.variable_name);
-						exe->error_flag = 1;
+						RaiseException(exe, "VariableList_FindVariable('%s') failed hence stoping execution", A->u.variable_name);
+						return NULL;
 					}
 					return v;
 				}
@@ -32,16 +45,16 @@ Identifier GetIdentifier(Executable exe, Identifier A)
 	return NULL;
 }
 
-void Execute_Mul(Identifier A, Identifier B, Identifier C)  
+void Execute_Mul(Identifier A, Identifier B, Identifier C)
 {
-	int answer = 0;	
+	int answer = 0;
 
 	if(IS_NULL(A) || IS_NULL(B) || IS_NULL(C)) return;
 
 	answer = A->u.number * B->u.number;
 	Identifier_SetInt(C, answer);
 }
-void Execute_Add(Identifier A, Identifier B, Identifier C)  
+void Execute_Add(Identifier A, Identifier B, Identifier C)
 {
 	int answer = 0;
 
@@ -50,7 +63,7 @@ void Execute_Add(Identifier A, Identifier B, Identifier C)
 	answer = A->u.number + B->u.number;
 	Identifier_SetInt(C, answer);
 }
-void Execute_Sub(Identifier A, Identifier B, Identifier C)  
+void Execute_Sub(Identifier A, Identifier B, Identifier C)
 {
 	int answer = 0;
 
@@ -83,7 +96,7 @@ void Execute_Gte(Identifier A, Identifier B, Identifier C)
 
 
 	if(IS_NULL(A) || IS_NULL(B) || IS_NULL(C)) return;
-	answer = A->u.number >= B->u.number;	
+	answer = A->u.number >= B->u.number;
 	Identifier_SetInt(C, answer);
 }
 void Execute_Lte(Identifier A, Identifier B, Identifier C)
@@ -97,7 +110,7 @@ void Execute_Lte(Identifier A, Identifier B, Identifier C)
 void Execute_Cmp(Identifier A, Identifier B, Identifier C)
 {
 	int answer = 0;
-	
+
 	if(IS_NULL(A) || IS_NULL(B) || IS_NULL(C)) return;
 	answer = A->u.number == B->u.number;
 	Identifier_SetInt(C, answer);
@@ -105,14 +118,14 @@ void Execute_Cmp(Identifier A, Identifier B, Identifier C)
 void Execute_Neq(Identifier A, Identifier B, Identifier C)
 {
 	int answer = 0;
-	
+
 	if(IS_NULL(A) || IS_NULL(B) || IS_NULL(C)) return;
 	answer = A->u.number == B->u.number;
 	Identifier_SetInt(C, answer);
 }
 void Execute_Equ(Identifier A, Identifier B, Identifier C)
 {
-	
+
 	if(IS_NULL(A) || IS_NULL(B) || IS_NULL(C)) return;
 	Identifier_SetInt(A, B->u.number);
 	Identifier_SetInt(C, B->u.number);
@@ -140,10 +153,10 @@ void Execute_Call(Executable exe, const char *fun_name, int num_args, Identifier
 	func = FunctionList_FindFunction(exe->func_list, fun_name);
 	if(IS_NULL(func))
 	{
-		LOG_ERROR("func '%s' not found", fun_name);
-		abort();
+		RaiseException(exe, "func '%s' not found", fun_name);
+		return; 
 	}
-	
+
 	if(exe->ec_top == (exe->ec_size-1))
 	{
 		if(STATUS_FAILURE == Executable_GrowExecutionContext(exe))
@@ -153,7 +166,7 @@ void Execute_Call(Executable exe, const char *fun_name, int num_args, Identifier
 		}
 	}
 	exe->ec = exe->ec_list[++exe->ec_top] = ExecutionContext_Create(NULL);
-	exe->ec->num_args = num_args+1; 
+	exe->ec->num_args = num_args+1;
 	exe->ec->args = (Identifier*)Malloc(sizeof(Identifier) * exe->ec->num_args);
 
 	exe->ec->args[0] = Identifier_NewInteger(num_args);
@@ -191,59 +204,59 @@ STATUS ExecutionContext_Execute(Executable exe)
 		}
 	}
 	exe->ec = exe->ec_list[++exe->ec_top] = ExecutionContext_Create(exe->first->next);
-	
+
 	while(!IS_NULL(exe->ec->cur_ptr) && (exe->error_flag == 0))
 	{
 		switch(exe->ec->cur_ptr->cmd)
 		{
 			case MUL:
-					Execute_Mul(GetIdentifier(exe, exe->ec->cur_ptr->A), 
-								GetIdentifier(exe, exe->ec->cur_ptr->B), 
+					Execute_Mul(GetIdentifier(exe, exe->ec->cur_ptr->A),
+								GetIdentifier(exe, exe->ec->cur_ptr->B),
 								GetIdentifier(exe, exe->ec->cur_ptr->C));
 					break;
 			case ADD:
-					Execute_Add(GetIdentifier(exe, exe->ec->cur_ptr->A), 
-								GetIdentifier(exe, exe->ec->cur_ptr->B), 
+					Execute_Add(GetIdentifier(exe, exe->ec->cur_ptr->A),
+								GetIdentifier(exe, exe->ec->cur_ptr->B),
 								GetIdentifier(exe, exe->ec->cur_ptr->C));
 					break;
 			case SUB:
-					Execute_Sub(GetIdentifier(exe, exe->ec->cur_ptr->A), 
-								GetIdentifier(exe, exe->ec->cur_ptr->B), 
+					Execute_Sub(GetIdentifier(exe, exe->ec->cur_ptr->A),
+								GetIdentifier(exe, exe->ec->cur_ptr->B),
 								GetIdentifier(exe, exe->ec->cur_ptr->C));
-					break;				
+					break;
 			case GTH:
-					Execute_Gth(GetIdentifier(exe, exe->ec->cur_ptr->A), 
-								GetIdentifier(exe, exe->ec->cur_ptr->B), 
+					Execute_Gth(GetIdentifier(exe, exe->ec->cur_ptr->A),
+								GetIdentifier(exe, exe->ec->cur_ptr->B),
 								GetIdentifier(exe, exe->ec->cur_ptr->C));
 					break;
 			case LTH:
-					Execute_Lth(GetIdentifier(exe, exe->ec->cur_ptr->A), 
-								GetIdentifier(exe, exe->ec->cur_ptr->B), 
-								GetIdentifier(exe, exe->ec->cur_ptr->C));				
-					break;			
+					Execute_Lth(GetIdentifier(exe, exe->ec->cur_ptr->A),
+								GetIdentifier(exe, exe->ec->cur_ptr->B),
+								GetIdentifier(exe, exe->ec->cur_ptr->C));
+					break;
 			case GTE:
-					Execute_Gte(GetIdentifier(exe, exe->ec->cur_ptr->A), 
-								GetIdentifier(exe, exe->ec->cur_ptr->B), 
+					Execute_Gte(GetIdentifier(exe, exe->ec->cur_ptr->A),
+								GetIdentifier(exe, exe->ec->cur_ptr->B),
 								GetIdentifier(exe, exe->ec->cur_ptr->C));
 					break;
 			case LTE:
-					Execute_Lte(GetIdentifier(exe, exe->ec->cur_ptr->A), 
-								GetIdentifier(exe, exe->ec->cur_ptr->B), 
+					Execute_Lte(GetIdentifier(exe, exe->ec->cur_ptr->A),
+								GetIdentifier(exe, exe->ec->cur_ptr->B),
 								GetIdentifier(exe, exe->ec->cur_ptr->C));
 					break;
 			case CMP:
-					Execute_Cmp(GetIdentifier(exe, exe->ec->cur_ptr->A), 
-								GetIdentifier(exe, exe->ec->cur_ptr->B), 
+					Execute_Cmp(GetIdentifier(exe, exe->ec->cur_ptr->A),
+								GetIdentifier(exe, exe->ec->cur_ptr->B),
 								GetIdentifier(exe, exe->ec->cur_ptr->C));
 					break;
 			case NEQ:
-					Execute_Neq(GetIdentifier(exe, exe->ec->cur_ptr->A), 
-								GetIdentifier(exe, exe->ec->cur_ptr->B), 
-								GetIdentifier(exe, exe->ec->cur_ptr->C));					
-					break;					
+					Execute_Neq(GetIdentifier(exe, exe->ec->cur_ptr->A),
+								GetIdentifier(exe, exe->ec->cur_ptr->B),
+								GetIdentifier(exe, exe->ec->cur_ptr->C));
+					break;
 			case EQU:
-					Execute_Equ(GetIdentifier(exe, exe->ec->cur_ptr->A), 
-								GetIdentifier(exe, exe->ec->cur_ptr->B), 
+					Execute_Equ(GetIdentifier(exe, exe->ec->cur_ptr->A),
+								GetIdentifier(exe, exe->ec->cur_ptr->B),
 								GetIdentifier(exe, exe->ec->cur_ptr->C));
 					break;
 			case JZ:
@@ -262,12 +275,11 @@ STATUS ExecutionContext_Execute(Executable exe)
 					}
 			case VAR:
 					{
-						if(STATUS_SUCCESS != VariableList_AddVariable(exe->ec->local_variables, 
+						if(STATUS_SUCCESS != VariableList_AddVariable(exe->ec->local_variables,
 																	  exe->ec->cur_ptr->A->u.variable_name,
 																	  GetIdentifier(exe, exe->ec->cur_ptr->B)))
 						{
-							LOG_ERROR("VariableList_AddVariable(%s) failed", exe->ec->cur_ptr->A->u.variable_name);
-							exe->error_flag = 1;
+							RaiseException(exe, "VariableList_AddVariable(%s) failed", exe->ec->cur_ptr->A->u.variable_name);
 							goto SCRIPT_ERROR;
 						}
 						break;
@@ -367,7 +379,7 @@ void VariableList_Destroy(VariableList vl)
 	while(!IS_NULL(vl))
 	{
 		tmp_vl = vl->next;
-		if(!IS_NULL(vl->variable_name) && strlen(vl->variable_name) != 0) 
+		if(!IS_NULL(vl->variable_name) && strlen(vl->variable_name) != 0)
 		{
 			Free(vl->variable_name);
 			Identifier_Destroy(vl->id);
@@ -423,7 +435,7 @@ Identifier  VariableList_FindVariable(VariableList vl, const char *variable_name
 STATUS VariableList_AddVariable(VariableList vl, const char *variable_name, Identifier v)
 {
 	int flag;
-	VariableList new_var = vl->next, tmp1_vl;
+	VariableList new_var = vl->next, tmp1_vl = NULL;
 
 	if(strlen(variable_name) < 1)
 	{

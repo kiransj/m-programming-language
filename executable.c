@@ -83,7 +83,7 @@ Executable Executable_Create(void)
 			Free(exe->ec_list);
 			Free(exe);
 			return NULL;
-		}	
+		}
 	}
 	else
 	{
@@ -128,8 +128,9 @@ void Executable_Destroy(Executable exe)
 
 STATUS Executable_AddCmd(Executable exe, CompilerCmd cmd, Identifier a, Identifier b, Identifier c, int number)
 {
-	Identifier A, B, C;
+	Identifier A = NULL, B = NULL, C = NULL;
 	ByteCode bc = ByteCode_Create();
+	bc->line_number = exe->line_number;
 	if(IS_NULL(bc))
 	{
 		LOG_ERROR("ByteCode_Create() failed");
@@ -160,7 +161,7 @@ STATUS Executable_AddCmd(Executable exe, CompilerCmd cmd, Identifier a, Identifi
 		case	LTE:
 		case	CMP:
 		case	NEQ:
-		case	OR: 
+		case	OR:
 		case	AND:
 		case	EQU:
 			{
@@ -194,7 +195,7 @@ STATUS Executable_AddCmd(Executable exe, CompilerCmd cmd, Identifier a, Identifi
 		case LABEL:
 			{
 				Free(bc);
-				bc = NULL;				
+				bc = NULL;
 				if(number >= exe->label_size)
 				{
 					exe->label_size = number;

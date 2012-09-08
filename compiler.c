@@ -8,13 +8,13 @@
 #include "util.h"
 
 
-unsigned int line_number;
+unsigned int line_number = 1;
 
 /*Comment the below code to print the byte code*/
-#if 1 
+#if 1
 #ifdef LOG_INFO_NL
 #undef LOG_INFO_NL
-#define LOG_INFO_NL(format, args...) 
+#define LOG_INFO_NL(format, args...)
 #endif
 #endif
 
@@ -27,7 +27,7 @@ char* token_to_str(int token)
 		case OR:			return "OR";
 		case CMP:			return "CMP";
 		case NEQ:			return "NEQ";
-		case GTH:			return "GTH";								
+		case GTH:			return "GTH";
 		case GTE:			return "GTE";
 		case LTH:			return "LTH";
 		case LTE:			return "LTE";
@@ -55,15 +55,17 @@ int Command_LoopStmt(Compiler c, CompilerCmd cmd, Identifier A, int label_number
 	int return_value=  0;
 	char buf1[64];
 	Executable exe = (Executable)c->priv_data;
+
+	exe->line_number = c->line_number;
 	if(STMT_START_WHILE == cmd)
-	{		
+	{
 		int label_number = c->label_number++;
 		LOG_INFO_NL("LABEL_%d:", label_number);
 		Executable_AddCmd(exe, LABEL, NULL, NULL, NULL, label_number);
 		return_value = c->label_number++;
 	}
 	else if(STMT_WHILE_COND == cmd)
-	{		
+	{
 		Identifier_to_str(A, buf1, 64);
 		LOG_INFO_NL("JZ %s, %d", buf1, label_number);
 		Executable_AddCmd(exe, JZ, A, NULL, NULL, label_number);
@@ -71,7 +73,7 @@ int Command_LoopStmt(Compiler c, CompilerCmd cmd, Identifier A, int label_number
 	}
 	else if(STMT_END_WHILE == cmd)
 	{
-		LOG_INFO_NL("JUMP %d", label_number-1);		
+		LOG_INFO_NL("JUMP %d", label_number-1);
 		LOG_INFO_NL("LABEL_%d:", label_number);
 
 		Executable_AddCmd(exe, JUMP, NULL, NULL, NULL, label_number-1);
@@ -88,6 +90,8 @@ int Command_ConditionStmt(Compiler c, CompilerCmd cmd, Identifier A, int label_n
 {
 	char buf1[64];
 	Executable exe = (Executable)c->priv_data;
+
+	exe->line_number = c->line_number;
 	if(STMT_IF == cmd)
 	{
 		int label_number = c->label_number++;
@@ -102,7 +106,7 @@ int Command_ConditionStmt(Compiler c, CompilerCmd cmd, Identifier A, int label_n
 	{
 		LOG_INFO_NL("LABEL_%d:", label_number);
 		Executable_AddCmd(exe, LABEL, NULL, NULL, NULL, label_number);
-	}	
+	}
 	return 0;
 }
 
@@ -110,6 +114,8 @@ void Command_FunctionArg(Compiler c, Identifier A)
 {
 	char buf1[64];
 	Executable exe = (Executable)c->priv_data;
+
+	exe->line_number = c->line_number;
 	Identifier_to_str(A, buf1, 64);
 	LOG_INFO_NL("PUSH %s", buf1);
 	Executable_AddCmd(exe, PUSH, A, NULL, NULL, 0);
@@ -122,6 +128,8 @@ void Command_VariableDecl(Compiler c, Identifier A, Identifier B)
 {
 	char buf1[64], buf2[64];
 	Executable exe = (Executable)c->priv_data;
+
+	exe->line_number = c->line_number;
 	Identifier_to_str(A, buf1, 64);
 	if(IS_NULL(B))
 	{
@@ -138,7 +146,9 @@ Identifier Command_function_call(Compiler c, Identifier A, int num_args)
 {
 	char buf2[64];
 	Executable exe = (Executable)c->priv_data;
-	Identifier res = Identifier_NewRegister(c->reg_num++);
+	Identifier res = NULL;
+	exe->line_number = c->line_number;
+	res = Identifier_NewRegister(c->reg_num++);
 	if(IS_NULL(res))
 	{
 		LOG_ERROR("Identifier_NewRegister() failed");
@@ -155,6 +165,7 @@ Identifier Command_function_call(Compiler c, Identifier A, int num_args)
 Identifier Command_Operation(Compiler c, Identifier A, CompilerCmd oper, Identifier B)
 {
 	Executable exe = (Executable)c->priv_data;
+	exe->line_number = c->line_number;
 	switch(oper)
 	{
 		case	SUB:
@@ -168,8 +179,8 @@ Identifier Command_Operation(Compiler c, Identifier A, CompilerCmd oper, Identif
 		case	LTE:
 		case	CMP:
 		case	NEQ:
-		case	OR: 
-		case	EQU: 
+		case	OR:
+		case	EQU:
 		case	AND:
 			{
 				char buf1[64], buf2[64], buf3[64];
@@ -179,11 +190,11 @@ Identifier Command_Operation(Compiler c, Identifier A, CompilerCmd oper, Identif
 					LOG_ERROR("Identifier_NewRegister() failed");
 					c->error_flag = 1;
 					return NULL;
-				}			
+				}
 				Identifier_to_str(A, buf1, 64);
 				Identifier_to_str(B, buf2, 64);
 				Identifier_to_str(res, buf3, 64);
-				Executable_AddCmd(exe, oper, A, B, res, 0);				
+				Executable_AddCmd(exe, oper, A, B, res, 0);
 				LOG_INFO_NL("%s %s, %s, %s", token_to_str(oper), buf1, buf2, buf3);
 
 				Identifier_Destroy(A);
@@ -191,7 +202,7 @@ Identifier Command_Operation(Compiler c, Identifier A, CompilerCmd oper, Identif
 				return res;
 			}
 			break;
-		default: 
+		default:
 			break;
 	}
 	return NULL;
@@ -206,7 +217,7 @@ int main(int argc, char *argv[])
 	void *pParser;
 	Compiler c;
 	Executable exe;
-	
+
 	if(argc == 1)
 	{
 		LOG_INFO_NL("usage %s filename", argv[0]);
@@ -225,13 +236,13 @@ int main(int argc, char *argv[])
 		return 1;
 	}
 
-	c->priv_data = (void*)exe;	
+	c->priv_data = (void*)exe;
 	Register_Native_Functions(exe);
 
 	yyin = fopen(argv[1], "r");
 	if(NULL == yyin)
 	{
-		Free(c);		
+		Free(c);
 		Executable_Destroy(exe);
 		printf("unable to open file\n");
 		return 1;

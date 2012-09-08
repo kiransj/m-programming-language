@@ -10,6 +10,7 @@ struct _ByteCode;
 typedef struct _ByteCode *ByteCode;
 struct _ByteCode
 {
+	int line_number;
 	CompilerCmd cmd;
 	Identifier A, B, C;
 	union
@@ -42,7 +43,7 @@ typedef struct _ExecutionContext
 	unsigned int num_args;
 	Identifier	 *args;
 
-	VariableList	local_variables;	
+	VariableList	local_variables;
 
 	ByteCode	 	cur_ptr;
 }*ExecutionContext;
@@ -52,13 +53,14 @@ void ExecutionContext_Destroy(ExecutionContext ec);
 
 typedef struct _Executable
 {
+	int				line_number;
 	ByteCode 		first, last;
 	unsigned int 	label_size, label_index;
 	unsigned int   *label_list;
-	FunctionList	func_list;	
-	
+	FunctionList	func_list;
+
 	IdentifierStack		is;
-	/*Initialized during RunTime*/	
+	/*Initialized during RunTime*/
 	ExecutionContext 	ec;
 	int 				ec_size, ec_top;
 	ExecutionContext 	*ec_list;

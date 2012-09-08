@@ -4,8 +4,8 @@
 var fact:=10, n:=fact-9;
 
 #variable Declartion where they are not initialzied
-var sum;
 
+var sum;
 #initialize sum with value 1
 sum:=1;
 
