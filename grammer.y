@@ -216,5 +216,16 @@ loop_stmt ::= while_loop_block.
 	Variable Declation list
 */
 variable_declaration ::= KEYWORD_VAR variable_list stmt_end.           
-variable_list ::= TOKEN_TYPE_VARIABLE(B).                               { Command_VariableDecl(compiler, B);} 
-variable_list ::= variable_list OPERATOR_COMMA  TOKEN_TYPE_VARIABLE(B). { Command_VariableDecl(compiler, B);}
+variable_list ::= variable_decl.
+variable_list ::= variable_list OPERATOR_COMMA  variable_decl. 			
+
+/*
+	Variable Declaration can be of 3 forms.
+
+	1. var a, b; 					Here the variables are not initialized.
+	2. var a := 10, b := a+10;		Here the variable are initialzed.
+	4. var a, b=10, c=20;			Here some are initialzed and some are not.
+*/
+
+variable_decl ::= TOKEN_TYPE_VARIABLE(B).                               { Command_VariableDecl(compiler, B, NULL);}
+variable_decl ::= TOKEN_TYPE_VARIABLE(B) OPERATOR_EQU expr(C) .         { Command_VariableDecl(compiler, B, C);} 

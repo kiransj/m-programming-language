@@ -5,6 +5,11 @@
 
 void Identifier_to_str(Identifier id, char * const buffer, const int size)
 {
+	if(IS_NULL(id))
+	{
+		snprintf(buffer, size, "NULL");
+		return;
+	}
 	switch(id->type)
 	{
 

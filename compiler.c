@@ -11,7 +11,7 @@
 unsigned int line_number;
 
 /*Comment the below code to print the byte code*/
-#if 0
+#if 1 
 #ifdef LOG_INFO_NL
 #undef LOG_INFO_NL
 #define LOG_INFO_NL(format, args...) 
@@ -118,14 +118,20 @@ void Command_FunctionArg(Compiler c, Identifier A)
 }
 
 
-void Command_VariableDecl(Compiler c, Identifier A)
+void Command_VariableDecl(Compiler c, Identifier A, Identifier B)
 {
-	char buf1[64];
+	char buf1[64], buf2[64];
 	Executable exe = (Executable)c->priv_data;
 	Identifier_to_str(A, buf1, 64);
-	LOG_INFO_NL("VAR %s", buf1);
-	Executable_AddCmd(exe, VAR, A, NULL, NULL, 0);
+	if(IS_NULL(B))
+	{
+		B =  Identifier_NewInteger(0);
+	}
+	Identifier_to_str(B, buf2, 64);
+	LOG_INFO_NL("VAR %s, %s", buf1, buf2);
+	Executable_AddCmd(exe, VAR, A, B, NULL, 0);
 	Identifier_Destroy(A);
+	Identifier_Destroy(B);
 	return ;
 }
 Identifier Command_function_call(Compiler c, Identifier A, int num_args)
@@ -200,14 +206,14 @@ int main(int argc, char *argv[])
 	void *pParser;
 	Compiler c;
 	Executable exe;
-
-	c = (Compiler)Malloc(sizeof(struct _Compiler));
+	
 	if(argc == 1)
 	{
 		LOG_INFO_NL("usage %s filename", argv[0]);
 		return 1;
 	}
 
+	c = (Compiler)Malloc(sizeof(struct _Compiler));
 	memset(c, 0, sizeof(Compiler));
 	c->label_number = 1;
 	c->reg_num = 1;
@@ -225,6 +231,8 @@ int main(int argc, char *argv[])
 	yyin = fopen(argv[1], "r");
 	if(NULL == yyin)
 	{
+		Free(c);		
+		Executable_Destroy(exe);
 		printf("unable to open file\n");
 		return 1;
 	}
@@ -243,7 +251,10 @@ int main(int argc, char *argv[])
 	LOG_INFO_NL("max number of regs required : %d", c->max_num_reg);
 	Parse(pParser, 0, yylval, c);
 	ParseFree(pParser, Free);
-	ExecutionContext_Execute(exe);
+	if(c->error_flag == 0)
+	{
+		ExecutionContext_Execute(exe);
+	}
 	Free(c);
 	Executable_Destroy(exe);
 	fclose(yyin);

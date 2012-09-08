@@ -1,16 +1,30 @@
-var fact, n, sum;
-fact:=5;
-n:=1;
+#sample program for factorial
+
+#variable declartion where variables are initialzed.
+var fact:=10, n:=fact-9;
+
+#variable Declartion where they are not initialzied
+var sum;
+
+#initialize sum with value 1
 sum:=1;
+
+#while loop implemention 
 while(n <= fact)
 	sum:=sum*n;
+
+	#this is native function it is defined in native_functions.c
 	output("fact(",n,") = ", sum);
 	n:=n+1;
 endwhile
 
 Output(fact, "! is " , sum);
+
+#max is also a native function defined in native_functions.c
 sum:=max(10, 12, 9);
 output("max(10, 12, 9):=", sum);
+
+#sample if condition
 if(sum > 0)
 	output("sum is > 0");
 endif

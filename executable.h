@@ -31,7 +31,7 @@ typedef struct _variablelist
 
 VariableList VariableList_Create(const char *var_name);
 void 		 VariableList_Destroy(VariableList);
-STATUS 		 VariableList_AddVariable(VariableList vl, const char *variable_name);
+STATUS 		 VariableList_AddVariable(VariableList vl, const char *variable_name, Identifier v);
 Identifier   VariableList_FindVariable(VariableList, const char *variable_name);
 
 typedef struct _ExecutionContext

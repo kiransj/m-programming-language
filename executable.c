@@ -219,6 +219,7 @@ STATUS Executable_AddCmd(Executable exe, CompilerCmd cmd, Identifier a, Identifi
 			{
 				bc->cmd = VAR;
 				bc->A = A;
+				bc->B = B;
 				break;
 			}
 		default:

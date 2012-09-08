@@ -262,7 +262,9 @@ STATUS ExecutionContext_Execute(Executable exe)
 					}
 			case VAR:
 					{
-						if(STATUS_SUCCESS != VariableList_AddVariable(exe->ec->local_variables, exe->ec->cur_ptr->A->u.variable_name))
+						if(STATUS_SUCCESS != VariableList_AddVariable(exe->ec->local_variables, 
+																	  exe->ec->cur_ptr->A->u.variable_name,
+																	  GetIdentifier(exe, exe->ec->cur_ptr->B)))
 						{
 							LOG_ERROR("VariableList_AddVariable(%s) failed", exe->ec->cur_ptr->A->u.variable_name);
 							exe->error_flag = 1;
@@ -418,7 +420,7 @@ Identifier  VariableList_FindVariable(VariableList vl, const char *variable_name
 	return NULL;
 }
 
-STATUS VariableList_AddVariable(VariableList vl, const char *variable_name)
+STATUS VariableList_AddVariable(VariableList vl, const char *variable_name, Identifier v)
 {
 	int flag;
 	VariableList new_var = vl->next, tmp1_vl;
@@ -434,7 +436,7 @@ STATUS VariableList_AddVariable(VariableList vl, const char *variable_name)
 		new_var = VariableList_Create(variable_name);
 		if(!IS_NULL(new_var))
 		{
-			new_var->id = Identifier_NewInteger(0);
+			new_var->id = Identifier_Clone(v);
 			new_var->next = NULL;
 			new_var->variable_name = (char*)Malloc(strlen(variable_name)+1);
 			memcpy(new_var->variable_name, variable_name, strlen(variable_name));
@@ -470,7 +472,7 @@ STATUS VariableList_AddVariable(VariableList vl, const char *variable_name)
 	new_var = VariableList_Create(variable_name);
 	if(!IS_NULL(new_var))
 	{
-		new_var->id = Identifier_NewInteger(0);
+		new_var->id = Identifier_Clone(v);
 		new_var->next = NULL;
 		new_var->variable_name = (char*)Malloc(strlen(variable_name)+1);
 		memcpy(new_var->variable_name, variable_name, strlen(variable_name));
