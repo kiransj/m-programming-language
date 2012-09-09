@@ -1,7 +1,8 @@
+function fact()
 #sample program for factorial
 
 #variable declartion where variables are initialzed.
-var fact:=10, n:=fact-9;
+var fact:=10, n:=1;
 
 #variable Declartion where they are not initialzied
 
@@ -20,11 +21,8 @@ endwhile
 
 Output(fact, "! is " , sum);
 
-#max is also a native function defined in native_functions.c
-sum:=max(10, 12, 9);
-output("max(10, 12, 9):=", sum);
+endfunction
 
-#sample if condition
-if(sum > 0)
-	output("sum is > 0");
-endif
+function Main()
+	fact(10);
+endfunction

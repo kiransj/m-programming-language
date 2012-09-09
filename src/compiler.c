@@ -11,7 +11,7 @@
 unsigned int line_number = 1;
 
 /*Comment the below code to print the byte code*/
-#if 1
+#if 0 
 #ifdef LOG_INFO_NL
 #undef LOG_INFO_NL
 #define LOG_INFO_NL(format, args...)
@@ -162,6 +162,18 @@ Identifier Command_function_call(Compiler c, Identifier A, int num_args)
 	Identifier_Destroy(A);
 	return res;
 }
+
+void Command_NewFunction(Compiler c, Identifier func_name)
+{
+	LOG_INFO_NL("FUNCTION %s", func_name->u.str);
+	Identifier_Destroy(func_name);
+	return;
+}
+
+void Command_EndFunction(Compiler c)
+{
+	LOG_INFO_NL("ENDFUNCTION ");
+}
 Identifier Command_Operation(Compiler c, Identifier A, CompilerCmd oper, Identifier B)
 {
 	Executable exe = (Executable)c->priv_data;
@@ -264,7 +276,7 @@ int main(int argc, char *argv[])
 	ParseFree(pParser, Free);
 	if(c->error_flag == 0)
 	{
-		ExecutionContext_Execute(exe);
+//		ExecutionContext_Execute(exe);
 	}
 	Free(c);
 	Executable_Destroy(exe);

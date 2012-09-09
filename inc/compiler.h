@@ -58,4 +58,6 @@ int Command_LoopStmt(Compiler c, CompilerCmd cmd, Identifier A, int label_number
 Identifier Command_function_call(Compiler c, Identifier A, int num_args);
 Identifier Command_Operation(Compiler, Identifier A, CompilerCmd oper, Identifier B);
 
+void Command_NewFunction(Compiler c, Identifier func_name);
+void Command_EndFunction(Compiler c);
 #endif
