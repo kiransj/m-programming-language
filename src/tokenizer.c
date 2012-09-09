@@ -205,6 +205,11 @@ Identifier Identifier_Clone(Identifier a)
 				i = Identifier_NewFloat(a->u.real);
 				break;
 			}
+		case IDENTIFIER_TYPE_ARGUMENT:
+			{
+				i = Identifier_NewArgument(a->u.argument_number);
+				break;
+			}
 		default:
 			{
 				LOG_ERROR("unkown type %u", a->type);

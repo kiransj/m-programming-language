@@ -25,7 +25,7 @@ Identifier GetIdentifier(Executable exe, Identifier A)
 				return A;
 
 		case IDENTIFIER_TYPE_REGISTER:
-				return exe->ec->regs[A->u.argument_number];
+				return exe->ec->regs[A->u.register_number];
 
 		case IDENTIFIER_TYPE_VARIABLE:
 				{
@@ -39,6 +39,9 @@ Identifier GetIdentifier(Executable exe, Identifier A)
 				}
 
 		case IDENTIFIER_TYPE_ARGUMENT:
+				{
+					return exe->ec->args[A->u.argument_number];
+				}
 		case IDENTIFIER_TYPE_UNKNOWN:
 				abort();
 	}
@@ -171,7 +174,13 @@ void Execute_Call(Executable exe, const char *fun_name, int num_args, Identifier
 	args[0] = Identifier_NewInteger(num_args);
 	for(i = num_args; i != 0; i--)
 	{
-		args[i] = GetIdentifier(exe, IdentifierStack_Pop(exe->is));
+		Identifier p = IdentifierStack_Pop(exe->is);
+		if(IS_NULL(p))
+		{
+			RaiseException(exe, "POP from stack failed. Function arg missing?");
+			return;
+		}
+		args[i] = GetIdentifier(exe, p);
 	}
 
 	if(func->type == FUNCTION_TYPE_NATIVE)
@@ -215,7 +224,7 @@ STATUS Execute_Return(Executable exe, Identifier ret)
 	else
 	{
 		exe->ec = exe->ec_list[exe->ec_top];
-		Identifier_Copy(ret_value, exe->ec->cur_ptr->C);
+		Identifier_Copy(ret_value, GetIdentifier(exe, exe->ec->cur_ptr->C));
 	}
 	Identifier_Destroy(ret_value);
 	return STATUS_SUCCESS;
@@ -235,6 +244,7 @@ STATUS ExecutionContext_Execute(Executable exe, const char *func_name)
 	exe->ec->cur_ptr = ((ByteCode)(func->u.address))->next;
 	while(!IS_NULL(exe->ec->cur_ptr) && (exe->error_flag == 0))
 	{
+//		LOG_INFO("Executing on line %d", exe->ec->cur_ptr->line_number);
 		switch(exe->ec->cur_ptr->cmd)
 		{
 			case MUL:
