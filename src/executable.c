@@ -223,6 +223,20 @@ STATUS Executable_AddCmd(Executable exe, CompilerCmd cmd, Identifier a, Identifi
 				bc->B = B;
 				break;
 			}
+		case FUNCTION:;
+			{
+				Free(bc);
+				bc = NULL;
+				FunctionList_AddLocalFunction(exe->func_list,A->u.str,(unsigned int)exe->last);
+				Identifier_Destroy(A);
+				break;
+			}
+		case RETURN:
+			{
+				bc->cmd = RETURN;
+				bc->A = A;
+				break;
+			}
 		default:
 			LOG_ERROR("unhandled cmd %u, aborting...", cmd);
 			abort();

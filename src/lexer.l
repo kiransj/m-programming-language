@@ -10,7 +10,7 @@
 
 "function"			   { return KEYWORD_FUNCTION;}
 "endfunction"		   { return KEYWORD_ENDFUNCTION;}
-
+"return"			   { return KEYWORD_RETURN;}
 "if"				   { return KEYWORD_IF;}
 "endif"				   { return KEYWORD_ENDIF;}
 "while"			       { return KEYWORD_WHILE;}

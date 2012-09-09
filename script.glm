@@ -20,7 +20,7 @@ while(n <= fact)
 endwhile
 
 Output(fact, "! is " , sum);
-
+return (fact);
 endfunction
 
 function Main()

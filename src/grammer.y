@@ -93,6 +93,7 @@ stmt ::= stmt simple_stmt.
 stmt ::= stmt condition_stmt.
 stmt ::= stmt loop_stmt.
 stmt ::= stmt variable_declaration.
+stmt ::= stmt return_stmt.
 
 /*
 	STMT end operator is defined by SEMI COLON
@@ -242,4 +243,13 @@ variable_list ::= variable_list OPERATOR_COMMA  variable_decl.
 */
 
 variable_decl ::= TOKEN_TYPE_VARIABLE(B).                               { Command_VariableDecl(compiler, B, NULL);}
-variable_decl ::= TOKEN_TYPE_VARIABLE(B) OPERATOR_EQU expr(C) .         { Command_VariableDecl(compiler, B, C);} 
+variable_decl ::= TOKEN_TYPE_VARIABLE(B) OPERATOR_EQU expr(C) .         { Command_VariableDecl(compiler, B, C);}
+
+
+/*
+	Return STMT. Return stmt should have a return value.
+	Syntax
+	return (expr);
+*/
+
+return_stmt ::= KEYWORD_RETURN expr(A) OPERATOR_SEMI_COLON.				{ Command_ReturnStmt(compiler, A);}

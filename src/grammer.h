@@ -29,3 +29,4 @@
 #define KEYWORD_WHILE                  29
 #define KEYWORD_ENDWHILE               30
 #define KEYWORD_VAR                    31
+#define KEYWORD_RETURN                 32

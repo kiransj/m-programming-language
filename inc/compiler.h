@@ -39,6 +39,9 @@ typedef enum
 	PUSH,
 	VAR,
 
+	FUNCTION,
+	ENDFUNCTION,
+	RETURN,
 
 	STMT_END,
 	STMT_IF,
