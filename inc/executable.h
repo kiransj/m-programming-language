@@ -57,7 +57,7 @@ typedef struct _Executable
 	ByteCode 		first, last;
 
 	/* Number of registered required*/
-	int max_num_regs;
+	int max_num_reg;
 
 	/*Data structure to save label and their address*/
 	unsigned int 	label_size, label_index;
@@ -86,7 +86,7 @@ STATUS Executable_AddCmd(Executable exe, CompilerCmd cmd, Identifier A, Identifi
 
 STATUS Executable_AddNativeFunction(Executable exe, const char *func_name, NativeFunction nf);
 
-STATUS ExecutionContext_Execute(Executable exe);
+STATUS ExecutionContext_Execute(Executable exe, const char *func_name);
 
 
 void Register_Native_Functions(Executable exe);

@@ -1,4 +1,4 @@
-function fact()
+function Factorial()
 #sample program for factorial
 
 #variable declartion where variables are initialzed.
@@ -19,10 +19,12 @@ while(n <= fact)
 	n:=n+1;
 endwhile
 
-Output(fact, "! is " , sum);
+	Output(fact, "! is " , sum);
 return (fact);
+
 endfunction
 
 function Main()
-	fact(10);
+	Factorial();
+	Output("Done!!!");
 endfunction

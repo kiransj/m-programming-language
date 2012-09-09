@@ -37,15 +37,13 @@ char* token_to_str(int token)
 		case MUL:			return "MUL";
 		case MOD:			return "MOD";
 		default:			return "NULL";
-	}
+}
 }
 
 void Command(Compiler c, CompilerCmd oper)
 {
 	if(oper == STMT_END)
 	{
-		if(c->reg_num > c->max_num_reg)
-			c->max_num_reg = c->reg_num;
 		c->reg_num = 1;
 	}
 }
@@ -63,7 +61,7 @@ int Command_LoopStmt(Compiler c, CompilerCmd cmd, Identifier A, int label_number
 		LOG_INFO_NL("LABEL_%d:", label_number);
 		Executable_AddCmd(exe, LABEL, NULL, NULL, NULL, label_number);
 		return_value = c->label_number++;
-	}
+	}	
 	else if(STMT_WHILE_COND == cmd)
 	{
 		Identifier_to_str(A, buf1, 64);
@@ -155,7 +153,10 @@ Identifier Command_function_call(Compiler c, Identifier A, int num_args)
 		c->error_flag = 1;
 		return NULL;
 	}
-
+	if(c->max_num_reg < c->reg_num)
+	{
+		c->max_num_reg = c->reg_num;
+	}	
 	Identifier_to_str(res, buf2, 64);
 	LOG_INFO_NL("CALL %s, %d, %s", A->u.variable_name, num_args, buf2);
 	Executable_AddCmd(exe, CALL, A, NULL, res, num_args);
@@ -222,6 +223,10 @@ Identifier Command_Operation(Compiler c, Identifier A, CompilerCmd oper, Identif
 					LOG_ERROR("Identifier_NewRegister() failed");
 					c->error_flag = 1;
 					return NULL;
+				}
+				if(c->max_num_reg < c->reg_num)
+				{
+					c->max_num_reg = c->reg_num;
 				}
 				Identifier_to_str(A, buf1, 64);
 				Identifier_to_str(B, buf2, 64);
@@ -299,7 +304,7 @@ int main(int argc, char *argv[])
 
 	if(c->error_flag == 0)
 	{
-//		ExecutionContext_Execute(exe);
+		ExecutionContext_Execute(exe, "Main");
 	}
 	Free(c);
 	Executable_Destroy(exe);

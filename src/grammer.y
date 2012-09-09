@@ -2,7 +2,6 @@
 %default_type {Identifier}
 
 %extra_argument {Compiler compiler}
-/*%token_destructor  {  Indentifier_Destroy($$); }*/
 
 %include {
 #include <stdio.h>

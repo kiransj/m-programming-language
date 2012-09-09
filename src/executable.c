@@ -227,7 +227,12 @@ STATUS Executable_AddCmd(Executable exe, CompilerCmd cmd, Identifier a, Identifi
 			{
 				Free(bc);
 				bc = NULL;
-				FunctionList_AddLocalFunction(exe->func_list,A->u.str,(unsigned int)exe->last);
+				if(FunctionList_AddLocalFunction(exe->func_list,A->u.str,(unsigned int)exe->last) != STATUS_SUCCESS)
+				{
+					LOG_ERROR("FunctionList_AddLocalFunction(%s) failed. Could be function '%s; already exist", A->u.str, A->u.str);
+					Identifier_Destroy(A);
+					return STATUS_FAILURE;
+				}
 				Identifier_Destroy(A);
 				break;
 			}
