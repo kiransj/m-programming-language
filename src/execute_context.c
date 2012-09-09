@@ -14,6 +14,16 @@ void RaiseException(Executable exe, char *format, ...)
 	LOG_ERROR("%s", buffer);
 	exe->error_flag = 1;
 }
+void PrintBackTrace(Executable exe)
+{
+	int i = 0;
+	LOG_ERROR("=========Printing Backtrace====");
+	for(i = exe->ec_top; i >= 0; i--)
+	{
+		LOG_ERROR("%d> line %d", i, exe->ec_list[i]->cur_ptr->line_number);
+	}
+	LOG_ERROR("=========End of Back Trace ====");
+}
 
 Identifier GetIdentifier(Executable exe, Identifier A)
 {
@@ -40,9 +50,15 @@ Identifier GetIdentifier(Executable exe, Identifier A)
 
 		case IDENTIFIER_TYPE_ARGUMENT:
 				{
+					if(A->u.argument_number >= exe->ec->num_args)
+					{
+						RaiseException(exe, "Accessing argument %d which is not passed", A->u.argument_number);
+						PrintBackTrace(exe);
+						return NULL;
+					}
 					return exe->ec->args[A->u.argument_number];
 				}
-		case IDENTIFIER_TYPE_UNKNOWN:
+		default:
 				abort();
 	}
 	return NULL;
@@ -304,8 +320,14 @@ STATUS ExecutionContext_Execute(Executable exe, const char *func_name)
 					Execute_Jump(exe, exe->ec->cur_ptr->u.label_number);
 					break;
 			case PUSH:
-					IdentifierStack_Push(exe->is, GetIdentifier(exe, exe->ec->cur_ptr->A));
-					break;
+					{
+						Identifier id = GetIdentifier(exe, exe->ec->cur_ptr->A);
+						if(!IS_NULL(id))
+						{
+							IdentifierStack_Push(exe->is, id);
+						}						
+						break;
+					}
 			case CALL:
 					{
 						Execute_Call(exe,  exe->ec->cur_ptr->A->u.str, exe->ec->cur_ptr->u.num_arguments, GetIdentifier(exe, exe->ec->cur_ptr->C));

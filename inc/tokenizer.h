@@ -8,13 +8,14 @@ extern unsigned int line_number;
 char* token_to_str(int token);
 typedef enum
 {
-	IDENTIFIER_TYPE_UNKNOWN,
+	IDENTIFIER_TYPE_UNKNOWN_START,
 	IDENTIFIER_TYPE_NUMBER,
 	IDENTIFIER_TYPE_FLOAT,	
 	IDENTIFIER_TYPE_STRING,
 	IDENTIFIER_TYPE_ARGUMENT,
 	IDENTIFIER_TYPE_VARIABLE,
 	IDENTIFIER_TYPE_REGISTER,
+	IDENTIFIER_TYPE_UNKNOWN_END,
 }IdentifierType;
 
 char* IdentifierType_str(IdentifierType);

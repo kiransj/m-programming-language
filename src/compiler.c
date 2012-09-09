@@ -11,7 +11,7 @@
 unsigned int line_number = 1;
 
 /*Comment the below code to print the byte code*/
-#if 0 
+#if 1 
 #ifdef LOG_INFO_NL
 #undef LOG_INFO_NL
 #define LOG_INFO_NL(format, args...)
