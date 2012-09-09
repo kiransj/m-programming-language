@@ -2,7 +2,6 @@
 %default_type {Identifier}
 
 %extra_argument {Compiler compiler}
-/*%token_destructor  {  Indentifier_Destroy($$); }*/
 
 %include {
 #include <stdio.h>
@@ -42,7 +41,15 @@
 	compatible with the rules laid down by all. Any mismatch is created as
 	compilation error.
 */
-all ::= stmt.
+all ::= program.
+
+program ::= .
+program ::= program	function_body.
+
+
+function_decl_start ::= KEYWORD_FUNCTION TOKEN_TYPE_VARIABLE(A)  OPERATOR_OPEN_PAREN   OPERATOR_CLOSE_PAREN.  {Command_NewFunction(compiler, A);} 
+function_decl_end   ::= KEYWORD_ENDFUNCTION.																  {Command_EndFunction(compiler);}
+function_body		::= function_decl_start stmt function_decl_end.
 
 /*
 	Statments can consists of the following.
@@ -85,6 +92,7 @@ stmt ::= stmt simple_stmt.
 stmt ::= stmt condition_stmt.
 stmt ::= stmt loop_stmt.
 stmt ::= stmt variable_declaration.
+stmt ::= stmt return_stmt.
 
 /*
 	STMT end operator is defined by SEMI COLON
@@ -104,9 +112,12 @@ simple_stmt ::= expr(A) stmt_end.						{Identifier_Destroy(A);}
 	4. A combination of above 3 functions.
 */
 
-expr(A) ::= TOKEN_TYPE_IDENTIFIER(B).					{A = Identifier_Clone(B); Identifier_Destroy(B);}
-expr(A) ::= TOKEN_TYPE_VARIABLE(B).						{A = Identifier_Clone(B); Identifier_Destroy(B);}
-expr(A) ::= function_call(B).							{A = Identifier_Clone(B); Identifier_Destroy(B);}
+expr(A) ::= TOKEN_TYPE_INTEGER(B).					{A = Identifier_Clone(B); Identifier_Destroy(B);}
+expr(A) ::= TOKEN_TYPE_FLOAT(B).					{A = Identifier_Clone(B); Identifier_Destroy(B);}
+expr(A) ::= TOKEN_TYPE_STRING(B).					{A = Identifier_Clone(B); Identifier_Destroy(B);}
+expr(A) ::= TOKEN_TYPE_ARGUMENT(B).					{A = Identifier_Clone(B); Identifier_Destroy(B);}
+expr(A) ::= TOKEN_TYPE_VARIABLE(B).					{A = Identifier_Clone(B); Identifier_Destroy(B);}
+expr(A) ::= function_call(B).						{A = Identifier_Clone(B); Identifier_Destroy(B);}
 
 /*
 	The defination of mathamatical operations supported
@@ -153,11 +164,11 @@ expr(A) ::= TOKEN_TYPE_VARIABLE(B) OPERATOR_EQU   expr(C).	{ A = Command_Operati
 	Function_name(argument_list)
 
 	Function_name has the same rule as that of variable name.
-	argument_list can be empty
-	argument_list can have on argument
-	argument_list can have more than one argument with each one seperating other by a COMMA.
-
-	The number of arguments passed to the function are counted.
+	1. argument_list can be empty
+	2. argument_list can have one argument
+	3. argument_list can have more than one argument with each one seperating other by a COMMA.
+	
+	The number of arguments passed to the function are counted using the argument list variable
 */
 
 %type argument_list {int}
@@ -173,12 +184,12 @@ argument_list(A) ::= argument_list(B) OPERATOR_COMMA expr(C).       { A=B+1; Com
 
 	the syntax of if condition is
 
-	if(exression)
+	if(expression)
 		stmts;
 	endif
 
 	'if' and 'endif' are keywords.
-	The stmts are executed if the expr returns a non zero value.
+	The stmts are executed if the expression returns a non zero value.
 */
 
 %type start_if_condition {int}
@@ -194,12 +205,12 @@ condition_stmt ::= if_condition_block.
 
 	the syntax of while loop is
 
-	while(exression)
+	while(expression)
 		stmts;
 	endwhile
 
 	'while' and 'endwhile' are keywords.
-	The stmts are executed if the expr returns a non zero value.
+	The stmts are executed if the expression returns a non zero value.
 */
 
 %type start_while_loop			{int}
@@ -213,7 +224,10 @@ while_loop_block			::= while_condition_block(B) stmt end_while_loop.							{Comm
 loop_stmt ::= while_loop_block.
 
 /*
-	Variable Declation list
+	Variable Declation list. Variable DECL starts with the 'var' keyword 
+	and followed by the variable name.
+	For more than one variale declaration the variable names should be seperated with a COMMA.
+	Variable can be initialized on declaration
 */
 variable_declaration ::= KEYWORD_VAR variable_list stmt_end.           
 variable_list ::= variable_decl.
@@ -228,4 +242,13 @@ variable_list ::= variable_list OPERATOR_COMMA  variable_decl.
 */
 
 variable_decl ::= TOKEN_TYPE_VARIABLE(B).                               { Command_VariableDecl(compiler, B, NULL);}
-variable_decl ::= TOKEN_TYPE_VARIABLE(B) OPERATOR_EQU expr(C) .         { Command_VariableDecl(compiler, B, C);} 
+variable_decl ::= TOKEN_TYPE_VARIABLE(B) OPERATOR_EQU expr(C) .         { Command_VariableDecl(compiler, B, C);}
+
+
+/*
+	Return STMT. Return stmt should have a return value.
+	Syntax
+	return (expr);
+*/
+
+return_stmt ::= KEYWORD_RETURN expr(A) OPERATOR_SEMI_COLON.				{ Command_ReturnStmt(compiler, A);}

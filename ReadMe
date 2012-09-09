@@ -6,7 +6,7 @@ The feature of the lanuage are
 2. conditions stmts				:= current on if(expr) ... endif is supported. 'else' is not supported
 3. loops.						:= while(expr) ... endwhile is supported
 4. Calling C functions from M.	:= Completed
-4. functions.					:= In progress.
+4. functions.					:= Completed. Recursive functions are supported. Passing arguments to functions are also supported
 5. global variables.			:= In progress.
 
 Local variables are defined as and when they are encountered. (this will change soon).

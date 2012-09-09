@@ -44,7 +44,6 @@ void Identifier_to_str(Identifier id, char * const buffer, const int size)
 				break;
 			}
 
-		case IDENTIFIER_TYPE_UNKNOWN: 		
 		default: 
 			strcpy(buffer, "unknown"); 
 			return;
@@ -55,7 +54,7 @@ char* IdentifierType_str(IdentifierType type)
 {
 	switch(type)
 	{
-		case IDENTIFIER_TYPE_UNKNOWN:	return "unknown";
+
 		case IDENTIFIER_TYPE_NUMBER:	return "int";
 		case IDENTIFIER_TYPE_FLOAT:		return "float";
 		case IDENTIFIER_TYPE_STRING:	return "string";
@@ -82,7 +81,7 @@ Identifier Identifier_NewString(const char *str)
 		else
 		{
 			LOG_ERROR("Malloc(%d) failed", strlen(str)+1);
-			i->type = IDENTIFIER_TYPE_UNKNOWN;
+			i->type = IDENTIFIER_TYPE_UNKNOWN_START;
 		}
 	}
 	else
@@ -205,6 +204,11 @@ Identifier Identifier_Clone(Identifier a)
 				i = Identifier_NewFloat(a->u.real);
 				break;
 			}
+		case IDENTIFIER_TYPE_ARGUMENT:
+			{
+				i = Identifier_NewArgument(a->u.argument_number);
+				break;
+			}
 		default:
 			{
 				LOG_ERROR("unkown type %u", a->type);
@@ -303,7 +307,7 @@ void Identifier_Destroy(Identifier t)
 	{
 		Free(t->u.variable_name);
 	}
-	else if(t->type == IDENTIFIER_TYPE_UNKNOWN)
+	else if(t->type <= IDENTIFIER_TYPE_UNKNOWN_START || t->type >= IDENTIFIER_TYPE_UNKNOWN_END)
 	{
 		abort();
 	}
@@ -337,6 +341,11 @@ IdentifierStack IdentifierStack_Create(void)
 
 STATUS IdentifierStack_Push(IdentifierStack is, Identifier A)
 {
+	if(IS_NULL(A))
+	{
+		LOG_ERROR("Trying to push NULL");
+		return STATUS_FAILURE;
+	}
 	if(is->top == (is->size-1))
 	{
 		is->size += 25;

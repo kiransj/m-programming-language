@@ -8,17 +8,20 @@
 
 %%
 
+"function"			   { return KEYWORD_FUNCTION;}
+"endfunction"		   { return KEYWORD_ENDFUNCTION;}
+"return"			   { return KEYWORD_RETURN;}
 "if"				   { return KEYWORD_IF;}
 "endif"				   { return KEYWORD_ENDIF;}
 "while"			       { return KEYWORD_WHILE;}
 "endwhile"			   { return KEYWORD_ENDWHILE;}
 "var"				   { return KEYWORD_VAR;}
-\$[0-9]+			   { yylval = Identifier_NewArgument(atoi(&yytext[1])); return TOKEN_TYPE_IDENTIFIER;}
-[0-9]+				   { yylval = Identifier_NewInteger(atoi(yytext)); 	  	return TOKEN_TYPE_IDENTIFIER;}
-[0-9]*\.[0-9]+		   { yylval = Identifier_NewFloat(atof(yytext)); 		return TOKEN_TYPE_IDENTIFIER;}
+\$[0-9]+			   { yylval = Identifier_NewArgument(atoi(&yytext[1])); return TOKEN_TYPE_ARGUMENT;}
+[0-9]+				   { yylval = Identifier_NewInteger(atoi(yytext)); 	  	return TOKEN_TYPE_INTEGER;}
+[0-9]*\.[0-9]+		   { yylval = Identifier_NewFloat(atof(yytext)); 		return TOKEN_TYPE_FLOAT;}
 [a-zA-Z_][a-zA-Z_0-9]* { yylval = Identifier_NewVariable(yytext); 		  	return TOKEN_TYPE_VARIABLE;}
 
-\"[^\"]*\"			   { yytext[strlen(yytext)-1]='\0';	yylval = Identifier_NewString(&yytext[1]); 			return TOKEN_TYPE_IDENTIFIER;}
+\"[^\"]*\"			   { yytext[strlen(yytext)-1]='\0';	yylval = Identifier_NewString(&yytext[1]); 			return TOKEN_TYPE_STRING;}
 
 
 "+"		{  return OPERATOR_ADD;}

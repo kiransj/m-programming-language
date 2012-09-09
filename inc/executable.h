@@ -55,11 +55,23 @@ typedef struct _Executable
 {
 	int				line_number;
 	ByteCode 		first, last;
+
+	/* Number of registered required*/
+	int max_num_reg;
+
+	/*Data structure to save label and their address*/
 	unsigned int 	label_size, label_index;
 	unsigned int   *label_list;
+
+	/* Stores function name and their address. Two types of functions are possible.
+	 * 1. Local function.  (function in the script)	
+	 * 2. Native function. (registered C function) */
 	FunctionList	func_list;
 
+	/* This stack is to pass arguments to called functions and also stores the 
+	 * return value*/
 	IdentifierStack		is;
+
 	/*Initialized during RunTime*/
 	ExecutionContext 	ec;
 	int 				ec_size, ec_top;
@@ -74,7 +86,7 @@ STATUS Executable_AddCmd(Executable exe, CompilerCmd cmd, Identifier A, Identifi
 
 STATUS Executable_AddNativeFunction(Executable exe, const char *func_name, NativeFunction nf);
 
-STATUS ExecutionContext_Execute(Executable exe);
+STATUS ExecutionContext_Execute(Executable exe, const char *func_name);
 
 
 void Register_Native_Functions(Executable exe);

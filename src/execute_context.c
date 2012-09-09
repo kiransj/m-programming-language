@@ -14,6 +14,16 @@ void RaiseException(Executable exe, char *format, ...)
 	LOG_ERROR("%s", buffer);
 	exe->error_flag = 1;
 }
+void PrintBackTrace(Executable exe)
+{
+	int i = 0;
+	LOG_ERROR("=========Printing Backtrace====");
+	for(i = exe->ec_top; i >= 0; i--)
+	{
+		LOG_ERROR("%d> line %d", i, exe->ec_list[i]->cur_ptr->line_number);
+	}
+	LOG_ERROR("=========End of Back Trace ====");
+}
 
 Identifier GetIdentifier(Executable exe, Identifier A)
 {
@@ -25,7 +35,7 @@ Identifier GetIdentifier(Executable exe, Identifier A)
 				return A;
 
 		case IDENTIFIER_TYPE_REGISTER:
-				return exe->ec->regs[A->u.argument_number];
+				return exe->ec->regs[A->u.register_number];
 
 		case IDENTIFIER_TYPE_VARIABLE:
 				{
@@ -39,7 +49,16 @@ Identifier GetIdentifier(Executable exe, Identifier A)
 				}
 
 		case IDENTIFIER_TYPE_ARGUMENT:
-		case IDENTIFIER_TYPE_UNKNOWN:
+				{
+					if(A->u.argument_number >= exe->ec->num_args)
+					{
+						RaiseException(exe, "Accessing argument %d which is not passed", A->u.argument_number);
+						PrintBackTrace(exe);
+						return NULL;
+					}
+					return exe->ec->args[A->u.argument_number];
+				}
+		default:
 				abort();
 	}
 	return NULL;
@@ -149,6 +168,7 @@ void Execute_Jump(Executable exe, int label_number)
 void Execute_Call(Executable exe, const char *fun_name, int num_args, Identifier result)
 {
 	int i;
+	Identifier *args;
 	FunctionList func;
 	func = FunctionList_FindFunction(exe->func_list, fun_name);
 	if(IS_NULL(func))
@@ -165,23 +185,29 @@ void Execute_Call(Executable exe, const char *fun_name, int num_args, Identifier
 			return ;
 		}
 	}
-	exe->ec = exe->ec_list[++exe->ec_top] = ExecutionContext_Create(NULL);
-	exe->ec->num_args = num_args+1;
-	exe->ec->args = (Identifier*)Malloc(sizeof(Identifier) * exe->ec->num_args);
 
-	exe->ec->args[0] = Identifier_NewInteger(num_args);
+	args = (Identifier*)Malloc(sizeof(Identifier) * (num_args+1));
+	args[0] = Identifier_NewInteger(num_args);
 	for(i = num_args; i != 0; i--)
 	{
-		exe->ec->args[i] = GetIdentifier(exe, IdentifierStack_Pop(exe->is));
+		Identifier p = IdentifierStack_Pop(exe->is);
+		if(IS_NULL(p))
+		{
+			RaiseException(exe, "POP from stack failed. Function arg missing?");
+			return;
+		}
+		args[i] = GetIdentifier(exe, p);
 	}
 
 	if(func->type == FUNCTION_TYPE_NATIVE)
 	{
 		Identifier r;
-		r = (*func->u.nFunc)(exe->ec->args, num_args);
-		ExecutionContext_Destroy(exe->ec);
-		exe->ec_top--;
-		exe->ec = exe->ec_list[exe->ec_top];
+		r = (*func->u.nFunc)(args, num_args);
+		for(i = 0; i < num_args+1; i++)
+		{
+			Identifier_Destroy(args[i]);
+		}
+		Free(args);
 		if(!IS_NULL(r))
 		{
 			Identifier_Copy(r,	result);
@@ -192,21 +218,49 @@ void Execute_Call(Executable exe, const char *fun_name, int num_args, Identifier
 			Identifier_SetInt(result, 0);
 		}
 	}
-}
-STATUS ExecutionContext_Execute(Executable exe)
-{
-	if(exe->ec_top == (exe->ec_size-1))
+	else
 	{
-		if(STATUS_FAILURE == Executable_GrowExecutionContext(exe))
-		{
-			LOG_ERROR("Executable_GrowExecutionContext() failed");
-			return STATUS_FAILURE;
-		}
+		exe->ec = exe->ec_list[++exe->ec_top] = ExecutionContext_Create(((ByteCode)(func->u.address)));
+		exe->ec->num_args = num_args+1;
+		exe->ec->args = args;
 	}
-	exe->ec = exe->ec_list[++exe->ec_top] = ExecutionContext_Create(exe->first->next);
+}
 
+
+STATUS Execute_Return(Executable exe, Identifier ret)
+{
+	Identifier ret_value = Identifier_Clone(ret);
+	ExecutionContext_Destroy(exe->ec);
+	exe->ec_top--;
+	if(-1 == exe->ec_top)
+	{
+		exe->ec = NULL;
+		LOG_INFO("End of program");
+	}
+	else
+	{
+		exe->ec = exe->ec_list[exe->ec_top];
+		Identifier_Copy(ret_value, GetIdentifier(exe, exe->ec->cur_ptr->C));
+	}
+	Identifier_Destroy(ret_value);
+	return STATUS_SUCCESS;
+}	
+
+STATUS ExecutionContext_Execute(Executable exe, const char *func_name)
+{	
+	FunctionList func;
+
+	exe->ec = exe->ec_list[++exe->ec_top] = ExecutionContext_Create(NULL);
+	func = FunctionList_FindFunction(exe->func_list, func_name);
+	if(IS_NULL(func) || (func->type != FUNCTION_TYPE_LOCAL))
+	{
+		RaiseException(exe, "func '%s' not found", func_name);
+		return STATUS_FAILURE; 
+	}
+	exe->ec->cur_ptr = ((ByteCode)(func->u.address))->next;
 	while(!IS_NULL(exe->ec->cur_ptr) && (exe->error_flag == 0))
 	{
+//		LOG_INFO("Executing on line %d", exe->ec->cur_ptr->line_number);
 		switch(exe->ec->cur_ptr->cmd)
 		{
 			case MUL:
@@ -266,8 +320,14 @@ STATUS ExecutionContext_Execute(Executable exe)
 					Execute_Jump(exe, exe->ec->cur_ptr->u.label_number);
 					break;
 			case PUSH:
-					IdentifierStack_Push(exe->is, GetIdentifier(exe, exe->ec->cur_ptr->A));
-					break;
+					{
+						Identifier id = GetIdentifier(exe, exe->ec->cur_ptr->A);
+						if(!IS_NULL(id))
+						{
+							IdentifierStack_Push(exe->is, id);
+						}						
+						break;
+					}
 			case CALL:
 					{
 						Execute_Call(exe,  exe->ec->cur_ptr->A->u.str, exe->ec->cur_ptr->u.num_arguments, GetIdentifier(exe, exe->ec->cur_ptr->C));
@@ -284,21 +344,23 @@ STATUS ExecutionContext_Execute(Executable exe)
 						}
 						break;
 					}
+			case RETURN:
+					{
+						Execute_Return(exe, GetIdentifier(exe, exe->ec->cur_ptr->A));
+						break;
+					}
 			default:
 					LOG_ERROR("CMD %u not found", exe->ec->cur_ptr->cmd);
 					abort();
 					break;
 		}
-		if(IS_NULL(exe->ec->cur_ptr))
+		if(IS_NULL(exe->ec) || IS_NULL(exe->ec->cur_ptr))
 		{
 			break;
 		}
 		exe->ec->cur_ptr = exe->ec->cur_ptr->next;
 	}
 SCRIPT_ERROR:
-	ExecutionContext_Destroy(exe->ec);
-	exe->ec_top--;
-	exe->ec = NULL;
 	return STATUS_SUCCESS;
 }
 
