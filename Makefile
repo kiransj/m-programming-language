@@ -58,5 +58,5 @@ $(M_LIB):$(COMPILER_OBJECTS)
 	@$(GCC) $(CFLAGS) $(WARNINGS) $(INCLUDES) -c $^  -o $@
 
 clean:
-	@rm -f $(COMPILER_OBJECTS) $(OUTPUT) *core*
+	@rm -f $(COMPILER_OBJECTS) $(OUTPUT) $(TEST_OBJECTS) $(M_LIB) *core*
 

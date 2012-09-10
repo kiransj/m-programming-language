@@ -1,8 +1,6 @@
 #include "util.h"
 #include "executable.h"
 
-Identifier Function_Max(Identifier *args, int num_args);
-Identifier Function_Output(Identifier *args, int num_args);
 
 Identifier Function_Output(Identifier *args, int num_args)
 {
@@ -55,8 +53,77 @@ Identifier Function_Max(Identifier *args, int num_args)
 	return Identifier_NewInteger(max);
 }
 
+
+VariableList keyValue;
+
+Identifier Function_KeyValueInit(Identifier *args, int num_args)
+{
+	keyValue = VariableList_Create("\0");
+	return NULL;
+}
+
+Identifier Function_KeyValueSet(Identifier *args, int num_args)
+{
+	Identifier t;
+
+	if(IS_NULL(keyValue))
+	{
+		LOG_ERROR("first call KeyValueInit()");
+		return NULL;
+	}
+	if((args[0]->u.number != 2) || (args[1]->type != IDENTIFIER_TYPE_STRING))
+	{
+		LOG_ERROR("KeyValueSet(string=key, id=value)");
+		return NULL;
+	}
+	t = VariableList_FindVariable(keyValue,args[1]->u.str);
+	if(IS_NULL(t))
+	{
+		if(STATUS_SUCCESS == VariableList_AddVariable(keyValue,args[1]->u.str,args[2]))
+			return Identifier_NewInteger(1);		
+	}
+	else
+	{
+		Identifier_Copy(args[2],t);
+		return Identifier_NewInteger(1);
+	}
+	return NULL;
+}
+
+Identifier Function_KeyValueGet(Identifier *args, int num_args)
+{
+	Identifier t;
+	if(IS_NULL(keyValue))
+	{
+		LOG_ERROR("first call KeyValueInit()");
+		return NULL;
+	}
+	if((args[0]->u.number != 1) || (args[1]->type != IDENTIFIER_TYPE_STRING))
+	{
+		LOG_ERROR("KeyValueGet(string=key)");
+		return NULL;
+	}
+	t = VariableList_FindVariable(keyValue,args[1]->u.str);
+	if(IS_NULL(t))
+	{
+		return NULL;
+	}
+
+	return Identifier_Clone(t);
+}
+
+
+
 void Register_Native_Functions(Executable exe)
 {
 	Executable_AddNativeFunction(exe, "output", Function_Output);
 	Executable_AddNativeFunction(exe, "max", Function_Max);
+	Executable_AddNativeFunction(exe, "KeyValueInit", Function_KeyValueInit);
+	Executable_AddNativeFunction(exe, "KeyValueSet", Function_KeyValueSet);
+	Executable_AddNativeFunction(exe, "KeyvalueGet", Function_KeyValueGet);
+}
+
+void UnRegister_Native_Functions(Executable exe)
+{
+
 }

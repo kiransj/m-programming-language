@@ -13,11 +13,16 @@ function Fibonacci()
 		return $1;
 	endif
 	return Fibonacci($1-1) + Fibonacci($1-2);
-endfunction	
+endfunction
+
+function testKeyValue()
+	var i:="keyValue";
+	KeyValueInit();
+	KeyValueSet("i", i);	
+endfunction
 
 function Main()
-	var ans, value:=10, out;
-
+	var ans, value:=10, out;	
 	value := 1;
 	while(value < 24)
 		ans := Fibonacci(value);
@@ -29,5 +34,8 @@ function Main()
 	out := "Fact("+value+") := " + Factorial(value);
 	Output(out);
 	out := 0;
+	testKeyValue();
+
+	output("value = " + KeyValueGet("i"));
 	return ("done");
 endfunction
