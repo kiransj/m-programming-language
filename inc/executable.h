@@ -90,6 +90,7 @@ STATUS Executable_AddNativeFunction(Executable exe, const char *func_name, Nativ
 STATUS ExecutionContext_Execute(Executable exe, const char *func_name);
 
 
+Executable Compile(const char *filename);
 void Register_Native_Functions(Executable exe);
 void RaiseException(Executable exe, const char *format, ...);
 #endif

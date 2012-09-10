@@ -1,5 +1,6 @@
 GCC=gcc
-CFLAGS := -g 
+AR=ar
+CFLAGS := -O2 #-g 
 WARNINGS:= -Wall
 LEMON:=lemon
 
@@ -14,10 +15,17 @@ SOURCE += src/execute_context.c
 SOURCE += src/function.c
 SOURCE += src/native_functions.c
 
+M_LIB:=libM.a
+LD_FLAGS := -L. -lM 
+
+TEST_FILES := test/main.c
+
 COMPILER_OBJECTS :=
 COMPILER_OBJECTS += $(GRAMMER_FILE:.y=.o)
 COMPILER_OBJECTS += $(LEXER_FILE:.l=.o)
 COMPILER_OBJECTS += $(SOURCE:.c=.o)
+
+TEST_OBJECTS := $(TEST_FILES:.c=.o)	
 
 INCLUDES:=  -Iinc -Isrc 
 
@@ -25,10 +33,14 @@ OUTPUT:=a.out
 
 all: $(OUTPUT)
 
-$(OUTPUT): $(COMPILER_OBJECTS)
-	@echo "building $(OUTPUT)"
-	@$(GCC) -o $(OUTPUT) $(CFLAGS) $(INCLUDES) $(COMPILER_OBJECTS)
+$(OUTPUT): $(M_LIB) $(TEST_OBJECTS)
+	@echo "building $@"
+	@$(GCC) $(CLFAGS) $(TEST_OBJECTS) $(LD_FLAGS)  -o $@
 
+$(M_LIB):$(COMPILER_OBJECTS)
+	@echo "building $(M_LIB)"
+	@$(AR) -q $(M_LIB) $(COMPILER_OBJECTS)
+	
 %.o:%.l
 	@echo "compiling $^"
 	@flex --outfile=`basename $^ .l`.c $(LEXER_FILE)
@@ -37,9 +49,9 @@ $(OUTPUT): $(COMPILER_OBJECTS)
 
 %.o:%.y
 	echo "compiling $^"
-	$(LEMON) -q $^
-	$(GCC) -g $(INCLUDES) -c `dirname $^`/`basename $^ .y`.c -o $@
-	rm `dirname $^`/`basename $^ .y`.c
+	@$(LEMON) -q $^
+	@$(GCC) -g $(INCLUDES) -c `dirname $^`/`basename $^ .y`.c -o $@
+	@rm `dirname $^`/`basename $^ .y`.c
 
 %.o:%.c
 	@echo "compiling $^"

@@ -3,7 +3,6 @@
 
 #include "tokenizer.h"
 
-
 typedef struct _Compiler 
 {
 	int line_number;
@@ -63,4 +62,6 @@ Identifier Command_Operation(Compiler, Identifier A, CompilerCmd oper, Identifie
 
 void Command_NewFunction(Compiler c, Identifier func_name);
 void Command_EndFunction(Compiler c);
+
+
 #endif

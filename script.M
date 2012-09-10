@@ -21,12 +21,12 @@ function Main()
 	value := 1;
 	while(value < 24)
 		ans := Fibonacci(value);
-		Output("Fibo (" +  value +  ") := " +  ans);
+		Output("Fibo(" +  value +  ") := " +  ans);
 		value := value + 1;
 	endwhile
 	
 	value := 10;
-	out := "Fact("+value+") = " + Factorial(value);
+	out := "Fact("+value+") := " + Factorial(value);
 	Output(out);
 	out := 0;
 	return ("done");

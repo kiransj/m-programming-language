@@ -248,41 +248,37 @@ Identifier Command_Operation(Compiler c, Identifier A, CompilerCmd oper, Identif
 void* ParseAlloc(void *(*)(size_t));
 void* ParseFree(void*, void (*)(void *));
 void Parse(void*, int, Identifier, Compiler);
-int main(int argc, char *argv[])
+
+Executable Compile(const char *filename)
 {
 	int yv;
 	void *pParser;
 	Compiler c;
 	Executable exe;
 
-	if(argc == 1)
-	{
-		LOG_INFO_NL("usage %s filename", argv[0]);
-		return 1;
-	}
-
 	c = (Compiler)Malloc(sizeof(struct _Compiler));
 	memset(c, 0, sizeof(Compiler));
 	c->label_number = 1;
 	c->reg_num = 1;
+
 	exe = Executable_Create();
 	if(IS_NULL(exe))
 	{
 		LOG_ERROR("Executable_Create() failed");
 		Free(c);
-		return 1;
+		return NULL;
 	}
 
 	c->priv_data = (void*)exe;
 	Register_Native_Functions(exe);
 
-	yyin = fopen(argv[1], "r");
+	yyin = fopen(filename, "r");
 	if(NULL == yyin)
 	{
 		Free(c);
 		Executable_Destroy(exe);
 		printf("unable to open file\n");
-		return 1;
+		return NULL;
 	}
 
 	pParser = (void*)ParseAlloc(Malloc);
@@ -302,18 +298,16 @@ int main(int argc, char *argv[])
 	exe->max_num_reg = c->max_num_reg;
 	LOG_INFO_NL("max number of regs required : %d", c->max_num_reg);
 
-	if(c->error_flag == 0)
+	if(c->error_flag != 0)
 	{
-		if(ExecutionContext_Execute(exe, "Main") == STATUS_SUCCESS)
-		{
-			char buf[64];
-			Identifier_to_str(exe->ret_value, buf, 64);
-			LOG_INFO("program returned %s", buf);
-		}
+		Executable_Destroy(exe);
+		exe = NULL;
+#if 0		
+
+#endif		
 	}
-	Free(c);
-	Executable_Destroy(exe);
+	Free(c);	
 	fclose(yyin);
 	yylex_destroy();
-	return 0;
+	return exe;
 }
