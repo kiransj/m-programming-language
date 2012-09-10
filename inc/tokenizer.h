@@ -18,13 +18,15 @@ typedef enum
 	IDENTIFIER_TYPE_OBJECT,
 	IDENTIFIER_TYPE_UNKNOWN_END,
 }IdentifierType;
+const char* IdentifierType_to_str(IdentifierType);
 
-typedef struct
+typedef struct _Object
 {
+	int num_refs;
 	void (*obj_delete)(void *ptr);
 	void *priv_data;
-}Object;
-const char* IdentifierType_str(IdentifierType);
+}*Object;
+
 typedef struct _Identifier
 {
 	IdentifierType type;

@@ -15,27 +15,19 @@ function Fibonacci()
 	return Fibonacci($1-1) + Fibonacci($1-2);
 endfunction
 
-function testKeyValue()
-	var i:="keyValue";
-	KeyValueInit();
-	KeyValueSet("i", i);	
+function GetKeyValue()
+	var  v;
+	v :=KeyValueInit();
+	if(typeof(v) == "object")
+		return v;
+	endif
+	output("KeyValueInit() failed");
+	return (0);
 endfunction
 
 function Main()
-	var ans, value:=10, out;	
-	value := 1;
-	while(value < 24)
-		ans := Fibonacci(value);
-		Output("Fibo(" +  value +  ") := " +  ans);
-		value := value + 1;
-	endwhile
-	
-	value := 10;
-	out := "Fact("+value+") := " + Factorial(value);
-	Output(out);
-	out := 0;
-	testKeyValue();
-	KeyValueSet("value", value);
-	output("value = " + KeyValueGet("value"));
-	return ("done");
+	var v, c, d, a;
+	v := GetKeyValue();	
+	KeyValueAdd(v, "version", 7);	
+	output("version : " + KeyValueGet(v, "version"));
 endfunction

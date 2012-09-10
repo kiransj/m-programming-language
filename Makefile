@@ -1,6 +1,6 @@
 GCC=gcc
 AR=ar
-CFLAGS := -O2 #-g 
+CFLAGS :=  -g 
 WARNINGS:= -Wall
 LEMON:=lemon
 
@@ -39,6 +39,7 @@ $(OUTPUT): $(M_LIB) $(TEST_OBJECTS)
 
 $(M_LIB):$(COMPILER_OBJECTS)
 	@echo "building $(M_LIB)"
+	@rm -f $(M_LIB)
 	@$(AR) -q $(M_LIB) $(COMPILER_OBJECTS)
 	
 %.o:%.l
