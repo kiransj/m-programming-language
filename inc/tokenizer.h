@@ -15,9 +15,15 @@ typedef enum
 	IDENTIFIER_TYPE_ARGUMENT,
 	IDENTIFIER_TYPE_VARIABLE,
 	IDENTIFIER_TYPE_REGISTER,
+	IDENTIFIER_TYPE_OBJECT,
 	IDENTIFIER_TYPE_UNKNOWN_END,
 }IdentifierType;
 
+typedef struct
+{
+	void (*obj_delete)(void *ptr);
+	void *priv_data;
+}Object;
 const char* IdentifierType_str(IdentifierType);
 typedef struct _Identifier
 {
@@ -30,6 +36,7 @@ typedef struct _Identifier
 		int 	number;
 		int 	argument_number;
 		int		register_number;
+		Object	obj;
 	}u;
 }*Identifier;
 
@@ -41,16 +48,19 @@ void Identifier_Destroy(Identifier A);
 Identifier Identifier_Clone(Identifier A);
 void Identifier_Copy(Identifier src, Identifier dest);
 
+void Identifier_Free(Identifier t);
 Identifier Identifier_NewString(const char *str);
 Identifier Identifier_NewFloat(const double real);
 Identifier Identifier_NewArgument(const int argument_number);
 Identifier Identifier_NewVariable(const char *variable_name);
 Identifier Identifier_NewInteger(const int number);
 Identifier Identifier_NewRegister(const int number);
+Identifier Identifier_NewObject(Object);
 
 void Identifier_SetInt(Identifier a, int num);
 void Identifier_SetFloat(Identifier a, double num);
 void Identifier_SetString(Identifier a, char *str);
+void Identifier_SetObject(Identifier dest, Object obj);
 
 typedef struct _IdentifierStack
 {

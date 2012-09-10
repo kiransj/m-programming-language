@@ -174,6 +174,20 @@ Identifier Identifier_NewRegister(const int number)
 	return i;
 }
 
+Identifier Identifier_NewObject(Object object)
+{
+	Identifier i = Identifier_Create();
+	if(!IS_NULL(i))
+	{
+		i->type = IDENTIFIER_TYPE_OBJECT;
+		i->u.obj = object;
+	}
+	else
+	{
+		LOG_ERROR("Identifier_Create() failed");
+	}
+	return i;
+}
 Identifier Identifier_Clone(Identifier a)
 {
 	Identifier i = NULL;
@@ -219,6 +233,7 @@ Identifier Identifier_Clone(Identifier a)
 	return i;
 }
 
+
 void Identifier_Copy(Identifier src, Identifier dest)
 {
 	switch(src->type)
@@ -238,6 +253,11 @@ void Identifier_Copy(Identifier src, Identifier dest)
 				Identifier_SetFloat(dest, src->u.real);
 				break;
 			}
+		case IDENTIFIER_TYPE_OBJECT:
+			{
+				Identifier_SetObject(dest, src->u.obj);
+				break;
+			}
 		default:
 			{
 				LOG_ERROR("unkown type %u", src->type);
@@ -247,33 +267,29 @@ void Identifier_Copy(Identifier src, Identifier dest)
 	}
 	return;
 }
+
+void Identifier_SetObject(Identifier dest, Object obj)
+{	
+	Identifier_Free(dest);
+	dest->type = IDENTIFIER_TYPE_OBJECT;
+	dest->u.obj = obj;
+}
 void Identifier_SetInt(Identifier a, int num)
 {
-	if(a->type == IDENTIFIER_TYPE_STRING)
-		Free(a->u.str);
-	if(a->type == IDENTIFIER_TYPE_VARIABLE)
-		Free(a->u.variable_name);
-
+	Identifier_Free(a);
 	a->type = IDENTIFIER_TYPE_NUMBER;
 	a->u.number = num;
 }
 void Identifier_SetString(Identifier a, char *str)
 {
-	if(a->type == IDENTIFIER_TYPE_STRING)
-		Free(a->u.str);
-	if(a->type == IDENTIFIER_TYPE_VARIABLE)
-		Free(a->u.variable_name);
-
+	Identifier_Free(a);
 	a->type = IDENTIFIER_TYPE_STRING;
 	a->u.str = (char*)Malloc(strlen(str)+1);
 	strcpy(a->u.str, str);
 }
 void Identifier_SetFloat(Identifier a, double num)
 {
-	if(a->type == IDENTIFIER_TYPE_STRING)
-		Free(a->u.str);
-	if(a->type == IDENTIFIER_TYPE_VARIABLE)
-		Free(a->u.variable_name);
+	Identifier_Free(a);
 	a->type = IDENTIFIER_TYPE_FLOAT;
 	a->u.real = num;
 }
@@ -293,12 +309,8 @@ Identifier Identifier_Create(void)
 	return id;
 }
 
-void Identifier_Destroy(Identifier t)
+void Identifier_Free(Identifier t)
 {
-	if(IS_NULL(t))
-	{
-		return;
-	}
 	if(t->type == IDENTIFIER_TYPE_VARIABLE)
 	{
 		Free(t->u.str);
@@ -307,10 +319,24 @@ void Identifier_Destroy(Identifier t)
 	{
 		Free(t->u.variable_name);
 	}
+	else if(t->type == IDENTIFIER_TYPE_OBJECT)
+	{
+		t->u.obj.obj_delete(t->u.obj.priv_data);
+	}
 	else if(t->type <= IDENTIFIER_TYPE_UNKNOWN_START || t->type >= IDENTIFIER_TYPE_UNKNOWN_END)
 	{
 		abort();
 	}
+	return;
+}
+
+void Identifier_Destroy(Identifier t)
+{
+	if(IS_NULL(t))
+	{
+		return;
+	}
+	Identifier_Free(t);
 	memset(t, 0, sizeof(struct _Identifier));
 	Free(t);
 	return;

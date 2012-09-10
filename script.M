@@ -35,7 +35,7 @@ function Main()
 	Output(out);
 	out := 0;
 	testKeyValue();
-
-	output("value = " + KeyValueGet("i"));
+	KeyValueSet("value", value);
+	output("value = " + KeyValueGet("value"));
 	return ("done");
 endfunction

@@ -80,7 +80,8 @@ Identifier Function_KeyValueSet(Identifier *args, int num_args)
 	if(IS_NULL(t))
 	{
 		if(STATUS_SUCCESS == VariableList_AddVariable(keyValue,args[1]->u.str,args[2]))
-			return Identifier_NewInteger(1);		
+			return Identifier_NewInteger(1);
+		LOG_ERROR("KeyValueSet(%s) failed", args[1]->u.str);
 	}
 	else
 	{
@@ -106,6 +107,7 @@ Identifier Function_KeyValueGet(Identifier *args, int num_args)
 	t = VariableList_FindVariable(keyValue,args[1]->u.str);
 	if(IS_NULL(t))
 	{
+		LOG_ERROR("KeyValueGet(%s) failed", args[1]->u.str);
 		return NULL;
 	}
 

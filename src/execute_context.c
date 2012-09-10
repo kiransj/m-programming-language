@@ -582,7 +582,7 @@ Identifier  VariableList_FindVariable(VariableList vl, const char *variable_name
 
 	if(IS_NULL(tmp_vl))
 	{
-		LOG_ERROR("Variable('%s') not found", variable_name);
+		//LOG_ERROR("Variable('%s') not found", variable_name);
 		return NULL;
 	}
 
@@ -609,7 +609,7 @@ Identifier  VariableList_FindVariable(VariableList vl, const char *variable_name
 	{
 		return tmp_vl->id;
 	}
-	LOG_ERROR("Variable('%s') not found", variable_name);
+	//LOG_ERROR("Variable('%s') not found", variable_name);
 	return NULL;
 }
 
