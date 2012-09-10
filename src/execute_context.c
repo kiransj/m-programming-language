@@ -33,6 +33,7 @@ Identifier GetIdentifier(Executable exe, Identifier A)
 		case IDENTIFIER_TYPE_FLOAT:
 		case IDENTIFIER_TYPE_STRING:
 		case IDENTIFIER_TYPE_NUMBER:
+		case IDENTIFIER_TYPE_OBJECT:
 				return A;
 
 		case IDENTIFIER_TYPE_REGISTER:
@@ -260,6 +261,11 @@ void Execute_Equ(Executable exe, Identifier A, Identifier B, Identifier C)
 	{
 		Identifier_SetFloat(A, B->u.real);
 		Identifier_SetFloat(C, B->u.real);	
+	}
+	else if(B->type == IDENTIFIER_TYPE_OBJECT)
+	{
+		Identifier_SetObject(A, B->u.obj);
+		Identifier_SetObject(C, B->u.obj);	
 	}
 	else
 	{
@@ -582,7 +588,7 @@ Identifier  VariableList_FindVariable(VariableList vl, const char *variable_name
 
 	if(IS_NULL(tmp_vl))
 	{
-		LOG_ERROR("Variable('%s') not found", variable_name);
+		//LOG_ERROR("Variable('%s') not found", variable_name);
 		return NULL;
 	}
 
@@ -609,10 +615,11 @@ Identifier  VariableList_FindVariable(VariableList vl, const char *variable_name
 	{
 		return tmp_vl->id;
 	}
-	LOG_ERROR("Variable('%s') not found", variable_name);
+	//LOG_ERROR("Variable('%s') not found", variable_name);
 	return NULL;
 }
 
+#if 0
 STATUS VariableList_AddVariable(VariableList vl, const char *variable_name, Identifier v)
 {
 	int flag;
@@ -683,3 +690,61 @@ STATUS VariableList_AddVariable(VariableList vl, const char *variable_name, Iden
 	LOG_ERROR("VariableList_Create() Failed");
 	return STATUS_FAILURE;
 }
+#else
+STATUS VariableList_AddVariable(VariableList vl, const char *variable_name, Identifier id)
+{
+	VariableList new_var, v, tmp_v;
+
+	new_var = VariableList_Create(variable_name);
+	if(!IS_NULL(new_var))
+	{
+		new_var->id = Identifier_Clone(id);
+		if(IS_NULL(new_var->id))
+		{
+			LOG_ERROR("Identifier_Clone() failed");
+			return STATUS_FAILURE;
+		}
+		new_var->variable_name = (char*)Malloc(strlen(variable_name)+1);
+		memcpy(new_var->variable_name, variable_name, strlen(variable_name));
+	}
+	else
+	{
+		LOG_ERROR("VariableList_Create() failed");
+		return STATUS_FAILURE;
+	}
+	if(vl->next == NULL)
+	{
+		vl->next = new_var;
+		return STATUS_SUCCESS;
+	}
+	else
+	{
+		tmp_v = vl;
+		v = vl->next;
+		while(!IS_NULL(v))
+		{
+			int tmp = strcasecmp(v->variable_name, variable_name);
+			if(0 == tmp)
+			{
+				VariableList_Destroy(new_var);
+				LOG_ERROR("variable with name '%s' already declared", variable_name);
+				return STATUS_FAILURE;
+			}
+			else if(tmp > 0)
+			{
+				new_var->next = tmp_v->next;
+				tmp_v->next = new_var;
+				return STATUS_SUCCESS;
+			}
+			tmp_v = v;
+			v = v->next;
+		}
+		if(IS_NULL(v))
+		{
+			tmp_v->next = new_var;
+			return STATUS_SUCCESS;
+		}
+	}
+	return STATUS_FAILURE;
+}
+#endif

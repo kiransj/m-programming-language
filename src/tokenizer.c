@@ -43,14 +43,13 @@ void Identifier_to_str(Identifier id, char * const buffer, const int size)
 				snprintf(buffer, size, "reg(%d)", id->u.register_number);
 				break;
 			}
-
 		default: 
 			strcpy(buffer, "unknown"); 
 			return;
 	}
 	return;
 }
-const char* IdentifierType_str(IdentifierType type)
+const char* IdentifierType_to_str(IdentifierType type)
 {
 	switch(type)
 	{
@@ -61,6 +60,7 @@ const char* IdentifierType_str(IdentifierType type)
 		case IDENTIFIER_TYPE_ARGUMENT:	return "arg";
 		case IDENTIFIER_TYPE_VARIABLE:	return "var";										
 		case IDENTIFIER_TYPE_REGISTER:	return "reg";
+		case IDENTIFIER_TYPE_OBJECT:	return "object";
 		default: break;
 	}
 	return "NULL";
@@ -174,6 +174,27 @@ Identifier Identifier_NewRegister(const int number)
 	return i;
 }
 
+Identifier Identifier_NewObject(Object object)
+{
+	Identifier i = Identifier_Create();
+	if(!IS_NULL(i))
+	{
+		if(IS_NULL(object))
+		{
+			Identifier_Destroy(i);
+			LOG_ERROR("Object passed is NULL");
+			return NULL;
+		}
+		i->type = IDENTIFIER_TYPE_OBJECT;
+		i->u.obj = object;
+		i->u.obj->num_refs++;
+	}
+	else
+	{
+		LOG_ERROR("Identifier_Create() failed");
+	}
+	return i;
+}
 Identifier Identifier_Clone(Identifier a)
 {
 	Identifier i = NULL;
@@ -209,6 +230,11 @@ Identifier Identifier_Clone(Identifier a)
 				i = Identifier_NewArgument(a->u.argument_number);
 				break;
 			}
+		case IDENTIFIER_TYPE_OBJECT:
+			{
+				i = Identifier_NewObject(a->u.obj);
+				break;
+			}
 		default:
 			{
 				LOG_ERROR("unkown type %u", a->type);
@@ -218,6 +244,7 @@ Identifier Identifier_Clone(Identifier a)
 	}
 	return i;
 }
+
 
 void Identifier_Copy(Identifier src, Identifier dest)
 {
@@ -238,6 +265,11 @@ void Identifier_Copy(Identifier src, Identifier dest)
 				Identifier_SetFloat(dest, src->u.real);
 				break;
 			}
+		case IDENTIFIER_TYPE_OBJECT:
+			{
+				Identifier_SetObject(dest, src->u.obj);
+				break;
+			}
 		default:
 			{
 				LOG_ERROR("unkown type %u", src->type);
@@ -247,33 +279,30 @@ void Identifier_Copy(Identifier src, Identifier dest)
 	}
 	return;
 }
+
+void Identifier_SetObject(Identifier dest, Object obj)
+{	
+	Identifier_Free(dest);
+	dest->type = IDENTIFIER_TYPE_OBJECT;
+	dest->u.obj = obj;
+	dest->u.obj->num_refs++;
+}
 void Identifier_SetInt(Identifier a, int num)
 {
-	if(a->type == IDENTIFIER_TYPE_STRING)
-		Free(a->u.str);
-	if(a->type == IDENTIFIER_TYPE_VARIABLE)
-		Free(a->u.variable_name);
-
+	Identifier_Free(a);
 	a->type = IDENTIFIER_TYPE_NUMBER;
 	a->u.number = num;
 }
 void Identifier_SetString(Identifier a, char *str)
 {
-	if(a->type == IDENTIFIER_TYPE_STRING)
-		Free(a->u.str);
-	if(a->type == IDENTIFIER_TYPE_VARIABLE)
-		Free(a->u.variable_name);
-
+	Identifier_Free(a);
 	a->type = IDENTIFIER_TYPE_STRING;
 	a->u.str = (char*)Malloc(strlen(str)+1);
 	strcpy(a->u.str, str);
 }
 void Identifier_SetFloat(Identifier a, double num)
 {
-	if(a->type == IDENTIFIER_TYPE_STRING)
-		Free(a->u.str);
-	if(a->type == IDENTIFIER_TYPE_VARIABLE)
-		Free(a->u.variable_name);
+	Identifier_Free(a);
 	a->type = IDENTIFIER_TYPE_FLOAT;
 	a->u.real = num;
 }
@@ -289,16 +318,13 @@ Identifier Identifier_Create(void)
 	else
 	{
 		memset(id, 0, sizeof(struct _Identifier));
+		Identifier_SetInt(id, 0);
 	}
 	return id;
 }
 
-void Identifier_Destroy(Identifier t)
+void Identifier_Free(Identifier t)
 {
-	if(IS_NULL(t))
-	{
-		return;
-	}
 	if(t->type == IDENTIFIER_TYPE_VARIABLE)
 	{
 		Free(t->u.str);
@@ -307,10 +333,29 @@ void Identifier_Destroy(Identifier t)
 	{
 		Free(t->u.variable_name);
 	}
+	else if(t->type == IDENTIFIER_TYPE_OBJECT)	
+	{
+		t->u.obj->num_refs--;
+		if(t->u.obj->num_refs == 0)
+		{
+			t->u.obj->obj_delete(t->u.obj->priv_data);
+			Free(t->u.obj);
+		}
+	}
 	else if(t->type <= IDENTIFIER_TYPE_UNKNOWN_START || t->type >= IDENTIFIER_TYPE_UNKNOWN_END)
 	{
-		abort();
+	//	abort();
 	}
+	return;
+}
+
+void Identifier_Destroy(Identifier t)
+{
+	if(IS_NULL(t))
+	{
+		return;
+	}
+	Identifier_Free(t);
 	memset(t, 0, sizeof(struct _Identifier));
 	Free(t);
 	return;

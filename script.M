@@ -13,21 +13,25 @@ function Fibonacci()
 		return $1;
 	endif
 	return Fibonacci($1-1) + Fibonacci($1-2);
-endfunction	
+endfunction
+
+function GetKeyValue()
+	var  v;
+	v :=KeyValueInit();
+	if(typeof(v) == "object")
+		KeyValueAdd(v, "CreatedBy", "GetKeyValue");	
+		return v;
+	endif
+	output("KeyValueInit() failed");
+	return (0);
+endfunction
 
 function Main()
-	var ans, value:=10, out;
-
-	value := 1;
-	while(value < 24)
-		ans := Fibonacci(value);
-		Output("Fibo(" +  value +  ") := " +  ans);
-		value := value + 1;
-	endwhile
-	
-	value := 10;
-	out := "Fact("+value+") := " + Factorial(value);
-	Output(out);
-	out := 0;
-	return ("done");
+	var v, c, d, a;
+	v := GetKeyValue();	
+	KeyValueAdd(v, "version", 7);	
+	KeyValueAdd(v, "time", "10:30");	
+	output("version : " + KeyValueGet(v, "version"));
+	output("time : " + KeyValueGet(v, "time"));
+	output("CreatedBy : " + KeyValueGet(v, "CreatedBy"));
 endfunction
