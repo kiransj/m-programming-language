@@ -2,6 +2,11 @@
 #include "executable.h"
 #include "string.h"
 
+/* 
+ * To avoid memory leaks please follow the following rules.
+ * Every return value should be created here or cloned here
+ */
+
 Identifier Function_Output(Identifier *args, int num_args)
 {
 	int i;
@@ -115,7 +120,7 @@ Identifier Function_KeyValueGet(Identifier *args, int num_args)
 			return Identifier_NewInteger(0);
 		}
 	}
-	return i;
+	return Identifier_Clone(i);
 }
 
 Identifier Function_TypeOf(Identifier *args, int num_args)

@@ -19,6 +19,7 @@ function GetKeyValue()
 	var  v;
 	v :=KeyValueInit();
 	if(typeof(v) == "object")
+		KeyValueAdd(v, "CreatedBy", "GetKeyValue");	
 		return v;
 	endif
 	output("KeyValueInit() failed");
@@ -29,5 +30,8 @@ function Main()
 	var v, c, d, a;
 	v := GetKeyValue();	
 	KeyValueAdd(v, "version", 7);	
+	KeyValueAdd(v, "time", "10:30");	
 	output("version : " + KeyValueGet(v, "version"));
+	output("time : " + KeyValueGet(v, "time"));
+	output("CreatedBy : " + KeyValueGet(v, "CreatedBy"));
 endfunction
