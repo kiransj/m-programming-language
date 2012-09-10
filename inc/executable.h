@@ -58,7 +58,8 @@ typedef struct _Executable
 
 	/* Number of registered required*/
 	int max_num_reg;
-
+	
+	Identifier ret_value;
 	/*Data structure to save label and their address*/
 	unsigned int 	label_size, label_index;
 	unsigned int   *label_list;
@@ -90,4 +91,5 @@ STATUS ExecutionContext_Execute(Executable exe, const char *func_name);
 
 
 void Register_Native_Functions(Executable exe);
+void RaiseException(Executable exe, const char *format, ...);
 #endif

@@ -123,6 +123,7 @@ void Executable_Destroy(Executable exe)
 	if(!IS_NULL(exe->is)) IdentifierStack_Destroy(exe->is);
 	if(!IS_NULL(exe->ec_list)) Free(exe->ec_list);
 	if(!IS_NULL(exe->func_list)) FunctionList_Destroy(exe->func_list);
+	if(!IS_NULL(exe->ret_value)) Identifier_Destroy(exe->ret_value);
 	Free(exe);
 }
 

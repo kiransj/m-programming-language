@@ -5,7 +5,7 @@
 #include "util.h"
 extern unsigned int line_number;
 
-char* token_to_str(int token);
+const char* token_to_str(int token);
 typedef enum
 {
 	IDENTIFIER_TYPE_UNKNOWN_START,
@@ -18,8 +18,7 @@ typedef enum
 	IDENTIFIER_TYPE_UNKNOWN_END,
 }IdentifierType;
 
-char* IdentifierType_str(IdentifierType);
-
+const char* IdentifierType_str(IdentifierType);
 typedef struct _Identifier
 {
 	IdentifierType type;

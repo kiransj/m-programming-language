@@ -1,5 +1,9 @@
 #include "util.h"
 #include "executable.h"
+
+Identifier Function_Max(Identifier *args, int num_args);
+Identifier Function_Output(Identifier *args, int num_args);
+
 Identifier Function_Output(Identifier *args, int num_args)
 {
 	int i;

@@ -16,11 +16,18 @@ function Fibonacci()
 endfunction	
 
 function Main()
-	var ans, value:=10;
+	var ans, value:=10, out;
 
-	ans := Fibonacci(value);
-	Output("Fibo ", value, " := ", ans);
-
-	ans := Factorial(10);
-	Output("Fact ", value, " := ", ans);
+	value := 1;
+	while(value < 24)
+		ans := Fibonacci(value);
+		Output("Fibo (" +  value +  ") := " +  ans);
+		value := value + 1;
+	endwhile
+	
+	value := 10;
+	out := "Fact("+value+") = " + Factorial(value);
+	Output(out);
+	out := 0;
+	return ("done");
 endfunction

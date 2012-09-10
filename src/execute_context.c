@@ -4,7 +4,7 @@
 #include "executable.h"
 
 
-void RaiseException(Executable exe, char *format, ...)
+void RaiseException(Executable exe, const char *format, ...)
 {
 	va_list ap;
 	char buffer[1024];
@@ -14,6 +14,7 @@ void RaiseException(Executable exe, char *format, ...)
 	LOG_ERROR("%s", buffer);
 	exe->error_flag = 1;
 }
+
 void PrintBackTrace(Executable exe)
 {
 	int i = 0;
@@ -73,14 +74,95 @@ void Execute_Mul(Identifier A, Identifier B, Identifier C)
 	answer = A->u.number * B->u.number;
 	Identifier_SetInt(C, answer);
 }
-void Execute_Add(Identifier A, Identifier B, Identifier C)
-{
-	int answer = 0;
-
-	if(IS_NULL(A) || IS_NULL(B) || IS_NULL(C)) return;
-
-	answer = A->u.number + B->u.number;
-	Identifier_SetInt(C, answer);
+void Execute_Add(Executable exe, Identifier A, Identifier B, Identifier C)
+{	
+	if(exe->error_flag)
+	{
+		LOG_ERROR("Addition could not be completed due to error");
+		return;
+	}
+	
+	if(A->type == IDENTIFIER_TYPE_NUMBER)
+	{
+		if(B->type == IDENTIFIER_TYPE_NUMBER)
+		{
+			int answer = 0;
+			answer = A->u.number + B->u.number;
+			Identifier_SetInt(C, answer);
+		}
+		else if(B->type == IDENTIFIER_TYPE_STRING)
+		{
+			int count = 0;
+			char *str = NULL;
+			count = snprintf(NULL, 0, "%d%s", A->u.number, B->u.str)+1;
+			str = (char*)Malloc(count);
+			if(!IS_NULL(str))
+			{
+				snprintf(str, count, "%d%s", A->u.number, B->u.str);
+				Identifier_SetString(C, str);
+				Free(str);
+			}
+			else
+			{
+				RaiseException(exe, "Malloc() failed");
+				return;
+			}
+		
+		}
+		else
+		{
+			RaiseException(exe, "Unknown Id type %d for addition. Stopping Execution", B->type);
+			return;
+		}
+	}
+	else if(A->type == IDENTIFIER_TYPE_STRING)
+	{
+		int count = 0;
+		char *str = NULL;
+		if(B->type == IDENTIFIER_TYPE_NUMBER)
+		{
+			count = snprintf(NULL, 0, "%s%d", A->u.str, B->u.number)+1;
+			str = (char*)Malloc(count);
+			if(!IS_NULL(str))
+			{
+				snprintf(str, count, "%s%d", A->u.str, B->u.number);
+				Identifier_SetString(C, str);
+				Free(str);
+			}
+			else
+			{
+				RaiseException(exe, "Malloc() failed");
+				return;
+			}
+		}
+		else if(B->type == IDENTIFIER_TYPE_STRING)
+		{
+			count = snprintf(NULL, 0, "%s%s", A->u.str, B->u.str)+1;
+			str = (char*)Malloc(count);
+			if(!IS_NULL(str))
+			{
+				snprintf(str, count, "%s%s", A->u.str, B->u.str);
+				Identifier_SetString(C, str);
+				Free(str);
+			}
+			else
+			{
+				RaiseException(exe, "Malloc() failed");
+				return;
+			}
+		}
+		else
+		{
+			RaiseException(exe, "Unknown Id type %d for addition. Stopping Execution", B->type);
+			return;
+		}
+	}
+	else
+	{
+			RaiseException(exe, "Unknown Id type %d for addition. Stopping Execution", B->type);
+			return;
+	}
+	return;
 }
 void Execute_Sub(Identifier A, Identifier B, Identifier C)
 {
@@ -126,12 +208,27 @@ void Execute_Lte(Identifier A, Identifier B, Identifier C)
 	answer = A->u.number <= B->u.number;
 	Identifier_SetInt(C, answer);
 }
-void Execute_Cmp(Identifier A, Identifier B, Identifier C)
+void Execute_Cmp(Executable exe, Identifier A, Identifier B, Identifier C)
 {
 	int answer = 0;
-
-	if(IS_NULL(A) || IS_NULL(B) || IS_NULL(C)) return;
-	answer = A->u.number == B->u.number;
+	if(exe->error_flag)
+	{
+		LOG_ERROR("Addition could not be completed due to error");
+		return;
+	}
+	if(A->type == IDENTIFIER_TYPE_STRING && B->type == IDENTIFIER_TYPE_STRING)
+	{
+		answer = !strcmp(A->u.str, B->u.str);
+	}
+	else if(A->type == IDENTIFIER_TYPE_NUMBER && B->type == IDENTIFIER_TYPE_NUMBER)
+	{
+		answer = A->u.number == B->u.number;
+	}
+	else
+	{
+		RaiseException(exe, "Comparing type %d with %d. Stoping Execution", A->type, B->type);
+		return;
+	}
 	Identifier_SetInt(C, answer);
 }
 void Execute_Neq(Identifier A, Identifier B, Identifier C)
@@ -142,12 +239,33 @@ void Execute_Neq(Identifier A, Identifier B, Identifier C)
 	answer = A->u.number == B->u.number;
 	Identifier_SetInt(C, answer);
 }
-void Execute_Equ(Identifier A, Identifier B, Identifier C)
+void Execute_Equ(Executable exe, Identifier A, Identifier B, Identifier C)
 {
-
-	if(IS_NULL(A) || IS_NULL(B) || IS_NULL(C)) return;
-	Identifier_SetInt(A, B->u.number);
-	Identifier_SetInt(C, B->u.number);
+	if(exe->error_flag)
+	{
+		LOG_ERROR("Addition could not be completed due to error");
+		return;
+	}
+	if(B->type == IDENTIFIER_TYPE_STRING)
+	{
+		Identifier_SetString(A, B->u.str);
+		Identifier_SetString(C, B->u.str);
+	}
+	else if(B->type == IDENTIFIER_TYPE_NUMBER)
+	{
+		Identifier_SetInt(A, B->u.number);
+		Identifier_SetInt(C, B->u.number);
+	}
+	else if(B->type == IDENTIFIER_TYPE_FLOAT)
+	{
+		Identifier_SetFloat(A, B->u.real);
+		Identifier_SetFloat(C, B->u.real);	
+	}
+	else
+	{
+		RaiseException(exe, "Unknown Id type %d for assignment. Stopping Execution", B->type);
+		return;
+	}
 }
 
 void Execute_Jz(Executable exe, Identifier A, int label_number)
@@ -234,8 +352,9 @@ STATUS Execute_Return(Executable exe, Identifier ret)
 	exe->ec_top--;
 	if(-1 == exe->ec_top)
 	{
+		exe->ret_value = Identifier_Clone(ret_value);
 		exe->ec = NULL;
-		LOG_INFO("End of program");
+//		LOG_INFO("End of program");
 	}
 	else
 	{
@@ -269,9 +388,9 @@ STATUS ExecutionContext_Execute(Executable exe, const char *func_name)
 								GetIdentifier(exe, exe->ec->cur_ptr->C));
 					break;
 			case ADD:
-					Execute_Add(GetIdentifier(exe, exe->ec->cur_ptr->A),
-								GetIdentifier(exe, exe->ec->cur_ptr->B),
-								GetIdentifier(exe, exe->ec->cur_ptr->C));
+					Execute_Add(exe, GetIdentifier(exe, exe->ec->cur_ptr->A),
+									 GetIdentifier(exe, exe->ec->cur_ptr->B),
+									 GetIdentifier(exe, exe->ec->cur_ptr->C));
 					break;
 			case SUB:
 					Execute_Sub(GetIdentifier(exe, exe->ec->cur_ptr->A),
@@ -299,9 +418,9 @@ STATUS ExecutionContext_Execute(Executable exe, const char *func_name)
 								GetIdentifier(exe, exe->ec->cur_ptr->C));
 					break;
 			case CMP:
-					Execute_Cmp(GetIdentifier(exe, exe->ec->cur_ptr->A),
-								GetIdentifier(exe, exe->ec->cur_ptr->B),
-								GetIdentifier(exe, exe->ec->cur_ptr->C));
+					Execute_Cmp(exe, GetIdentifier(exe, exe->ec->cur_ptr->A),
+									 GetIdentifier(exe, exe->ec->cur_ptr->B),
+									 GetIdentifier(exe, exe->ec->cur_ptr->C));
 					break;
 			case NEQ:
 					Execute_Neq(GetIdentifier(exe, exe->ec->cur_ptr->A),
@@ -309,9 +428,9 @@ STATUS ExecutionContext_Execute(Executable exe, const char *func_name)
 								GetIdentifier(exe, exe->ec->cur_ptr->C));
 					break;
 			case EQU:
-					Execute_Equ(GetIdentifier(exe, exe->ec->cur_ptr->A),
-								GetIdentifier(exe, exe->ec->cur_ptr->B),
-								GetIdentifier(exe, exe->ec->cur_ptr->C));
+					Execute_Equ(exe, GetIdentifier(exe, exe->ec->cur_ptr->A),
+									 GetIdentifier(exe, exe->ec->cur_ptr->B),
+									 GetIdentifier(exe, exe->ec->cur_ptr->C));
 					break;
 			case JZ:
 					Execute_Jz(exe, GetIdentifier(exe, exe->ec->cur_ptr->A), exe->ec->cur_ptr->u.label_number);

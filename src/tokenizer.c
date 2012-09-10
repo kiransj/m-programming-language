@@ -50,7 +50,7 @@ void Identifier_to_str(Identifier id, char * const buffer, const int size)
 	}
 	return;
 }
-char* IdentifierType_str(IdentifierType type)
+const char* IdentifierType_str(IdentifierType type)
 {
 	switch(type)
 	{

@@ -18,7 +18,7 @@ unsigned int line_number = 1;
 #endif
 #endif
 
-char* token_to_str(int token)
+const char* token_to_str(int token)
 {
 	switch(token)
 	{
@@ -37,7 +37,7 @@ char* token_to_str(int token)
 		case MUL:			return "MUL";
 		case MOD:			return "MOD";
 		default:			return "NULL";
-}
+	}
 }
 
 void Command(Compiler c, CompilerCmd oper)
@@ -57,9 +57,9 @@ int Command_LoopStmt(Compiler c, CompilerCmd cmd, Identifier A, int label_number
 	exe->line_number = c->line_number;
 	if(STMT_START_WHILE == cmd)
 	{
-		int label_number = c->label_number++;
-		LOG_INFO_NL("LABEL_%d:", label_number);
-		Executable_AddCmd(exe, LABEL, NULL, NULL, NULL, label_number);
+		int label_num = c->label_number++;
+		LOG_INFO_NL("LABEL_%d:", label_num);
+		Executable_AddCmd(exe, LABEL, NULL, NULL, NULL, label_num);
 		return_value = c->label_number++;
 	}	
 	else if(STMT_WHILE_COND == cmd)
@@ -92,13 +92,13 @@ int Command_ConditionStmt(Compiler c, CompilerCmd cmd, Identifier A, int label_n
 	exe->line_number = c->line_number;
 	if(STMT_IF == cmd)
 	{
-		int label_number = c->label_number++;
+		int label_num = c->label_number++;
 		Identifier_to_str(A, buf1, 64);
-		LOG_INFO_NL("JZ %s, %d", buf1,label_number);
-		Executable_AddCmd(exe, JZ, A, NULL, NULL, label_number);
+		LOG_INFO_NL("JZ %s, %d", buf1,label_num);
+		Executable_AddCmd(exe, JZ, A, NULL, NULL, label_num);
 
 		Identifier_Destroy(A);
-		return label_number;
+		return label_num;
 	}
 	else if(STMT_ENDIF == cmd)
 	{
@@ -304,7 +304,12 @@ int main(int argc, char *argv[])
 
 	if(c->error_flag == 0)
 	{
-		ExecutionContext_Execute(exe, "Main");
+		if(ExecutionContext_Execute(exe, "Main") == STATUS_SUCCESS)
+		{
+			char buf[64];
+			Identifier_to_str(exe->ret_value, buf, 64);
+			LOG_INFO("program returned %s", buf);
+		}
 	}
 	Free(c);
 	Executable_Destroy(exe);
