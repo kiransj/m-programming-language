@@ -1,9 +1,11 @@
 #ifndef _EXECUTABLE_H_
 #define _EXECUTABLE_H_
 
+#include "M.h"
 #include "compiler.h"
-#include "tokenizer.h"
+#include "identifier.h"
 #include "function.h"
+#include "variable_list.h"
 #include "util.h"
 
 struct _ByteCode;
@@ -22,21 +24,10 @@ struct _ByteCode
 	ByteCode next;
 };
 
-typedef struct _variablelist
+struct _ExecutionContext
 {
-	char *variable_name;
-	Identifier id;
-	struct _variablelist *next;
-}*VariableList;
+	char			*func_name;
 
-
-VariableList VariableList_Create(const char *var_name);
-void 		 VariableList_Destroy(VariableList);
-STATUS 		 VariableList_AddVariable(VariableList vl, const char *variable_name, Identifier v);
-Identifier   VariableList_FindVariable(VariableList, const char *variable_name);
-
-typedef struct _ExecutionContext
-{
 	unsigned int num_regs;
 	Identifier	 *regs;
 
@@ -45,13 +36,13 @@ typedef struct _ExecutionContext
 
 	VariableList	local_variables;
 
-	ByteCode	 	cur_ptr;
-}*ExecutionContext;
+	ByteCode	 	cur_ptr;	
+};
 
 ExecutionContext ExecutionContext_Create(ByteCode cur_ptr);
 void ExecutionContext_Destroy(ExecutionContext ec);
 
-typedef struct _Executable
+struct _Executable
 {
 	int				line_number;
 	ByteCode 		first, last;
@@ -78,19 +69,12 @@ typedef struct _Executable
 	int 				ec_size, ec_top;
 	ExecutionContext 	*ec_list;
 	int					error_flag;
-}*Executable;
+};
 
-Executable Executable_Create(void);
 void Executable_Destroy(Executable exe);
 STATUS Executable_GrowExecutionContext(Executable exe);
 STATUS Executable_AddCmd(Executable exe, CompilerCmd cmd, Identifier A, Identifier B, Identifier C, int number);
 
-STATUS Executable_AddNativeFunction(Executable exe, const char *func_name, NativeFunction nf);
 
-STATUS ExecutionContext_Execute(Executable exe, const char *func_name);
-
-
-Executable Compile(const char *filename);
-void Register_Native_Functions(Executable exe);
 void RaiseException(Executable exe, const char *format, ...);
 #endif

@@ -1,5 +1,6 @@
 #include <string.h>
 #include <stdarg.h>
+
 #include "function.h"
 #include "executable.h"
 
@@ -18,11 +19,12 @@ void RaiseException(Executable exe, const char *format, ...)
 void PrintBackTrace(Executable exe)
 {
 	int i = 0;
-	LOG_ERROR("=========Printing Backtrace====");
+	LOG_ERROR("=========Printing Backtrace====\n\n");
 	for(i = exe->ec_top; i >= 0; i--)
 	{
-		LOG_ERROR("%d> line %d", i, exe->ec_list[i]->cur_ptr->line_number);
+		LOG_ERROR("%d> function %20s:%d", i,exe->ec_list[i]->func_name, exe->ec_list[i]->cur_ptr->line_number);
 	}
+	LOG_INFO_NL("\n\n");
 	LOG_ERROR("=========End of Back Trace ====");
 }
 
@@ -232,12 +234,28 @@ void Execute_Cmp(Executable exe, Identifier A, Identifier B, Identifier C)
 	}
 	Identifier_SetInt(C, answer);
 }
-void Execute_Neq(Identifier A, Identifier B, Identifier C)
+void Execute_Neq(Executable exe, Identifier A, Identifier B, Identifier C)
 {
 	int answer = 0;
+	if(exe->error_flag)
+	{
+		LOG_ERROR("Addition could not be completed due to error");
+		return;
+	}
+	if(A->type == IDENTIFIER_TYPE_STRING && B->type == IDENTIFIER_TYPE_STRING)
+	{
+		answer = strcmp(A->u.str, B->u.str);
+	}
+	else if(A->type == IDENTIFIER_TYPE_NUMBER && B->type == IDENTIFIER_TYPE_NUMBER)
+	{
+		answer = A->u.number != B->u.number;
+	}
+	else
+	{
+		RaiseException(exe, "Comparing type %d with %d. Stoping Execution", A->type, B->type);
+		return;
+	}
 
-	if(IS_NULL(A) || IS_NULL(B) || IS_NULL(C)) return;
-	answer = A->u.number == B->u.number;
 	Identifier_SetInt(C, answer);
 }
 void Execute_Equ(Executable exe, Identifier A, Identifier B, Identifier C)
@@ -317,7 +335,7 @@ void Execute_Call(Executable exe, const char *fun_name, int num_args, Identifier
 		Identifier p = IdentifierStack_Pop(exe->is);
 		if(IS_NULL(p))
 		{
-			RaiseException(exe, "POP from stack failed. Function arg missing?");
+			RaiseException(exe, "POP from stack failed. This should not happen");
 			return;
 		}
 		args[i] = GetIdentifier(exe, p);
@@ -334,7 +352,7 @@ void Execute_Call(Executable exe, const char *fun_name, int num_args, Identifier
 		Free(args);
 		if(!IS_NULL(r))
 		{
-			Identifier_Copy(r,	result);
+			Identifier_Copy(result, r);
 			Identifier_Destroy(r);
 		}
 		else
@@ -347,6 +365,7 @@ void Execute_Call(Executable exe, const char *fun_name, int num_args, Identifier
 		exe->ec = exe->ec_list[++exe->ec_top] = ExecutionContext_Create(((ByteCode)(func->u.address)));
 		exe->ec->num_args = num_args+1;
 		exe->ec->args = args;
+		exe->ec->func_name =func->func_name;
 	}
 }
 
@@ -365,7 +384,7 @@ STATUS Execute_Return(Executable exe, Identifier ret)
 	else
 	{
 		exe->ec = exe->ec_list[exe->ec_top];
-		Identifier_Copy(ret_value, GetIdentifier(exe, exe->ec->cur_ptr->C));
+		Identifier_Copy(GetIdentifier(exe, exe->ec->cur_ptr->C), ret_value);
 	}
 	Identifier_Destroy(ret_value);
 	return STATUS_SUCCESS;
@@ -382,6 +401,7 @@ STATUS ExecutionContext_Execute(Executable exe, const char *func_name)
 		RaiseException(exe, "func '%s' not found", func_name);
 		return STATUS_FAILURE; 
 	}
+	exe->ec->func_name =func->func_name;
 	exe->ec->cur_ptr = ((ByteCode)(func->u.address))->next;
 	while(!IS_NULL(exe->ec->cur_ptr) && (exe->error_flag == 0))
 	{
@@ -429,9 +449,9 @@ STATUS ExecutionContext_Execute(Executable exe, const char *func_name)
 									 GetIdentifier(exe, exe->ec->cur_ptr->C));
 					break;
 			case NEQ:
-					Execute_Neq(GetIdentifier(exe, exe->ec->cur_ptr->A),
-								GetIdentifier(exe, exe->ec->cur_ptr->B),
-								GetIdentifier(exe, exe->ec->cur_ptr->C));
+					Execute_Neq(exe, GetIdentifier(exe, exe->ec->cur_ptr->A),
+									 GetIdentifier(exe, exe->ec->cur_ptr->B),
+									 GetIdentifier(exe, exe->ec->cur_ptr->C));
 					break;
 			case EQU:
 					Execute_Equ(exe, GetIdentifier(exe, exe->ec->cur_ptr->A),
@@ -536,7 +556,7 @@ ExecutionContext ExecutionContext_Create(ByteCode cur_ptr)
 		ec->regs[i] = Identifier_NewInteger(0);
 	}
 
-	ec->local_variables = VariableList_Create("\0");
+	ec->local_variables = VariableList_Create();
 	if(IS_NULL(ec->local_variables))
 	{
 		Free(ec->regs);
@@ -548,203 +568,18 @@ ExecutionContext ExecutionContext_Create(ByteCode cur_ptr)
 	return ec;
 }
 
-VariableList VariableList_Create(const char *variable_name)
+int ExecutionContext_GetReturnValue(Executable exe)
 {
-	VariableList vl;
-	vl = (VariableList)Malloc(sizeof(struct _variablelist));
-	if(IS_NULL(vl))
+	switch(exe->ret_value->type)
 	{
-		LOG_ERROR("Malloc(%u) failed", sizeof(struct _variablelist));
-		return NULL;
+		case IDENTIFIER_TYPE_NUMBER:
+				return exe->ret_value->u.number;
+		case IDENTIFIER_TYPE_FLOAT:
+				return (int)exe->ret_value->u.real;
+		case IDENTIFIER_TYPE_STRING:
+				return atoi(exe->ret_value->u.str);
+		default:
+				return 0;
 	}
-	memset(vl, 0, sizeof(struct _variablelist));
-	return vl;
+	return 0;
 }
-void VariableList_Destroy(VariableList vl)
-{
-	VariableList tmp_vl;
-	while(!IS_NULL(vl))
-	{
-		tmp_vl = vl->next;
-		if(!IS_NULL(vl->variable_name) && strlen(vl->variable_name) != 0)
-		{
-			Free(vl->variable_name);
-			Identifier_Destroy(vl->id);
-		}
-		Free(vl);
-		vl = tmp_vl;
-	}
-}
-Identifier  VariableList_FindVariable(VariableList vl, const char *variable_name)
-{
-	int flag;
-	VariableList tmp_vl = vl->next, tmp1_vl;
-
-	if(strlen(variable_name) < 1)
-	{
-		LOG_ERROR("variable_name is of size 0");
-		return NULL;
-	}
-
-	if(IS_NULL(tmp_vl))
-	{
-		//LOG_ERROR("Variable('%s') not found", variable_name);
-		return NULL;
-	}
-
-	flag = 1;
-	do
-	{
-		int tmp = strcasecmp(tmp_vl->variable_name, variable_name);
-		if(tmp > 0)
-		{
-			flag = 2;
-			break;
-		}
-		else if(tmp == 0)
-		{
-			flag = 0;
-			break;
-		}
-		tmp1_vl = tmp_vl;
-		tmp_vl = tmp_vl->next;
-	}
-	while(!IS_NULL(tmp_vl));
-
-	if(flag == 0)
-	{
-		return tmp_vl->id;
-	}
-	//LOG_ERROR("Variable('%s') not found", variable_name);
-	return NULL;
-}
-
-#if 0
-STATUS VariableList_AddVariable(VariableList vl, const char *variable_name, Identifier v)
-{
-	int flag;
-	VariableList new_var = vl->next, tmp1_vl = NULL;
-
-	if(strlen(variable_name) < 1)
-	{
-		LOG_ERROR("variable_name is of size 0");
-		return STATUS_FAILURE;
-	}
-
-	if(IS_NULL(new_var))
-	{
-		new_var = VariableList_Create(variable_name);
-		if(!IS_NULL(new_var))
-		{
-			new_var->id = Identifier_Clone(v);
-			new_var->next = NULL;
-			new_var->variable_name = (char*)Malloc(strlen(variable_name)+1);
-			memcpy(new_var->variable_name, variable_name, strlen(variable_name));
-			vl->next = new_var;
-			return STATUS_SUCCESS;
-		}
-		else
-		{
-			LOG_ERROR("VariableList_Create() Failed");
-			return STATUS_FAILURE;
-		}
-	}
-
-	flag = 1;
-	do
-	{
-		int tmp = strcasecmp(new_var->variable_name, variable_name);
-		if(tmp > 0)
-		{
-			flag = 2;
-			break;
-		}
-		else if(tmp == 0)
-		{
-			LOG_ERROR("variable with name '%s' already declared", variable_name);
-			return STATUS_FAILURE;
-		}
-		tmp1_vl = new_var;
-		new_var = new_var->next;
-	}
-	while(!IS_NULL(new_var));
-
-	new_var = VariableList_Create(variable_name);
-	if(!IS_NULL(new_var))
-	{
-		new_var->id = Identifier_Clone(v);
-		new_var->next = NULL;
-		new_var->variable_name = (char*)Malloc(strlen(variable_name)+1);
-		memcpy(new_var->variable_name, variable_name, strlen(variable_name));
-		if(flag == 1)
-		{
-			tmp1_vl->next = new_var;
-		}
-		else if(flag == 2)
-		{
-			new_var->next = tmp1_vl->next;
-			tmp1_vl->next = new_var;
-		}
-		return STATUS_SUCCESS;
-	}
-	LOG_ERROR("VariableList_Create() Failed");
-	return STATUS_FAILURE;
-}
-#else
-STATUS VariableList_AddVariable(VariableList vl, const char *variable_name, Identifier id)
-{
-	VariableList new_var, v, tmp_v;
-
-	new_var = VariableList_Create(variable_name);
-	if(!IS_NULL(new_var))
-	{
-		new_var->id = Identifier_Clone(id);
-		if(IS_NULL(new_var->id))
-		{
-			LOG_ERROR("Identifier_Clone() failed");
-			return STATUS_FAILURE;
-		}
-		new_var->variable_name = (char*)Malloc(strlen(variable_name)+1);
-		memcpy(new_var->variable_name, variable_name, strlen(variable_name));
-	}
-	else
-	{
-		LOG_ERROR("VariableList_Create() failed");
-		return STATUS_FAILURE;
-	}
-	if(vl->next == NULL)
-	{
-		vl->next = new_var;
-		return STATUS_SUCCESS;
-	}
-	else
-	{
-		tmp_v = vl;
-		v = vl->next;
-		while(!IS_NULL(v))
-		{
-			int tmp = strcasecmp(v->variable_name, variable_name);
-			if(0 == tmp)
-			{
-				VariableList_Destroy(new_var);
-				LOG_ERROR("variable with name '%s' already declared", variable_name);
-				return STATUS_FAILURE;
-			}
-			else if(tmp > 0)
-			{
-				new_var->next = tmp_v->next;
-				tmp_v->next = new_var;
-				return STATUS_SUCCESS;
-			}
-			tmp_v = v;
-			v = v->next;
-		}
-		if(IS_NULL(v))
-		{
-			tmp_v->next = new_var;
-			return STATUS_SUCCESS;
-		}
-	}
-	return STATUS_FAILURE;
-}
-#endif

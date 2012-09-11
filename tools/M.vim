@@ -1,6 +1,7 @@
 syntax off
 syntax on
-syntax keyword Type var if endif while endwhile return function endfunction
+syntax case ignore
+syntax keyword Type var if endif while endwhile return function endfunction typeof
 syntax region String start=+"+ end=+"+ skip=+\\"+
 syntax region Comment start=+#+ end=+\n+ 
 

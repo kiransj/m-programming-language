@@ -1,18 +1,21 @@
 GCC=gcc
 AR=ar
-CFLAGS :=  -g 
+CFLAGS :=   
 WARNINGS:= -Wall
 LEMON:=lemon
+
+FEATURES := -DENABLE_KEY_VALUE
 
 GRAMMER_FILE:=src/grammer.y
 LEXER_FILE:=src/lexer.l
 
 SOURCE := src/compiler.c
 SOURCE += src/util.c
-SOURCE += src/tokenizer.c
+SOURCE += src/identifier.c
 SOURCE += src/executable.c
 SOURCE += src/execute_context.c
 SOURCE += src/function.c
+SOURCE += src/variable_list.c
 SOURCE += src/native_functions.c
 
 M_LIB:=libM.a
@@ -56,7 +59,7 @@ $(M_LIB):$(COMPILER_OBJECTS)
 
 %.o:%.c
 	@echo "compiling $^"
-	@$(GCC) $(CFLAGS) $(WARNINGS) $(INCLUDES) -c $^  -o $@
+	@$(GCC) $(CFLAGS) $(FEATURES) $(WARNINGS) $(INCLUDES) -c $^  -o $@
 
 clean:
 	@rm -f $(COMPILER_OBJECTS) $(OUTPUT) $(TEST_OBJECTS) $(M_LIB) *core*

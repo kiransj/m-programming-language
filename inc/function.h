@@ -1,7 +1,8 @@
 #ifndef _FUNCTION_H_
 #define _FUNCTION_H_
 
-#include "tokenizer.h"
+#include "identifier.h"
+#include "native_functions.h"
 #include "util.h"
 typedef enum
 {
@@ -10,7 +11,6 @@ typedef enum
 	FUNCTION_TYPE_LOCAL,
 }FUNCTION_TYPE;
 
-typedef Identifier (*NativeFunction)(Identifier *args, int num_args);
 typedef struct _functionlist
 {
 	char 					*func_name;

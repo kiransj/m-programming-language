@@ -249,25 +249,24 @@ void* ParseAlloc(void *(*)(size_t));
 void* ParseFree(void*, void (*)(void *));
 void Parse(void*, int, Identifier, Compiler);
 
-Executable Compile(const char *filename)
+STATUS Compile(Executable exe, const char *filename)
 {
 	int yv;
 	void *pParser;
+	STATUS ret_value = STATUS_FAILURE;
 	Compiler c;
-	Executable exe;
+
+	if(IS_NULL(exe))
+	{
+		LOG_ERROR("exe variable is NULL");
+		return ret_value;
+	}
+
 
 	c = (Compiler)Malloc(sizeof(struct _Compiler));
 	memset(c, 0, sizeof(Compiler));
 	c->label_number = 1;
 	c->reg_num = 1;
-
-	exe = Executable_Create();
-	if(IS_NULL(exe))
-	{
-		LOG_ERROR("Executable_Create() failed");
-		Free(c);
-		return NULL;
-	}
 
 	c->priv_data = (void*)exe;
 	Register_Native_Functions(exe);
@@ -276,9 +275,8 @@ Executable Compile(const char *filename)
 	if(NULL == yyin)
 	{
 		Free(c);
-		Executable_Destroy(exe);
 		printf("unable to open file\n");
-		return NULL;
+		return ret_value;
 	}
 
 	pParser = (void*)ParseAlloc(Malloc);
@@ -298,16 +296,12 @@ Executable Compile(const char *filename)
 	exe->max_num_reg = c->max_num_reg;
 	LOG_INFO_NL("max number of regs required : %d", c->max_num_reg);
 
-	if(c->error_flag != 0)
+	if(c->error_flag == 0)
 	{
-		Executable_Destroy(exe);
-		exe = NULL;
-#if 0		
-
-#endif		
+		ret_value = STATUS_SUCCESS;
 	}
 	Free(c);	
 	fclose(yyin);
 	yylex_destroy();
-	return exe;
+	return ret_value;
 }

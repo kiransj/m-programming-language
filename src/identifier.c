@@ -1,5 +1,5 @@
 #include <string.h>
-#include "tokenizer.h"
+#include "identifier.h"
 #include "util.h"
 #include "compiler.h"
 
@@ -246,7 +246,7 @@ Identifier Identifier_Clone(Identifier a)
 }
 
 
-void Identifier_Copy(Identifier src, Identifier dest)
+void Identifier_Copy(Identifier dest, Identifier src)
 {
 	switch(src->type)
 	{

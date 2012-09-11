@@ -48,7 +48,7 @@ void Identifier_to_str(Identifier id, char * const buffer, const int size);
 Identifier Identifier_Create(void);
 void Identifier_Destroy(Identifier A);
 Identifier Identifier_Clone(Identifier A);
-void Identifier_Copy(Identifier src, Identifier dest);
+void Identifier_Copy(Identifier dest, Identifier src);
 
 void Identifier_Free(Identifier t);
 Identifier Identifier_NewString(const char *str);
@@ -59,10 +59,10 @@ Identifier Identifier_NewInteger(const int number);
 Identifier Identifier_NewRegister(const int number);
 Identifier Identifier_NewObject(Object);
 
-void Identifier_SetInt(Identifier a, int num);
-void Identifier_SetFloat(Identifier a, double num);
-void Identifier_SetString(Identifier a, char *str);
-void Identifier_SetObject(Identifier dest, Object obj);
+inline void Identifier_SetInt(Identifier a, int num);
+inline void Identifier_SetFloat(Identifier a, double num);
+inline void Identifier_SetString(Identifier a, char *str);
+inline void Identifier_SetObject(Identifier dest, Object obj);
 
 typedef struct _IdentifierStack
 {
