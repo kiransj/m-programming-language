@@ -1,8 +1,9 @@
 #ifndef _NATIVE_FUNCTIONS_H_
 
 #include "M.h"
-
+#include "identifier.h"
 typedef Identifier (*NativeFunction)(Identifier *args, int num_args);
+
 STATUS Executable_AddNativeFunction(Executable exe, const char *func_name, NativeFunction nf);
 void Register_Native_Functions(Executable exe);
 Identifier Function_Output(Identifier *args, int num_args);

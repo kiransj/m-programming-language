@@ -7,7 +7,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "tokenizer.h"
+#include "identifier.h"
 #include "compiler.h"
 #include "util.h"
 }

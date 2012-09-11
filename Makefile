@@ -1,6 +1,6 @@
 GCC=gcc
 AR=ar
-CFLAGS :=  -g 
+CFLAGS :=   
 WARNINGS:= -Wall
 LEMON:=lemon
 
@@ -11,7 +11,7 @@ LEXER_FILE:=src/lexer.l
 
 SOURCE := src/compiler.c
 SOURCE += src/util.c
-SOURCE += src/tokenizer.c
+SOURCE += src/identifier.c
 SOURCE += src/executable.c
 SOURCE += src/execute_context.c
 SOURCE += src/function.c

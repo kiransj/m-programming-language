@@ -1,9 +1,7 @@
 
 #include <string.h>
-#include "util.h"
-#include "variable_list.h"
 #include "native_functions.h"
-
+#include "variable_list.h"
 /* 
  * To avoid memory leaks please follow the following rules.
  * Every return value should be created here or cloned here
@@ -71,6 +69,7 @@ Identifier Function_TypeOf(Identifier *args, int num_args)
 }
 
 #ifdef ENABLE_KEY_VALUE
+
 typedef struct _KeyValue
 {
 	VariableList vl;

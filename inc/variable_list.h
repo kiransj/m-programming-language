@@ -1,6 +1,7 @@
 #ifndef _VARIABLE_LIST_H_
 #define _VARIABLE_LIST_H_
-#include "tokenizer.h"
+
+#include "identifier.h"
 
 struct _variablelist;
 typedef struct _variablelist *VariableList;

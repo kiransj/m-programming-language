@@ -1,7 +1,7 @@
 #ifndef _FUNCTION_H_
 #define _FUNCTION_H_
 
-#include "tokenizer.h"
+#include "identifier.h"
 #include "native_functions.h"
 #include "util.h"
 typedef enum
