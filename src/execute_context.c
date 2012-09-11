@@ -232,12 +232,28 @@ void Execute_Cmp(Executable exe, Identifier A, Identifier B, Identifier C)
 	}
 	Identifier_SetInt(C, answer);
 }
-void Execute_Neq(Identifier A, Identifier B, Identifier C)
+void Execute_Neq(Executable exe, Identifier A, Identifier B, Identifier C)
 {
 	int answer = 0;
+	if(exe->error_flag)
+	{
+		LOG_ERROR("Addition could not be completed due to error");
+		return;
+	}
+	if(A->type == IDENTIFIER_TYPE_STRING && B->type == IDENTIFIER_TYPE_STRING)
+	{
+		answer = strcmp(A->u.str, B->u.str);
+	}
+	else if(A->type == IDENTIFIER_TYPE_NUMBER && B->type == IDENTIFIER_TYPE_NUMBER)
+	{
+		answer = A->u.number != B->u.number;
+	}
+	else
+	{
+		RaiseException(exe, "Comparing type %d with %d. Stoping Execution", A->type, B->type);
+		return;
+	}
 
-	if(IS_NULL(A) || IS_NULL(B) || IS_NULL(C)) return;
-	answer = A->u.number == B->u.number;
 	Identifier_SetInt(C, answer);
 }
 void Execute_Equ(Executable exe, Identifier A, Identifier B, Identifier C)
@@ -429,9 +445,9 @@ STATUS ExecutionContext_Execute(Executable exe, const char *func_name)
 									 GetIdentifier(exe, exe->ec->cur_ptr->C));
 					break;
 			case NEQ:
-					Execute_Neq(GetIdentifier(exe, exe->ec->cur_ptr->A),
-								GetIdentifier(exe, exe->ec->cur_ptr->B),
-								GetIdentifier(exe, exe->ec->cur_ptr->C));
+					Execute_Neq(exe, GetIdentifier(exe, exe->ec->cur_ptr->A),
+									 GetIdentifier(exe, exe->ec->cur_ptr->B),
+									 GetIdentifier(exe, exe->ec->cur_ptr->C));
 					break;
 			case EQU:
 					Execute_Equ(exe, GetIdentifier(exe, exe->ec->cur_ptr->A),

@@ -58,21 +58,45 @@ Identifier Function_Max(Identifier *args, int num_args)
 	return Identifier_NewInteger(max);
 }
 
+Identifier Function_TypeOf(Identifier *args, int num_args)
+{
+	if(args[0]->u.number != 1)
+	{
+		LOG_ERROR("typeof(variable) usage");
+		return Identifier_NewInteger(0);
+	}
+	return (Identifier_NewString(IdentifierType_to_str(args[1]->type)));
+}
+
+typedef struct _KeyValue
+{
+	VariableList vl;
+	VariableList cur_ptr;
+}*KeyValue;
 
 void KeyValue_delete(void *ptr)
 {
-	VariableList keyValue = (VariableList)ptr;
-	VariableList_Destroy(keyValue);
+	KeyValue keyValue = (KeyValue)ptr;
+	VariableList_Destroy(keyValue->vl);
+	memset(keyValue, 0, sizeof(struct _KeyValue));
+	Free(keyValue);
 	LOG_ERROR("Deleting the keyValue");
 }
 
-Identifier Function_KeyValueInit(Identifier *args, int num_args)
+Identifier Function_KeyValue(Identifier *args, int num_args)
 {
-	Object obj = NULL;
-	Identifier i = NULL;
-	VariableList keyValue;
-	keyValue = VariableList_Create("\0");
-	if(!IS_NULL(keyValue))
+	Object 		obj = NULL;
+	Identifier 	i = NULL;
+	KeyValue	keyValue;
+
+	keyValue = (KeyValue)Malloc(sizeof(struct _KeyValue));
+	if(IS_NULL(keyValue))
+	{
+		LOG_ERROR("Malloc(%u) failed", sizeof(struct _KeyValue));
+		return Identifier_NewInteger(0);
+	}
+	keyValue->vl= VariableList_Create("\0");
+	if(!IS_NULL(keyValue->vl))
 	{
 		obj = (Object)Malloc(sizeof(struct _Object));
 		memset(obj, 0, sizeof(struct _Object));
@@ -85,16 +109,16 @@ Identifier Function_KeyValueInit(Identifier *args, int num_args)
 
 Identifier Function_KeyValueAdd(Identifier *args, int num_args)
 {
-	VariableList vl;
+	KeyValue keyValue;
 	if(args[0]->u.number != 3 || args[1]->type != IDENTIFIER_TYPE_OBJECT || args[2]->type != IDENTIFIER_TYPE_STRING)
 	{
 		LOG_ERROR("KeyValueAdd(object, key, value) usage");
 		return Identifier_NewInteger(0);
 	}
-	vl = (VariableList)args[1]->u.obj->priv_data;
-	if(!IS_NULL(vl))
+	keyValue = (KeyValue)args[1]->u.obj->priv_data;
+	if(!IS_NULL(keyValue))
 	{
-		if(STATUS_SUCCESS == VariableList_AddVariable(vl, args[2]->u.str, args[3]))
+		if(STATUS_SUCCESS == VariableList_AddVariable(keyValue->vl, args[2]->u.str, args[3]))
 		{
 			return Identifier_NewInteger(1);
 		}
@@ -105,16 +129,16 @@ Identifier Function_KeyValueAdd(Identifier *args, int num_args)
 Identifier Function_KeyValueGet(Identifier *args, int num_args)
 {
 	Identifier i = NULL;
-	VariableList vl;
+	KeyValue keyValue;
 	if(args[0]->u.number != 2 || args[1]->type != IDENTIFIER_TYPE_OBJECT || args[2]->type != IDENTIFIER_TYPE_STRING)
 	{
 		LOG_ERROR("KeyValueAdd(object, key, value) usage");
 		return Identifier_NewInteger(0);
 	}
-	vl = (VariableList)args[1]->u.obj->priv_data;
-	if(!IS_NULL(vl))
+	keyValue = (KeyValue)args[1]->u.obj->priv_data;
+	if(!IS_NULL(keyValue))
 	{
-		i = VariableList_FindVariable(vl, args[2]->u.str);
+		i = VariableList_FindVariable(keyValue->vl, args[2]->u.str);
 		if(IS_NULL(i))
 		{
 			return Identifier_NewInteger(0);
@@ -123,22 +147,102 @@ Identifier Function_KeyValueGet(Identifier *args, int num_args)
 	return Identifier_Clone(i);
 }
 
-Identifier Function_TypeOf(Identifier *args, int num_args)
+
+Identifier Function_KeyValueIterator(Identifier *args, int num_args)
 {
-	if(args[0]->u.number != 1)
+	KeyValue keyValue;
+	if(args[0]->u.number != 1 || args[1]->type != IDENTIFIER_TYPE_OBJECT)
 	{
-		LOG_ERROR("typeof(variable) usage");
+		LOG_ERROR("KeyValueAdd(object, key, value) usage");
 		return Identifier_NewInteger(0);
 	}
-	return (Identifier_NewString(IdentifierType_to_str(args[1]->type)));
+
+	keyValue = (KeyValue)args[1]->u.obj->priv_data;
+	if(!IS_NULL(keyValue))
+	{
+		keyValue->cur_ptr = keyValue->vl;
+		return Identifier_NewInteger(1);
+	}
+	return Identifier_NewInteger(0);
+}
+Identifier Function_KeyValueNext(Identifier *args, int num_args)
+{
+	KeyValue keyValue;
+	if(args[0]->u.number != 1 || args[1]->type != IDENTIFIER_TYPE_OBJECT)
+	{
+		LOG_ERROR("KeyValueAdd(object, key, value) usage");
+		return Identifier_NewInteger(0);
+	}
+
+	keyValue = (KeyValue)args[1]->u.obj->priv_data;
+	if(!IS_NULL(keyValue))
+	{
+		if(IS_NULL(keyValue->cur_ptr))
+		{
+			LOG_ERROR("First call KeyValueIterator() and then call KeyValueNext");
+			return Identifier_NewInteger(0);
+		}
+		keyValue->cur_ptr = keyValue->cur_ptr->next;
+		return Identifier_NewInteger((IS_NULL(keyValue->cur_ptr) ? 0 : 1));
+	}
+	return Identifier_NewInteger(0);
+}
+Identifier Function_KeyValueGetKey(Identifier *args, int num_args)
+{
+	KeyValue keyValue;
+	if(args[0]->u.number != 1 || args[1]->type != IDENTIFIER_TYPE_OBJECT)
+	{
+		LOG_ERROR("KeyValueAdd(object, key, value) usage");
+		return Identifier_NewInteger(0);
+	}
+
+	keyValue = (KeyValue)args[1]->u.obj->priv_data;
+	if(!IS_NULL(keyValue))
+	{
+		if(IS_NULL(keyValue->cur_ptr) || IS_NULL(keyValue->cur_ptr->variable_name))
+		{
+			LOG_ERROR("First call KeyValueNext() and then KeyValueGetName()");
+			return Identifier_NewInteger(0);
+		}
+		return Identifier_NewString(keyValue->cur_ptr->variable_name);
+	}
+	return Identifier_NewInteger(0);
+}
+
+Identifier Function_KeyValueGetValue(Identifier *args, int num_args)
+{
+	KeyValue keyValue;
+	if(args[0]->u.number != 1 || args[1]->type != IDENTIFIER_TYPE_OBJECT)
+	{
+		LOG_ERROR("KeyValueAdd(object, key, value) usage");
+		return Identifier_NewInteger(0);
+	}
+
+	keyValue = (KeyValue)args[1]->u.obj->priv_data;
+	if(!IS_NULL(keyValue))
+	{
+		if(IS_NULL(keyValue->cur_ptr) || IS_NULL(keyValue->cur_ptr->variable_name))
+		{
+			LOG_ERROR("First call KeyValueNext() and then KeyValueGetName()");
+			return Identifier_NewInteger(0);
+		}
+		return Identifier_Clone(keyValue->cur_ptr->id);
+	}
+	return Identifier_NewInteger(0);
 }
 void Register_Native_Functions(Executable exe)
 {
 	Executable_AddNativeFunction(exe, "output", Function_Output);
 	Executable_AddNativeFunction(exe, "max", Function_Max);
-	Executable_AddNativeFunction(exe, "KeyValueInit", Function_KeyValueInit);
+
+	Executable_AddNativeFunction(exe, "KeyValue", Function_KeyValue);
 	Executable_AddNativeFunction(exe, "KeyValueAdd", Function_KeyValueAdd);
 	Executable_AddNativeFunction(exe, "KeyValueGet", Function_KeyValueGet);
+	Executable_AddNativeFunction(exe, "KeyValueIterator", Function_KeyValueIterator);
+	Executable_AddNativeFunction(exe, "KeyValueNext", Function_KeyValueNext);
+	Executable_AddNativeFunction(exe, "KeyValueGetKey", Function_KeyValueGetKey);
+	Executable_AddNativeFunction(exe, "KeyValueGetValue", Function_KeyValueGetValue);
+
 	Executable_AddNativeFunction(exe, "typeof", Function_TypeOf);
 }
 

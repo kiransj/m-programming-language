@@ -17,21 +17,29 @@ endfunction
 
 function GetKeyValue()
 	var  v;
-	v :=KeyValueInit();
+	v :=KeyValue();
 	if(typeof(v) == "object")
-		KeyValueAdd(v, "CreatedBy", "GetKeyValue");	
+		KeyValueAdd(v, "version", "10");	
+		KeyValueAdd(v, "Path", "/home/kiran/root/bin");	
+		KeyValueAdd(v, "time", "10:30");
 		return v;
 	endif
-	output("KeyValueInit() failed");
+	output("KeyValue() failed");
 	return (0);
 endfunction
 
 function Main()
 	var v, c, d, a;
 	v := GetKeyValue();	
-	KeyValueAdd(v, "version", 7);	
-	KeyValueAdd(v, "time", "10:30");	
-	output("version : " + KeyValueGet(v, "version"));
-	output("time : " + KeyValueGet(v, "time"));
-	output("CreatedBy : " + KeyValueGet(v, "CreatedBy"));
+	if(typeof(v) != "object")
+		output("getKeyValue() failed");
+		return (0);
+	endif
+	Fibonacci(28);
+	if(KeyValueIterator(v))
+		while(KeyValueNext(v))
+			output("Key: "+KeyValueGetKey(v)+ ", value : " + KeyValueGetValue(v));
+		endwhile	
+	endif
+	return (1);
 endfunction
