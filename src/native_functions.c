@@ -68,6 +68,7 @@ Identifier Function_TypeOf(Identifier *args, int num_args)
 	return (Identifier_NewString(IdentifierType_to_str(args[1]->type)));
 }
 
+#ifdef ENABLE_KEY_VALUE
 typedef struct _KeyValue
 {
 	VariableList vl;
@@ -153,7 +154,7 @@ Identifier Function_KeyValueIterator(Identifier *args, int num_args)
 	KeyValue keyValue;
 	if(args[0]->u.number != 1 || args[1]->type != IDENTIFIER_TYPE_OBJECT)
 	{
-		LOG_ERROR("KeyValueAdd(object, key, value) usage");
+		LOG_ERROR("KeyValueIterator(object) usage");
 		return Identifier_NewInteger(0);
 	}
 
@@ -170,7 +171,7 @@ Identifier Function_KeyValueNext(Identifier *args, int num_args)
 	KeyValue keyValue;
 	if(args[0]->u.number != 1 || args[1]->type != IDENTIFIER_TYPE_OBJECT)
 	{
-		LOG_ERROR("KeyValueAdd(object, key, value) usage");
+		LOG_ERROR("KeyValueNext(object) usage");
 		return Identifier_NewInteger(0);
 	}
 
@@ -192,7 +193,7 @@ Identifier Function_KeyValueGetKey(Identifier *args, int num_args)
 	KeyValue keyValue;
 	if(args[0]->u.number != 1 || args[1]->type != IDENTIFIER_TYPE_OBJECT)
 	{
-		LOG_ERROR("KeyValueAdd(object, key, value) usage");
+		LOG_ERROR("KeyValueGetKey(object) usage");
 		return Identifier_NewInteger(0);
 	}
 
@@ -214,7 +215,7 @@ Identifier Function_KeyValueGetValue(Identifier *args, int num_args)
 	KeyValue keyValue;
 	if(args[0]->u.number != 1 || args[1]->type != IDENTIFIER_TYPE_OBJECT)
 	{
-		LOG_ERROR("KeyValueAdd(object, key, value) usage");
+		LOG_ERROR("KeyValueGetValue(object) usage");
 		return Identifier_NewInteger(0);
 	}
 
@@ -230,11 +231,15 @@ Identifier Function_KeyValueGetValue(Identifier *args, int num_args)
 	}
 	return Identifier_NewInteger(0);
 }
+#endif
+
+
 void Register_Native_Functions(Executable exe)
 {
 	Executable_AddNativeFunction(exe, "output", Function_Output);
 	Executable_AddNativeFunction(exe, "max", Function_Max);
-
+	Executable_AddNativeFunction(exe, "typeof", Function_TypeOf);
+#ifdef ENABLE_KEY_VALUE
 	Executable_AddNativeFunction(exe, "KeyValue", Function_KeyValue);
 	Executable_AddNativeFunction(exe, "KeyValueAdd", Function_KeyValueAdd);
 	Executable_AddNativeFunction(exe, "KeyValueGet", Function_KeyValueGet);
@@ -242,8 +247,8 @@ void Register_Native_Functions(Executable exe)
 	Executable_AddNativeFunction(exe, "KeyValueNext", Function_KeyValueNext);
 	Executable_AddNativeFunction(exe, "KeyValueGetKey", Function_KeyValueGetKey);
 	Executable_AddNativeFunction(exe, "KeyValueGetValue", Function_KeyValueGetValue);
+#endif
 
-	Executable_AddNativeFunction(exe, "typeof", Function_TypeOf);
 }
 
 void UnRegister_Native_Functions(Executable exe)

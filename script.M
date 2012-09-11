@@ -32,10 +32,9 @@ function Main()
 	var v, c, d, a;
 	v := GetKeyValue();	
 	if(typeof(v) != "object")
-		output("getKeyValue() failed");
+		output("KeyValue() failed");
 		return (0);
 	endif
-	Fibonacci(28);
 	if(KeyValueIterator(v))
 		while(KeyValueNext(v))
 			output("Key: "+KeyValueGetKey(v)+ ", value : " + KeyValueGetValue(v));

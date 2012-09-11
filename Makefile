@@ -4,6 +4,8 @@ CFLAGS :=  -g
 WARNINGS:= -Wall
 LEMON:=lemon
 
+FEATURES := -DENABLE_KEY_VALUE
+
 GRAMMER_FILE:=src/grammer.y
 LEXER_FILE:=src/lexer.l
 
@@ -56,7 +58,7 @@ $(M_LIB):$(COMPILER_OBJECTS)
 
 %.o:%.c
 	@echo "compiling $^"
-	@$(GCC) $(CFLAGS) $(WARNINGS) $(INCLUDES) -c $^  -o $@
+	@$(GCC) $(CFLAGS) $(FEATURES) $(WARNINGS) $(INCLUDES) -c $^  -o $@
 
 clean:
 	@rm -f $(COMPILER_OBJECTS) $(OUTPUT) $(TEST_OBJECTS) $(M_LIB) *core*
