@@ -46,7 +46,7 @@
 ";"		{  return OPERATOR_SEMI_COLON;}
 ","		{  return OPERATOR_COMMA;}
 \n		{line_number++;}
-[\t ]*	;
+[\t\r ]*	;
 #[^\n]*	;
 .		{fprintf(stderr, "unknown string %s on line %d\n", yytext, line_number);   return 0;}
 %%

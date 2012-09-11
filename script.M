@@ -4,6 +4,7 @@ function Factorial()
 	if($1 <= 2)
 		return ($1);
 	endif
+	#recursion
 	return Factorial($1-1) * $1;
 endfunction
 
@@ -16,8 +17,12 @@ endfunction
 
 function GetKeyValue()
 	var  v;
+	# Create a KeyValue Object. This is native call the return type is an Object.
 	v :=KeyValue();
+	#Check if the call of successful. The different return values of
+	#typeof() is "int", "string", "float", "object"
 	if(typeof(v) == "object")
+		#Add some object to KeyValue.
 		KeyValueAdd(v, "version", "10");	
 		KeyValueAdd(v, "Path", "/home/kiran/root/bin");	
 		KeyValueAdd(v, "time", "10:30");
@@ -35,24 +40,25 @@ function Main()
 		output("KeyValue() failed");
 		return (0);
 	endif
+	Output("KeyValue version : " +KeyValueGet(v, "version"));
+	#Print all the entries in the KeyValue Object.
 	printKeyValueList(v);
 	return (11);
 endfunction
 
 function printKeyValueList()
+	#Make sure one argument is passed
 	if($0 != 1)
 		output("USAGE: printKeyValueList(keyValueObject)");
 		return (0);
 	endif
 	var v := $1;
+	#Setup the iterator
 	if(KeyValueIterator(v))
+		#for each element in the list print it.
 		while(KeyValueNext(v))
 			output("Key: "+KeyValueGetKey(v)+ ", value : " + KeyValueGetValue(v));
 		endwhile	
 	endif
 endfunction	
 
-function Main1()
-	var fact:=10;
-	output("fact("+fact+")="+Factorial(fact));
-endfunction	

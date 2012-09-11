@@ -11,11 +11,13 @@
 unsigned int line_number = 1;
 
 /*Comment the below code to print the byte code*/
-#if 1 
+#ifndef PRINT_BYTE_CODE 
+
 #ifdef LOG_INFO_NL
 #undef LOG_INFO_NL
 #define LOG_INFO_NL(format, args...)
 #endif
+
 #endif
 
 const char* token_to_str(int token)
