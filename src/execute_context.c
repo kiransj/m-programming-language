@@ -568,4 +568,18 @@ ExecutionContext ExecutionContext_Create(ByteCode cur_ptr)
 	return ec;
 }
 
-
+int ExecutionContext_GetReturnValue(Executable exe)
+{
+	switch(exe->ret_value->type)
+	{
+		case IDENTIFIER_TYPE_NUMBER:
+				return exe->ret_value->u.number;
+		case IDENTIFIER_TYPE_FLOAT:
+				return (int)exe->ret_value->u.real;
+		case IDENTIFIER_TYPE_STRING:
+				return atoi(exe->ret_value->u.str);
+		default:
+				return 0;
+	}
+	return 0;
+}

@@ -36,10 +36,14 @@ function Main()
 		return (0);
 	endif
 	printKeyValueList(v);
-	return (1);
+	return (11);
 endfunction
 
 function printKeyValueList()
+	if($0 != 1)
+		output("USAGE: printKeyValueList(keyValueObject)");
+		return (0);
+	endif
 	var v := $1;
 	if(KeyValueIterator(v))
 		while(KeyValueNext(v))

@@ -11,13 +11,20 @@ int main(int argc, char *argv[])
 		return 1;
 	}
 	exe = Executable_Create();
-	ret = Compile(exe, argv[1]);
-	if(STATUS_SUCCESS == ret)
+
+	if(!IS_NULL(exe))
 	{
-		if(ExecutionContext_Execute(exe, "Main") == STATUS_SUCCESS)
+		ret = Compile(exe, argv[1]);
+		if(STATUS_SUCCESS == ret)
 		{
+			if(ExecutionContext_Execute(exe, "Main") == STATUS_SUCCESS)
+			{
+				LOG_INFO("program returned : %d", ExecutionContext_GetReturnValue(exe));
+			}
 		}
+
 		Executable_Destroy(exe);
+
 	}
 
 	return 0;

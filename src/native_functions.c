@@ -82,7 +82,6 @@ void KeyValue_delete(void *ptr)
 	VariableList_Destroy(keyValue->vl);
 	memset(keyValue, 0, sizeof(struct _KeyValue));
 	Free(keyValue);
-	LOG_ERROR("Deleting the keyValue");
 }
 
 Identifier Function_KeyValue(Identifier *args, int num_args)
