@@ -15,6 +15,7 @@ SOURCE += src/tokenizer.c
 SOURCE += src/executable.c
 SOURCE += src/execute_context.c
 SOURCE += src/function.c
+SOURCE += src/variable_list.c
 SOURCE += src/native_functions.c
 
 M_LIB:=libM.a

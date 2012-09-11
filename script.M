@@ -1,11 +1,10 @@
 function Factorial()  
   #the first argument passed is the value. It can be accessed using $1
   #$0 can be used to access the number of argument passed
-  var n := $1; 
-	if(n <= 2)
-		return (n);
+	if($1 <= 2)
+		return ($1);
 	endif
-	return Factorial(n-1) * n;
+	return Factorial($1-1) * $1;
 endfunction
 
 function Fibonacci()
@@ -28,6 +27,7 @@ function GetKeyValue()
 	return (0);
 endfunction
 
+
 function Main()
 	var v, c, d, a;
 	v := GetKeyValue();	
@@ -35,10 +35,20 @@ function Main()
 		output("KeyValue() failed");
 		return (0);
 	endif
+	printKeyValueList(v);
+	return (1);
+endfunction
+
+function printKeyValueList()
+	var v := $1;
 	if(KeyValueIterator(v))
 		while(KeyValueNext(v))
 			output("Key: "+KeyValueGetKey(v)+ ", value : " + KeyValueGetValue(v));
 		endwhile	
 	endif
-	return (1);
-endfunction
+endfunction	
+
+function Main1()
+	var fact:=10;
+	output("fact("+fact+")="+Factorial(fact));
+endfunction	

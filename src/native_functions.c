@@ -1,6 +1,8 @@
+
+#include <string.h>
 #include "util.h"
-#include "executable.h"
-#include "string.h"
+#include "variable_list.h"
+#include "native_functions.h"
 
 /* 
  * To avoid memory leaks please follow the following rules.
@@ -96,7 +98,7 @@ Identifier Function_KeyValue(Identifier *args, int num_args)
 		LOG_ERROR("Malloc(%u) failed", sizeof(struct _KeyValue));
 		return Identifier_NewInteger(0);
 	}
-	keyValue->vl= VariableList_Create("\0");
+	keyValue->vl= VariableList_Create();
 	if(!IS_NULL(keyValue->vl))
 	{
 		obj = (Object)Malloc(sizeof(struct _Object));

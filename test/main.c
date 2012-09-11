@@ -1,25 +1,21 @@
 
-#include "compiler.h"
-#include "executable.h"
-#include "util.h"
+#include "M.h"
 
 int main(int argc, char *argv[])
 {
 	Executable exe;
-
+	STATUS ret;
 	if(argc == 1)
 	{
 		LOG_ERROR("usage %s <filename>", argv[0]);
 		return 1;
 	}
-	exe = Compile(argv[1]);
-	if(!IS_NULL(exe))
+	exe = Executable_Create();
+	ret = Compile(exe, argv[1]);
+	if(STATUS_SUCCESS == ret)
 	{
 		if(ExecutionContext_Execute(exe, "Main") == STATUS_SUCCESS)
 		{
-			char buf[64];
-			Identifier_to_str(exe->ret_value, buf, 64);
-			LOG_INFO("program returned %s", buf);
 		}
 		Executable_Destroy(exe);
 	}
