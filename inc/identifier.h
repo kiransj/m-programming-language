@@ -22,6 +22,7 @@ const char* IdentifierType_to_str(IdentifierType);
 
 typedef struct _Object
 {
+	char type[16];
 	int num_refs;
 	void (*obj_delete)(void *ptr);
 	void *priv_data;

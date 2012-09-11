@@ -1,6 +1,6 @@
 GCC=gcc
 AR=ar
-CFLAGS :=   
+CFLAGS := -g 
 WARNINGS:= -Wall
 LEMON:=lemon
 

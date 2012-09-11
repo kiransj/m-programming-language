@@ -58,7 +58,7 @@ const char* IdentifierType_to_str(IdentifierType type)
 		case IDENTIFIER_TYPE_FLOAT:		return "float";
 		case IDENTIFIER_TYPE_STRING:	return "string";
 		case IDENTIFIER_TYPE_ARGUMENT:	return "arg";
-		case IDENTIFIER_TYPE_VARIABLE:	return "var";										
+		case IDENTIFIER_TYPE_VARIABLE:	return "var";
 		case IDENTIFIER_TYPE_REGISTER:	return "reg";
 		case IDENTIFIER_TYPE_OBJECT:	return "object";
 		default: break;

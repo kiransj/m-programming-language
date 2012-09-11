@@ -65,7 +65,10 @@ Identifier Function_TypeOf(Identifier *args, int num_args)
 		LOG_ERROR("typeof(variable) usage");
 		return Identifier_NewInteger(0);
 	}
-	return (Identifier_NewString(IdentifierType_to_str(args[1]->type)));
+	if(args[1]->type != IDENTIFIER_TYPE_OBJECT)
+		return (Identifier_NewString(IdentifierType_to_str(args[1]->type)));
+	else
+		return Identifier_NewString(args[1]->u.obj->type);
 }
 
 #ifdef ENABLE_KEY_VALUE
@@ -103,6 +106,7 @@ Identifier Function_KeyValue(Identifier *args, int num_args)
 		memset(obj, 0, sizeof(struct _Object));
 		obj->priv_data = (void*)keyValue;
 		obj->obj_delete = KeyValue_delete;
+		strcpy(obj->type, "keyvalue");
 		i = Identifier_NewObject(obj); 
 	}
 	return i;

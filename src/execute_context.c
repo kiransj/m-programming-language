@@ -234,7 +234,26 @@ void Execute_Cmp(Executable exe, Identifier A, Identifier B, Identifier C)
 	}
 	Identifier_SetInt(C, answer);
 }
+void Execute_And(Executable exe, Identifier A, Identifier B, Identifier C)
+{
+	int answer = 0;
+	if(exe->error_flag)
+	{
+		LOG_ERROR("Addition could not be completed due to error");
+		return;
+	}
+	if(A->type == IDENTIFIER_TYPE_NUMBER && B->type == IDENTIFIER_TYPE_NUMBER)
+	{
+		answer = A->u.number && B->u.number;
+	}
+	else
+	{
+		RaiseException(exe, "Comparing type %d with %d. Stoping Execution", A->type, B->type);
+		return;
+	}
 
+	Identifier_SetInt(C, answer);
+}
 void Execute_Or(Executable exe, Identifier A, Identifier B, Identifier C)
 {
 	int answer = 0;
@@ -468,7 +487,12 @@ STATUS ExecutionContext_Execute(Executable exe, const char *func_name)
 				Execute_Or(exe, GetIdentifier(exe, exe->ec->cur_ptr->A),
 								 GetIdentifier(exe, exe->ec->cur_ptr->B),
 								 GetIdentifier(exe, exe->ec->cur_ptr->C));
-
+				break;
+			case AND:
+				Execute_And(exe, GetIdentifier(exe, exe->ec->cur_ptr->A),
+								 GetIdentifier(exe, exe->ec->cur_ptr->B),
+								 GetIdentifier(exe, exe->ec->cur_ptr->C));
+				break;
 			case CMP:
 					Execute_Cmp(exe, GetIdentifier(exe, exe->ec->cur_ptr->A),
 									 GetIdentifier(exe, exe->ec->cur_ptr->B),
