@@ -200,14 +200,23 @@ else_condition       ::= KEYWORD_ELSE.												{Command_ConditionStmt(compile
 endif_condition 	 ::= KEYWORD_ENDIF.												{Command_ConditionStmt(compiler, STMT_ENDIF, NULL);} 
 start_if_condition   ::= KEYWORD_IF conditional_expression(B).						{Command_ConditionStmt(compiler, STMT_IF, B);}
 
+/*
 if_condition_block	 ::= start_if_condition stmt endif_condition. 
 if_condition_block	 ::= start_if_condition stmt else_condition stmt endif_condition.
 if_condition_block	 ::= start_if_condition stmt elif_block endif_condition. 
 
 elif_block			 ::= elif_condition stmt.
 elif_block			 ::= elif_block elif_condition stmt.
+*/
 
-condition_stmt ::= if_condition_block.
+if_condition_block   ::= start_if_condition stmt.
+if_condition_block   ::= start_if_condition stmt elif_block.
+
+elif_block  	 ::= elif_condition stmt.
+elif_block		 ::= elif_block elif_condition stmt.
+
+condition_stmt ::= if_condition_block endif_condition.
+condition_stmt ::= if_condition_block else_condition stmt endif_condition.
 
 /*
 	while loop grammer.

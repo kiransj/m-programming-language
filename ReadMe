@@ -3,7 +3,7 @@ This code is simple programming lanuage named M.
 
 The feature of the lanuage are
 1. variable						:= Variable are declared using 'var' keyword. Every variable used should be declared 
-2. conditions stmts				:= current on if(expr) ... endif is supported. 'else' is not supported
+2. conditions stmts				:= if() stmt endif, if() stmt else stmt endif, if() stmt elif() stmt elif() stmt else endif. supported
 3. loops.						:= while(expr) ... endwhile is supported
 5. Calling C functions from M.	:= Completed
 6. functions.					:= Completed. Recursive functions are supported. Passing arguments to functions are also supported
@@ -17,19 +17,27 @@ Syntax of M language.
 
 A factorial program
 
-==========Start of factorial program ==================
-
-n:=10;
-fact:=1;
-i:=1
-while(i <= n)
-	fact:=fact * i;
-	i := i+1;
-endwhile
-output("fact(", n, ") = ", fact);	#this is native call, and the registered C function gets called
-if(fact > 1000)
-	output("fact( ", fact, ") is huge number");
-endif
+==========Sample program to show loops and conditional statments ==================
+function Main()  
+	var a := 1;
+	while(a < 6)
+		if(a < 2)
+			output("a<2");
+		elif(a > 2)
+			output("a>2");
+			if(a > 5)	
+				output("a>5");
+			elif(a < 5)
+				output("a<5)");
+			else
+				output("a==5");
+			endif
+		elif(a == 2)
+			output("a==2");
+		endif
+		a := a + 1;
+	endwhile
+endfunction
 
 =========End of program==================
 
