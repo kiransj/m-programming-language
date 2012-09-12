@@ -15,6 +15,7 @@
 "return"			   { return KEYWORD_RETURN;}
 "if"				   { return KEYWORD_IF;}
 "else"				   { return KEYWORD_ELSE;}
+"elif"				   { return KEYWORD_ELIF;}
 "endif"				   { return KEYWORD_ENDIF;}
 "while"			       { return KEYWORD_WHILE;}
 "endwhile"			   { return KEYWORD_ENDWHILE;}

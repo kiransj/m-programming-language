@@ -5,7 +5,7 @@ function Main()
 	if(n != 10)
 		output("inside if" );
 	else
-		output("inside else " );
+		output("inside else");
 	endif
 	return (fact);
 endfunction

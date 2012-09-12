@@ -128,8 +128,27 @@ int Command_ConditionStmt(Compiler c, CompilerCmd cmd, Identifier A)
 		LOG_INFO_NL("JUMP %d", label_number_tmp);
 		LOG_INFO_NL("LABEL_%d:", label_number);		
 
-		Executable_AddCmd(exe, JUMP, NULL, NULL, NULL, label_number);						
+		Executable_AddCmd(exe, JUMP, NULL, NULL, NULL, label_number_tmp);						
 		Executable_AddCmd(exe, LABEL, NULL, NULL, NULL, label_number);				
+	}
+	else if(STMT_ELIF == cmd)
+	{
+		int label_number_tmp =  c->label_number++;
+		int label_number = c->label_stack[c->label_top--];
+
+		c->label_stack[++c->label_top] = label_number_tmp; 
+		LOG_INFO_NL("JUMP %d", label_number_tmp);
+		LOG_INFO_NL("LABEL_%d:", label_number);		
+		Identifier_to_str(A, buf1, 64);		
+
+		label_number_tmp = c->label_number++;
+		c->label_stack[++c->label_top] = label_number_tmp; 
+
+		LOG_INFO_NL("JZ %s, %d:", buf1, label_number_tmp);		
+
+		Executable_AddCmd(exe, JUMP, NULL, NULL, NULL, label_number);						
+		Executable_AddCmd(exe, LABEL, NULL, NULL, NULL, label_number);
+		Executable_AddCmd(exe, JZ, A, NULL, NULL, label_number_tmp);
 	}
 	else if(STMT_ENDIF == cmd)
 	{
@@ -335,7 +354,8 @@ STATUS Compile(Executable exe, const char *filename)
 	{
 		ret_value = STATUS_SUCCESS;
 	}
-	Free(c);	
+	Free(c->label_stack);
+	Free(c);
 	fclose(yyin);
 	yylex_destroy();
 	return ret_value;
