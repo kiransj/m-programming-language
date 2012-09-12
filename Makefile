@@ -1,6 +1,6 @@
 GCC=gcc
 AR=ar
-CFLAGS := -g 
+CFLAGS := -O1 
 WARNINGS:= -Wall
 LEMON:=lemon
 
@@ -47,9 +47,9 @@ $(M_LIB):$(COMPILER_OBJECTS)
 	
 %.o:%.l
 	@echo "compiling $^"
-	@flex --outfile=`basename $^ .l`.c $(LEXER_FILE)
-	@$(GCC) $(CFLAGS) $(INCLUDES) -c `basename $^ .l`.c -o $@
-	@rm `basename $^ .l`.c
+	@flex --outfile=`dirname $^`/`basename $^ .l`.c $(LEXER_FILE)
+	@$(GCC) $(CFLAGS) $(INCLUDES) -c `dirname $^`/`basename $^ .l`.c -o $@
+	@rm `dirname $^`/`basename $^ .l`.c
 
 %.o:%.y
 	echo "compiling $^"
