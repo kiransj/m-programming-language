@@ -192,9 +192,11 @@ argument_list(A) ::= argument_list(B) OPERATOR_COMMA expr(C).       { A=B+1; Com
 	The stmts are executed if the expression returns a non zero value.
 */
 
-end_if_condition 	 ::= KEYWORD_ENDIF.													 
+else_if_condition    ::= KEYWORD_ELSE.													{Command_ConditionStmt(compiler, STMT_ELSE, NULL);} 
+end_if_condition 	 ::= KEYWORD_ENDIF.													{Command_ConditionStmt(compiler, STMT_ENDIF, NULL);} 
 start_if_condition   ::= KEYWORD_IF OPERATOR_OPEN_PAREN expr(B) OPERATOR_CLOSE_PAREN.	{Command_ConditionStmt(compiler, STMT_IF, B);}
-if_condition_block	 ::= start_if_condition stmt end_if_condition. 						{Command_ConditionStmt(compiler, STMT_ENDIF, NULL);}
+if_condition_block	 ::= start_if_condition stmt end_if_condition. 						
+if_condition_block	 ::= start_if_condition stmt else_if_condition stmt end_if_condition. 
 
 condition_stmt ::= if_condition_block.
 

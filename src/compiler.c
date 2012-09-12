@@ -60,6 +60,12 @@ int Command_LoopStmt(Compiler c, CompilerCmd cmd, Identifier A)
 	if(STMT_START_WHILE == cmd)
 	{
 		int label_num = c->label_number++;
+
+		if((c->label_top+1) == c->label_size)
+		{
+			c->label_size += 100;
+			c->label_stack = (int*)ReAlloc(c->label_stack, sizeof(int) * c->label_size);
+		}
 		c->label_stack[++c->label_top] = label_num;
 		LOG_INFO_NL("LABEL_%d:", label_num);
 		Executable_AddCmd(exe, LABEL, NULL, NULL, NULL, label_num);
@@ -98,6 +104,13 @@ int Command_ConditionStmt(Compiler c, CompilerCmd cmd, Identifier A)
 	if(STMT_IF == cmd)
 	{
 		int label_num = c->label_number++;
+
+		if((c->label_top+1) == c->label_size)
+		{
+			c->label_size += 100;
+			c->label_stack = (int*)ReAlloc(c->label_stack, sizeof(int) * c->label_size);
+		}
+
 		c->label_stack[++c->label_top] = label_num;
 		Identifier_to_str(A, buf1, 64);
 		LOG_INFO_NL("JZ %s, %d", buf1, label_num);
@@ -105,6 +118,18 @@ int Command_ConditionStmt(Compiler c, CompilerCmd cmd, Identifier A)
 
 		Identifier_Destroy(A);
 		return label_num;
+	}
+	else if(STMT_ELSE == cmd)
+	{
+		int label_number_tmp =  c->label_number++;
+		int label_number = c->label_stack[c->label_top--];
+
+		c->label_stack[++c->label_top] = label_number_tmp; 
+		LOG_INFO_NL("JUMP %d", label_number_tmp);
+		LOG_INFO_NL("LABEL_%d:", label_number);		
+
+		Executable_AddCmd(exe, JUMP, NULL, NULL, NULL, label_number);						
+		Executable_AddCmd(exe, LABEL, NULL, NULL, NULL, label_number);				
 	}
 	else if(STMT_ENDIF == cmd)
 	{
