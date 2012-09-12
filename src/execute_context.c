@@ -438,7 +438,7 @@ STATUS ExecutionContext_Execute(Executable exe, const char *func_name)
 	func = FunctionList_FindFunction(exe->func_list, func_name);
 	if(IS_NULL(func) || (func->type != FUNCTION_TYPE_LOCAL))
 	{
-		RaiseException(exe, "func '%s' not found", func_name);
+		LOG_ERROR("func '%s' not found", func_name);
 		return STATUS_FAILURE; 
 	}
 	exe->ec->func_name =func->func_name;
@@ -620,6 +620,10 @@ ExecutionContext ExecutionContext_Create(ByteCode cur_ptr)
 
 int ExecutionContext_GetReturnValue(Executable exe)
 {
+	if(IS_NULL(exe->ret_value))
+	{
+		return 0;
+	}
 	switch(exe->ret_value->type)
 	{
 		case IDENTIFIER_TYPE_NUMBER:

@@ -50,7 +50,7 @@ void Command(Compiler c, CompilerCmd oper)
 	}
 }
 
-int Command_LoopStmt(Compiler c, CompilerCmd cmd, Identifier A, int label_number)
+int Command_LoopStmt(Compiler c, CompilerCmd cmd, Identifier A)
 {
 	int return_value=  0;
 	char buf1[64];
@@ -60,12 +60,14 @@ int Command_LoopStmt(Compiler c, CompilerCmd cmd, Identifier A, int label_number
 	if(STMT_START_WHILE == cmd)
 	{
 		int label_num = c->label_number++;
+		c->label_stack[++c->label_top] = label_num;
 		LOG_INFO_NL("LABEL_%d:", label_num);
 		Executable_AddCmd(exe, LABEL, NULL, NULL, NULL, label_num);
 		return_value = c->label_number++;
-	}	
+	}
 	else if(STMT_WHILE_COND == cmd)
 	{
+		int label_number = c->label_stack[c->label_top]+1;
 		Identifier_to_str(A, buf1, 64);
 		LOG_INFO_NL("JZ %s, %d", buf1, label_number);
 		Executable_AddCmd(exe, JZ, A, NULL, NULL, label_number);
@@ -73,11 +75,12 @@ int Command_LoopStmt(Compiler c, CompilerCmd cmd, Identifier A, int label_number
 	}
 	else if(STMT_END_WHILE == cmd)
 	{
-		LOG_INFO_NL("JUMP %d", label_number-1);
-		LOG_INFO_NL("LABEL_%d:", label_number);
+		int label_number = c->label_stack[c->label_top--];
+		LOG_INFO_NL("JUMP %d", label_number);
+		LOG_INFO_NL("LABEL_%d:", label_number+1);
 
-		Executable_AddCmd(exe, JUMP, NULL, NULL, NULL, label_number-1);
-		Executable_AddCmd(exe, LABEL, NULL, NULL, NULL, label_number);
+		Executable_AddCmd(exe, JUMP, NULL, NULL, NULL, label_number);
+		Executable_AddCmd(exe, LABEL, NULL, NULL, NULL, label_number+1);
 	}
 	if(!IS_NULL(A))
 	{
@@ -86,7 +89,7 @@ int Command_LoopStmt(Compiler c, CompilerCmd cmd, Identifier A, int label_number
 	return return_value;
 }
 
-int Command_ConditionStmt(Compiler c, CompilerCmd cmd, Identifier A, int label_number)
+int Command_ConditionStmt(Compiler c, CompilerCmd cmd, Identifier A)
 {
 	char buf1[64];
 	Executable exe = (Executable)c->priv_data;
@@ -95,8 +98,9 @@ int Command_ConditionStmt(Compiler c, CompilerCmd cmd, Identifier A, int label_n
 	if(STMT_IF == cmd)
 	{
 		int label_num = c->label_number++;
+		c->label_stack[++c->label_top] = label_num;
 		Identifier_to_str(A, buf1, 64);
-		LOG_INFO_NL("JZ %s, %d", buf1,label_num);
+		LOG_INFO_NL("JZ %s, %d", buf1, label_num);
 		Executable_AddCmd(exe, JZ, A, NULL, NULL, label_num);
 
 		Identifier_Destroy(A);
@@ -104,6 +108,7 @@ int Command_ConditionStmt(Compiler c, CompilerCmd cmd, Identifier A, int label_n
 	}
 	else if(STMT_ENDIF == cmd)
 	{
+		int label_number = c->label_stack[c->label_top--];
 		LOG_INFO_NL("LABEL_%d:", label_number);
 		Executable_AddCmd(exe, LABEL, NULL, NULL, NULL, label_number);
 	}
@@ -268,8 +273,11 @@ STATUS Compile(Executable exe, const char *filename)
 	c = (Compiler)Malloc(sizeof(struct _Compiler));
 	memset(c, 0, sizeof(Compiler));
 	c->label_number = 1;
-	c->reg_num = 1;
+	c->label_size = 100;
+	c->label_top = -1;
+	c->label_stack = (int *)Malloc(sizeof(int) * c->label_size);
 
+	c->reg_num = 1;
 	c->priv_data = (void*)exe;
 	Register_Native_Functions(exe);
 

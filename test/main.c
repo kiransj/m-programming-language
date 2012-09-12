@@ -1,4 +1,3 @@
-
 #include "M.h"
 
 int main(int argc, char *argv[])
@@ -17,17 +16,41 @@ int main(int argc, char *argv[])
 		ret = Compile(exe, argv[1]);
 		if(STATUS_SUCCESS == ret)
 		{
-			if(ExecutionContext_Execute(exe, "Main") == STATUS_SUCCESS)
+			if( ExecutionContext_Execute(exe, "Main") == STATUS_SUCCESS)
 			{
 				LOG_INFO("program returned : %d", ExecutionContext_GetReturnValue(exe));
 			}
 		}
-
 		Executable_Destroy(exe);
-
 	}
 
 	return 0;
 }
 
+#if 0
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <dirent.h>
+int main(int argc, char *argv[])
+{
+	struct dirent *d;
+	DIR *dir;
 
+	dir = opendir("/bin");
+	if(NULL != dir)
+	{
+		while(NULL != (d = readdir(dir)))
+		{
+			char full_path[128];
+			struct stat st;			
+			snprintf(full_path, 128, "/bin/%s", d->d_name);
+			if(stat(full_path, &st) == 0)
+			{
+				LOG_INFO_NL("%32s %u", full_path, (unsigned int)st.st_size);
+			}
+		}
+		closedir(dir);
+	}
+	return 0;
+}
+#endif

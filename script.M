@@ -61,5 +61,8 @@ function printKeyValueList()
 			output("Key: "+KeyValueGetKey(v)+ ", value : " + KeyValueGetValue(v));
 		endwhile
 	endif
+
+	v := 14;
+	output("Fibonacci("+v+") := " + Fibonacci(v));
 endfunction	
 
