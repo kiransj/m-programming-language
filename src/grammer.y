@@ -112,13 +112,20 @@ simple_stmt ::= expr(A) stmt_end.						{Identifier_Destroy(A);}
 	4. A combination of above 3 functions.
 */
 
+%type object_refs {Identifier}
+object_refs(A) ::= TOKEN_TYPE_VARIABLE(B) OPERATOR_OBJECT_REF TOKEN_TYPE_VARIABLE(C).{
+																						A=Identifier_NewMap(B->u.variable_name, C->u.variable_name);
+																						Identifier_Destroy(B);
+																						Identifier_Destroy(C);
+																					 }
+
 expr(A) ::= TOKEN_TYPE_INTEGER(B).					{A = Identifier_Clone(B); Identifier_Destroy(B);}
 expr(A) ::= TOKEN_TYPE_FLOAT(B).					{A = Identifier_Clone(B); Identifier_Destroy(B);}
 expr(A) ::= TOKEN_TYPE_STRING(B).					{A = Identifier_Clone(B); Identifier_Destroy(B);}
 expr(A) ::= TOKEN_TYPE_ARGUMENT(B).					{A = Identifier_Clone(B); Identifier_Destroy(B);}
 expr(A) ::= TOKEN_TYPE_VARIABLE(B).					{A = Identifier_Clone(B); Identifier_Destroy(B);}
 expr(A) ::= function_call(B).						{A = Identifier_Clone(B); Identifier_Destroy(B);}
-
+expr(A) ::= object_refs(B).						    {A = Identifier_Clone(B); Identifier_Destroy(B);}
 /*
 	The defination of mathamatical operations supported
 	by this language. These operations can be performed on
@@ -156,6 +163,7 @@ expr(A) ::= OPERATOR_OPEN_PAREN  expr(B) OPERATOR_CLOSE_PAREN.
 */
 
 expr(A) ::= TOKEN_TYPE_VARIABLE(B) OPERATOR_EQU   expr(C).	{ A = Command_Operation(compiler, B, EQU, C); }
+expr(A) ::= object_refs(B)    OPERATOR_EQU   expr(C).		{ A = Command_Operation(compiler, B, EQU, C); }
 
 /*
 	Function call grammer.

@@ -16,7 +16,7 @@ int main(int argc, char *argv[])
 		ret = Compile(exe, argv[1]);
 		if(STATUS_SUCCESS == ret)
 		{
-			if( ExecutionContext_Execute(exe, "Main") == STATUS_SUCCESS)
+			if(0 && ExecutionContext_Execute(exe, "Main") == STATUS_SUCCESS)
 			{
 				LOG_INFO("program returned : %d", ExecutionContext_GetReturnValue(exe));
 			}

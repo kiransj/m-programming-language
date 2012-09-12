@@ -43,6 +43,11 @@ void Identifier_to_str(Identifier id, char * const buffer, const int size)
 				snprintf(buffer, size, "reg(%d)", id->u.register_number);
 				break;
 			}
+		case IDENTIFIER_TYPE_MAP:
+			{
+				snprintf(buffer, size, "map(%s->%s)", id->u.map->map_name, id->u.map->element_name);
+				break;
+			}
 		default: 
 			strcpy(buffer, "unknown"); 
 			return;
@@ -61,6 +66,7 @@ const char* IdentifierType_to_str(IdentifierType type)
 		case IDENTIFIER_TYPE_VARIABLE:	return "var";
 		case IDENTIFIER_TYPE_REGISTER:	return "reg";
 		case IDENTIFIER_TYPE_OBJECT:	return "object";
+		case IDENTIFIER_TYPE_MAP:		return "map";
 		default: break;
 	}
 	return "NULL";
@@ -80,9 +86,9 @@ Identifier Identifier_NewString(const char *str)
 		}
 		else
 		{
-			LOG_ERROR("Malloc(%d) failed", strlen(str)+1);
-			i->type = IDENTIFIER_TYPE_UNKNOWN_START;
-		}
+			Identifier_Destroy(i);
+			i = NULL;
+		}	
 	}
 	else
 	{
@@ -102,6 +108,11 @@ Identifier Identifier_NewVariable(const char *variable_name)
 		{
 			i->type = IDENTIFIER_TYPE_VARIABLE;
 			strcpy(i->u.variable_name, variable_name);
+		}
+		else
+		{
+			Identifier_Destroy(i);
+			i = NULL;
 		}
 	}
 	else
@@ -174,6 +185,21 @@ Identifier Identifier_NewRegister(const int number)
 	return i;
 }
 
+
+Identifier Identifier_NewMap(const char *map_name, const char *element_name)
+{
+	Identifier i = Identifier_Create();
+	i->type = IDENTIFIER_TYPE_MAP;
+	i->u.map = Map_Create(map_name, element_name);
+	if(IS_NULL(i->u.map))
+	{
+		Identifier_Destroy(i);
+		LOG_ERROR("Map_Create() failed");
+		i = NULL;
+	}
+	return i;
+}
+
 Identifier Identifier_NewObject(Object object)
 {
 	Identifier i = Identifier_Create();
@@ -195,6 +221,9 @@ Identifier Identifier_NewObject(Object object)
 	}
 	return i;
 }
+
+
+
 Identifier Identifier_Clone(Identifier a)
 {
 	Identifier i = NULL;
@@ -233,6 +262,14 @@ Identifier Identifier_Clone(Identifier a)
 		case IDENTIFIER_TYPE_OBJECT:
 			{
 				i = Identifier_NewObject(a->u.obj);
+				break;
+			}
+		case IDENTIFIER_TYPE_MAP:
+			{
+				i = Identifier_Create();
+				i->type = IDENTIFIER_TYPE_MAP;
+				i->u.map = a->u.map;
+				i->u.map->num_refs++;
 				break;
 			}
 		default:
@@ -318,7 +355,7 @@ Identifier Identifier_Create(void)
 	else
 	{
 		memset(id, 0, sizeof(struct _Identifier));
-		Identifier_SetInt(id, 0);
+		id->type = IDENTIFIER_TYPE_NUMBER;
 	}
 	return id;
 }
@@ -342,9 +379,17 @@ void Identifier_Free(Identifier t)
 			Free(t->u.obj);
 		}
 	}
+	else if(t->type == IDENTIFIER_TYPE_MAP)
+	{
+		t->u.map->num_refs--;
+		if(0 == t->u.map->num_refs)
+		{
+			Map_Delete(t->u.map);
+		}
+	}
 	else if(t->type <= IDENTIFIER_TYPE_UNKNOWN_START || t->type >= IDENTIFIER_TYPE_UNKNOWN_END)
 	{
-	//	abort();
+		abort();
 	}
 	return;
 }
@@ -439,4 +484,37 @@ void IdentifierStack_Destroy(IdentifierStack is)
 	}
 	Free(is->list);
 	Free(is);
+}
+
+Map Map_Create(const char *map_name, const char *element_name)
+{
+	Map map = (Map)Malloc(sizeof(struct _Map));
+	if(!IS_NULL(map))
+	{
+		map->map_name = (char*)Malloc(strlen(map_name));
+		map->element_name = (char*)Malloc(strlen(element_name));
+		if(IS_NULL(map->map_name) || IS_NULL(map->element_name))
+		{
+			Free(map->map_name);		/*Free free's only if its not NULL*/
+			Free(map->element_name);
+			Free(map);
+			LOG_ERROR("Malloc failed");
+			return NULL;
+		}
+		strcpy(map->map_name, map_name);
+		strcpy(map->element_name, element_name);
+		map->num_refs = 1;
+	}
+	else
+	{
+		LOG_ERROR("Unable to create Map object");
+	}
+	return map;
+}
+
+void Map_Delete(Map m)
+{
+	Free(m->map_name);
+	Free(m->element_name);
+	Free(m);
 }

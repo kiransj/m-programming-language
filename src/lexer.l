@@ -27,7 +27,7 @@
 
 \"[^\"]*\"			   { yytext[strlen(yytext)-1]='\0';	yylval = Identifier_NewString(&yytext[1]); 			return TOKEN_TYPE_STRING;}
 
-
+"->"	{  return OPERATOR_OBJECT_REF;}
 "+"		{  return OPERATOR_ADD;}
 "-"		{  return OPERATOR_SUB;}
 "*"		{  return OPERATOR_MUL;}

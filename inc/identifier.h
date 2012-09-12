@@ -16,6 +16,7 @@ typedef enum
 	IDENTIFIER_TYPE_VARIABLE,
 	IDENTIFIER_TYPE_REGISTER,
 	IDENTIFIER_TYPE_OBJECT,
+	IDENTIFIER_TYPE_MAP,
 	IDENTIFIER_TYPE_UNKNOWN_END,
 }IdentifierType;
 const char* IdentifierType_to_str(IdentifierType);
@@ -27,6 +28,17 @@ typedef struct _Object
 	void (*obj_delete)(void *ptr);
 	void *priv_data;
 }*Object;
+
+typedef struct _Map
+{
+	int num_refs;
+	char *map_name;
+	char *element_name;
+}*Map;
+
+Map Map_Create(const char *map_name, const char *element_name);
+void Map_Delete(Map m);
+
 
 typedef struct _Identifier
 {
@@ -40,6 +52,7 @@ typedef struct _Identifier
 		int 	argument_number;
 		int		register_number;
 		Object	obj;
+		Map		map;
 	}u;
 }*Identifier;
 
@@ -59,6 +72,7 @@ Identifier Identifier_NewVariable(const char *variable_name);
 Identifier Identifier_NewInteger(const int number);
 Identifier Identifier_NewRegister(const int number);
 Identifier Identifier_NewObject(Object);
+Identifier Identifier_NewMap(const char *map_name, const char *element_name);
 
 inline void Identifier_SetInt(Identifier a, int num);
 inline void Identifier_SetFloat(Identifier a, double num);
