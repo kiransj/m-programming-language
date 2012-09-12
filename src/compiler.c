@@ -103,58 +103,65 @@ int Command_ConditionStmt(Compiler c, CompilerCmd cmd, Identifier A)
 	exe->line_number = c->line_number;
 	if(STMT_IF == cmd)
 	{
-		int label_num = c->label_number++;
-
 		if((c->label_top+1) == c->label_size)
 		{
 			c->label_size += 100;
 			c->label_stack = (int*)ReAlloc(c->label_stack, sizeof(int) * c->label_size);
 		}
 
-		c->label_stack[++c->label_top] = label_num;
+		c->label_stack[++c->label_top] = c->label_number++;	
+		c->label_stack[++c->label_top] = c->label_number++;		
+
 		Identifier_to_str(A, buf1, 64);
-		LOG_INFO_NL("JZ %s, %d", buf1, label_num);
-		Executable_AddCmd(exe, JZ, A, NULL, NULL, label_num);
+		LOG_INFO_NL("JZ %s, %d", buf1, c->label_stack[c->label_top]);
+		Executable_AddCmd(exe, JZ, A, NULL, NULL, c->label_stack[c->label_top]);
 
 		Identifier_Destroy(A);
-		return label_num;
+		return 0;
 	}
 	else if(STMT_ELSE == cmd)
 	{
-		int label_number_tmp =  c->label_number++;
-		int label_number = c->label_stack[c->label_top--];
+		int label_number_tmp = c->label_stack[c->label_top--];
+		int label_number     = c->label_stack[c->label_top];
 
-		c->label_stack[++c->label_top] = label_number_tmp; 
-		LOG_INFO_NL("JUMP %d", label_number_tmp);
-		LOG_INFO_NL("LABEL_%d:", label_number);		
-
-		Executable_AddCmd(exe, JUMP, NULL, NULL, NULL, label_number_tmp);						
-		Executable_AddCmd(exe, LABEL, NULL, NULL, NULL, label_number);				
-	}
-	else if(STMT_ELIF == cmd)
-	{
-		int label_number_tmp =  c->label_number++;
-		int label_number = c->label_stack[c->label_top--];
-
-		c->label_stack[++c->label_top] = label_number_tmp; 
-		LOG_INFO_NL("JUMP %d", label_number_tmp);
-		LOG_INFO_NL("LABEL_%d:", label_number);		
-		Identifier_to_str(A, buf1, 64);		
-
-		label_number_tmp = c->label_number++;
-		c->label_stack[++c->label_top] = label_number_tmp; 
-
-		LOG_INFO_NL("JZ %s, %d:", buf1, label_number_tmp);		
+		c->label_stack[++c->label_top] = c->label_number++;
+		LOG_INFO_NL("JUMP %d",  label_number);
+		LOG_INFO_NL("LABEL_%d:", label_number_tmp);		
 
 		Executable_AddCmd(exe, JUMP, NULL, NULL, NULL, label_number);						
-		Executable_AddCmd(exe, LABEL, NULL, NULL, NULL, label_number);
-		Executable_AddCmd(exe, JZ, A, NULL, NULL, label_number_tmp);
+		Executable_AddCmd(exe, LABEL, NULL, NULL, NULL, label_number_tmp);
+	}
+	else if(STMT_ELIF_KEYWORD == cmd)
+	{
+		int label_number_tmp = c->label_stack[c->label_top--];
+		int label_number     = c->label_stack[c->label_top];
+
+		LOG_INFO_NL("JUMP %d",  label_number);
+		LOG_INFO_NL("LABEL_%d:", label_number_tmp);		
+
+		Executable_AddCmd(exe, JUMP, NULL, NULL, NULL, label_number);						
+		Executable_AddCmd(exe, LABEL, NULL, NULL, NULL, label_number_tmp);
+	}
+	else if(STMT_ELIF_CONDITION == cmd)
+	{
+		int label_number =  c->label_number++;
+		c->label_stack[++c->label_top] = label_number;
+		Identifier_to_str(A, buf1, 64);
+		LOG_INFO_NL("JZ %s, %d", buf1, label_number);
+		
+		Executable_AddCmd(exe, JZ, A, NULL, NULL, label_number);
+		Identifier_Destroy(A);
 	}
 	else if(STMT_ENDIF == cmd)
 	{
 		int label_number = c->label_stack[c->label_top--];
+		int label_number_tmp = c->label_stack[c->label_top--];
+
 		LOG_INFO_NL("LABEL_%d:", label_number);
+		LOG_INFO_NL("LABEL_%d:", label_number_tmp);
+
 		Executable_AddCmd(exe, LABEL, NULL, NULL, NULL, label_number);
+		Executable_AddCmd(exe, LABEL, NULL, NULL, NULL, label_number_tmp);
 	}
 	return 0;
 }

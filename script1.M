@@ -1,12 +1,11 @@
 function Main()  
-	var n := 10;
-	var fact := 1;
-
-	if(n != 10)
-		output("inside if" );
+	var a := 2;
+	if(a < 2)
+		output("a<2");
+	elif(a > 2)
+		output("a>2");
 	else
-		output("inside else");
+		output("a==2");
 	endif
-	return (fact);
 endfunction
 

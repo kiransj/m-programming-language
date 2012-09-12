@@ -194,14 +194,19 @@ argument_list(A) ::= argument_list(B) OPERATOR_COMMA expr(C).       { A=B+1; Com
 
 conditional_expression(A) ::= OPERATOR_OPEN_PAREN expr(B) OPERATOR_CLOSE_PAREN. 		{ A = Identifier_Clone(B); Identifier_Destroy(B);}
 
-elif_if_condition    ::= KEYWORD_ELIF conditional_expression(B). 						{Command_ConditionStmt(compiler, STMT_ELIF, B);} 
-else_if_condition    ::= KEYWORD_ELSE.													{Command_ConditionStmt(compiler, STMT_ELSE, NULL);} 
-end_if_condition 	 ::= KEYWORD_ENDIF.													{Command_ConditionStmt(compiler, STMT_ENDIF, NULL);} 
-start_if_condition   ::= KEYWORD_IF conditional_expression(B).							{Command_ConditionStmt(compiler, STMT_IF, B);}
+elif_keyword		 ::= KEYWORD_ELIF.												{Command_ConditionStmt(compiler, STMT_ELIF_KEYWORD, NULL);} 
+elif_condition       ::= elif_keyword conditional_expression(B). 					{Command_ConditionStmt(compiler, STMT_ELIF_CONDITION, B);} 
+else_condition       ::= KEYWORD_ELSE.												{Command_ConditionStmt(compiler, STMT_ELSE, NULL);} 
+endif_condition 	 ::= KEYWORD_ENDIF.												{Command_ConditionStmt(compiler, STMT_ENDIF, NULL);} 
+start_if_condition   ::= KEYWORD_IF conditional_expression(B).						{Command_ConditionStmt(compiler, STMT_IF, B);}
 
-if_condition_block	 ::= start_if_condition stmt end_if_condition. 						
-if_condition_block	 ::= start_if_condition stmt else_if_condition stmt end_if_condition. 
-if_condition_block	 ::= start_if_condition stmt elif_if_condition stmt end_if_condition. 
+if_condition_block	 ::= start_if_condition stmt endif_condition. 
+if_condition_block	 ::= start_if_condition stmt else_condition stmt endif_condition.
+if_condition_block	 ::= start_if_condition stmt elif_block endif_condition. 
+
+elif_block			 ::= elif_condition stmt.
+elif_block			 ::= elif_block elif_condition stmt.
+
 condition_stmt ::= if_condition_block.
 
 /*
