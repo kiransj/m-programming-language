@@ -1,3 +1,24 @@
+function testIf()  
+	var a := 1;
+	while(a < 6)
+		if(a < 2)
+			output("a<2");
+		elif(a > 2)
+			output("a>2");
+			if(a > 5)	
+				output("a>5");
+			elif(a < 5)
+				output("a<5)");
+			else
+				output("a==5");
+			endif
+		elif(a == 2)
+			output("a==2");
+		endif
+		a := a + 1;
+	endwhile
+endfunction
+
 function Factorial()  
   #the first argument passed is the value. It can be accessed using $1
   #$0 can be used to access the number of argument passed
@@ -37,6 +58,7 @@ endfunction
 
 function Main()
 	var v;
+	testif();
 	v := GetKeyValue();	
 	if(typeof(v) != "keyvalue")
 		output("KeyValue() failed" + typeof(v));
@@ -45,15 +67,19 @@ function Main()
 	Output("KeyValue version : " +KeyValueGet(v, "version"));
 	#Print all the entries in the KeyValue Object.
 	printKeyValueList(v);
+
+	v := 14;		
+	output("Fibonacci("+v+") := " + Fibonacci(v));
+	output("Fact(10) = " + Factorial(10));
 	return (11);
 endfunction
 
 function printKeyValueList()
 	#Make sure one argument is passed
-	if(($0 != 1) || (typeof($1) != "keyvalue"))
+	if($0 != 1) 
 		output("USAGE: printKeyValueList(keyValueObject)");
 		return (0);
-	else
+	elif(typeof($1) == "keyvalue")
 		var v := $1;
 		#Setup the iterator
 		if(KeyValueIterator(v))
@@ -61,9 +87,11 @@ function printKeyValueList()
 			while(KeyValueNext(v))
 				output("Key: "+KeyValueGetKey(v)+ ", value : " + KeyValueGetValue(v));
 			endwhile
-		endif
-		v := 14;
-		output("Fibonacci("+v+") := " + Fibonacci(v));
+		else
+			output("KeyValueIterator() failed");
+		endif		
+	else
+		output("object is of type '" + typeof($1) + "' insted it should be keyvalue");
 	endif
 endfunction	
 

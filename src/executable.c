@@ -199,7 +199,7 @@ STATUS Executable_AddCmd(Executable exe, CompilerCmd cmd, Identifier a, Identifi
 				bc = NULL;
 				if(number >= exe->label_size)
 				{
-					exe->label_size = number;
+					exe->label_size = number + 50;
 					exe->label_list = (unsigned int *)ReAlloc(exe->label_list, sizeof(unsigned int) * exe->label_size);
 					if(IS_NULL(exe->label_list))
 					{
