@@ -24,9 +24,11 @@
 #define TOKEN_TYPE_STRING              24
 #define TOKEN_TYPE_ARGUMENT            25
 #define OPERATOR_COMMA                 26
-#define KEYWORD_ENDIF                  27
-#define KEYWORD_IF                     28
-#define KEYWORD_WHILE                  29
-#define KEYWORD_ENDWHILE               30
-#define KEYWORD_VAR                    31
-#define KEYWORD_RETURN                 32
+#define KEYWORD_ELIF                   27
+#define KEYWORD_ELSE                   28
+#define KEYWORD_ENDIF                  29
+#define KEYWORD_IF                     30
+#define KEYWORD_WHILE                  31
+#define KEYWORD_ENDWHILE               32
+#define KEYWORD_VAR                    33
+#define KEYWORD_RETURN                 34

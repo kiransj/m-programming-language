@@ -192,13 +192,31 @@ argument_list(A) ::= argument_list(B) OPERATOR_COMMA expr(C).       { A=B+1; Com
 	The stmts are executed if the expression returns a non zero value.
 */
 
-%type start_if_condition {int}
+conditional_expression(A) ::= OPERATOR_OPEN_PAREN expr(B) OPERATOR_CLOSE_PAREN. 		{ A = Identifier_Clone(B); Identifier_Destroy(B);}
 
-end_if_condition 	 ::= KEYWORD_ENDIF.													 
-start_if_condition(A)::= KEYWORD_IF OPERATOR_OPEN_PAREN expr(B) OPERATOR_CLOSE_PAREN.	{A=Command_ConditionStmt(compiler, STMT_IF, B, 0);}
-if_condition_block	 ::= start_if_condition(A) stmt end_if_condition. 					{Command_ConditionStmt(compiler, STMT_ENDIF, NULL, A);}
+elif_keyword		 ::= KEYWORD_ELIF.												{Command_ConditionStmt(compiler, STMT_ELIF_KEYWORD, NULL);} 
+elif_condition       ::= elif_keyword conditional_expression(B). 					{Command_ConditionStmt(compiler, STMT_ELIF_CONDITION, B);} 
+else_condition       ::= KEYWORD_ELSE.												{Command_ConditionStmt(compiler, STMT_ELSE, NULL);} 
+endif_condition 	 ::= KEYWORD_ENDIF.												{Command_ConditionStmt(compiler, STMT_ENDIF, NULL);} 
+start_if_condition   ::= KEYWORD_IF conditional_expression(B).						{Command_ConditionStmt(compiler, STMT_IF, B);}
 
-condition_stmt ::= if_condition_block.
+/*
+if_condition_block	 ::= start_if_condition stmt endif_condition. 
+if_condition_block	 ::= start_if_condition stmt else_condition stmt endif_condition.
+if_condition_block	 ::= start_if_condition stmt elif_block endif_condition. 
+
+elif_block			 ::= elif_condition stmt.
+elif_block			 ::= elif_block elif_condition stmt.
+*/
+
+if_condition_block   ::= start_if_condition stmt.
+if_condition_block   ::= start_if_condition stmt elif_block.
+
+elif_block  	 ::= elif_condition stmt.
+elif_block		 ::= elif_block elif_condition stmt.
+
+condition_stmt ::= if_condition_block endif_condition.
+condition_stmt ::= if_condition_block else_condition stmt endif_condition.
 
 /*
 	while loop grammer.
@@ -213,13 +231,10 @@ condition_stmt ::= if_condition_block.
 	The stmts are executed if the expression returns a non zero value.
 */
 
-%type start_while_loop			{int}
-%type while_condition_block		{int}
-
-start_while_loop(A)			::= KEYWORD_WHILE.															{A=Command_LoopStmt(compiler, STMT_START_WHILE, NULL, 0);}
+start_while_loop			::= KEYWORD_WHILE.															{Command_LoopStmt(compiler, STMT_START_WHILE, NULL);}
 end_while_loop				::= KEYWORD_ENDWHILE.
-while_condition_block(A)	::= start_while_loop(B) OPERATOR_OPEN_PAREN expr(C) OPERATOR_CLOSE_PAREN. 	{A=B;Command_LoopStmt(compiler, STMT_WHILE_COND, C, B);} 
-while_loop_block			::= while_condition_block(B) stmt end_while_loop.							{Command_LoopStmt(compiler, STMT_END_WHILE, NULL, B);}
+while_condition_block		::= start_while_loop  conditional_expression(C). 							{Command_LoopStmt(compiler, STMT_WHILE_COND, C);} 
+while_loop_block			::= while_condition_block stmt end_while_loop.								{Command_LoopStmt(compiler, STMT_END_WHILE, NULL);}
 
 loop_stmt ::= while_loop_block.
 

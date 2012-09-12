@@ -7,9 +7,13 @@ typedef struct _Compiler
 {
 	int line_number;
 	int error_flag;
-	int reg_num, max_num_reg;
-	int label_number;
+	int reg_num, max_num_reg;	
 	void *priv_data;
+
+
+	int label_number;
+	int *label_stack;
+	int label_top, label_size;
 }*Compiler;
 
 
@@ -44,6 +48,9 @@ typedef enum
 
 	STMT_END,
 	STMT_IF,
+	STMT_ELSE,
+	STMT_ELIF_KEYWORD,
+	STMT_ELIF_CONDITION,
 	STMT_ENDIF,
 	STMT_WHILE_COND,
 	STMT_START_WHILE,
@@ -54,8 +61,8 @@ void Command(Compiler, CompilerCmd oper);
 void Command_FunctionArg(Compiler C, Identifier A);
 void Command_VariableDecl(Compiler, Identifier, Identifier);
 
-int  Command_ConditionStmt(Compiler c, CompilerCmd cmd, Identifier A, int label_number);
-int Command_LoopStmt(Compiler c, CompilerCmd cmd, Identifier A, int label_number);
+int  Command_ConditionStmt(Compiler c, CompilerCmd cmd, Identifier A);
+int Command_LoopStmt(Compiler c, CompilerCmd cmd, Identifier A);
 
 Identifier Command_function_call(Compiler c, Identifier A, int num_args);
 Identifier Command_Operation(Compiler, Identifier A, CompilerCmd oper, Identifier B);

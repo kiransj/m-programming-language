@@ -3,16 +3,18 @@ function Factorial()
   #$0 can be used to access the number of argument passed
 	if($1 <= 2)
 		return ($1);
+	else
+		#recursion
+		return Factorial($1-1) * $1;
 	endif
-	#recursion
-	return Factorial($1-1) * $1;
 endfunction
 
 function Fibonacci()
 	if($1 < 2) 
-		return $1;
+		return $1;		
+	else
+		return Fibonacci($1-1) + Fibonacci($1-2);
 	endif
-	return Fibonacci($1-1) + Fibonacci($1-2);
 endfunction
 
 function GetKeyValue()
@@ -51,15 +53,17 @@ function printKeyValueList()
 	if(($0 != 1) || (typeof($1) != "keyvalue"))
 		output("USAGE: printKeyValueList(keyValueObject)");
 		return (0);
-	endif
-
-	var v := $1;
-	#Setup the iterator
-	if(KeyValueIterator(v))
-		#for each element in the list print it.
-		while(KeyValueNext(v))
-			output("Key: "+KeyValueGetKey(v)+ ", value : " + KeyValueGetValue(v));
-		endwhile
+	else
+		var v := $1;
+		#Setup the iterator
+		if(KeyValueIterator(v))
+			#for each element in the list print it.
+			while(KeyValueNext(v))
+				output("Key: "+KeyValueGetKey(v)+ ", value : " + KeyValueGetValue(v));
+			endwhile
+		endif
+		v := 14;
+		output("Fibonacci("+v+") := " + Fibonacci(v));
 	endif
 endfunction	
 

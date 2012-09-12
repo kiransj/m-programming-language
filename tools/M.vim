@@ -1,11 +1,11 @@
 syntax off
 syntax on
 syntax case ignore
-syntax keyword Type var if endif while endwhile return function endfunction typeof
+syntax keyword Type var if endif while endwhile return function endfunction typeof else
 syntax region String start=+"+ end=+"+ skip=+\\"+
 syntax region Comment start=+#+ end=+\n+ 
-syntax region Number start=+[0-9]+ end=+[^0-9]+ 
-syntax region Argument start=+$[0-9]+ end=+[^0-9]+ 
+"syntax region Number start=+[0-9]+ end=+[^0-9]+ skip=+[^0-9]+ 
+"syntax region Argument start=+$[0-9]+ end=+[^0-9]+ 
 
 
 hi Number term=bold ctermfg=red guifg=red
