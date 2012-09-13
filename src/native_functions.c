@@ -288,6 +288,7 @@ Identifier Function_FileListGet(Identifier *args, int num_args)
 			Identifier obj = Map_Create();			
 			Map_AddString(obj,"name", full_path);
 			Map_AddInt(obj,"size", (int)st.st_size);
+			Map_AddInt(obj, "isdir", (int)S_ISDIR(st.st_mode));
 			return obj;
 		}
 	}

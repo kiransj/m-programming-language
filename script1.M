@@ -1,24 +1,16 @@
 function Main()  
 	var obj;
-	obj := FileListObject("/bin");
-	obj := FileListObject("/bin");
-	obj := FileListObject("/bin");
-	obj := FileListObject("/bin");
-	obj := FileListObject("/bin");
+	obj := FileListObject(".");
 	if(typeof(obj) != "filelist")
 		output("FileListObject() failed");
 	else
 		output("FileListObject() succeed");
 		var tmp;
 		while(typeof(tmp := FileListGet(obj))  == "struct")
-			output(tmp->name +  "   " + tmp->size);
+			if(tmp->isdir)
+				output(tmp->name +  "   " );
+			endif
 		endwhile
-		tmp := FileListGet(obj);
-		tmp := FileListGet(obj);
-		tmp := FileListGet(obj);
-		tmp := FileListGet(obj);
-		tmp := FileListGet(obj);
-		output("tmp := " + tmp);
 	endif
 	return 0;
 endfunction
