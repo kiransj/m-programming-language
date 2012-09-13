@@ -62,6 +62,35 @@ Identifier GetIdentifier(Executable exe, Identifier A)
 					}
 					return exe->ec->args[A->u.argument_number];
 				}
+		case IDENTIFIER_TYPE_MAP_ELEMENT:
+				{
+					Identifier i;
+					Identifier v = VariableList_FindVariable(exe->ec->local_variables, A->u.map_element->map_name);
+					if(IS_NULL(v))
+					{
+						RaiseException(exe, "VariableList_FindVariable('%s') failed hence stoping execution", A->u.map_element->map_name);
+						return NULL;
+					}
+					if(v->type != IDENTIFIER_TYPE_OBJECT || (strcmp(v->u.obj->type, "map") != 0))
+					{
+						Identifier i;
+						i = Map_Create();
+						if(IS_NULL(i))
+						{
+							RaiseException(exe, "Map_Create() failed hence stoping execution", A->u.variable_name);
+							return NULL;
+						}
+						Identifier_Copy(v, i);
+						Identifier_Destroy(i);
+					}
+					i = Map_FindElement(v, A->u.map_element->element_name);
+					if(IS_NULL(i))
+					{
+						RaiseException(exe, "Map_FindElement(%s, %s) failed hence stoping execution", A->u.variable_name);
+						return NULL;
+					}
+					return i;
+				}
 		default:
 				abort();
 	}

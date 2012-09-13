@@ -18,4 +18,12 @@ VariableList VariableList_Create(void);
 void 		 VariableList_Destroy(VariableList);
 STATUS 		 VariableList_AddVariable(VariableList vl, const char *variable_name, Identifier v);
 Identifier   VariableList_FindVariable(VariableList, const char *variable_name);
+
+typedef struct _map
+{
+	VariableList list;
+}*Map;
+
+Identifier Map_Create(void);
+Identifier Map_FindElement(Identifier m, const char *element_name);
 #endif

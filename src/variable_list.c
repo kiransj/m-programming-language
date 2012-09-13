@@ -135,3 +135,51 @@ STATUS VariableList_AddVariable(VariableList vl, const char *variable_name, Iden
 	}
 	return STATUS_FAILURE;
 }
+
+
+void map_delete(void *ptr)
+{
+	Map m = (Map)ptr;
+	VariableList_Destroy(m->list);
+	Free(m);
+}
+
+Identifier Map_Create(void)
+{
+	Object o = (Object)Malloc(sizeof(struct _Object));
+	if(!IS_NULL(o))
+	{
+		Map m = (Map)Malloc(sizeof(struct _map));
+		m->list = VariableList_Create();
+		o->priv_data = (void*)m;
+		strcpy(o->type, "struct");
+		o->obj_delete = map_delete;
+		return Identifier_NewObject(o);
+	}
+	else
+	{
+		LOG_ERROR("Malloc() failed");
+	}
+	return NULL;
+}
+
+Identifier Map_FindElement(Identifier m, const char *element_name)
+{
+	Identifier i;
+	Map map = (Map)m->u.obj->priv_data;
+	
+	i = VariableList_FindVariable(map->list,element_name);
+	if(IS_NULL(i))
+	{
+		i = Identifier_NewInteger(0);
+		if(STATUS_FAILURE == VariableList_AddVariable(map->list,element_name,i))
+		{
+			LOG_ERROR("VariableList_AddVariable() failed");
+			Identifier_Destroy(i);
+			return NULL; 
+		}
+		Identifier_Destroy(i);
+		i = VariableList_FindVariable(map->list, element_name);
+	}
+	return i;
+}

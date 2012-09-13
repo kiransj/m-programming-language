@@ -43,9 +43,9 @@ void Identifier_to_str(Identifier id, char * const buffer, const int size)
 				snprintf(buffer, size, "reg(%d)", id->u.register_number);
 				break;
 			}
-		case IDENTIFIER_TYPE_MAP:
+		case IDENTIFIER_TYPE_MAP_ELEMENT:
 			{
-				snprintf(buffer, size, "map(%s->%s)", id->u.map->map_name, id->u.map->element_name);
+				snprintf(buffer, size, "map(%s->%s)", id->u.map_element->map_name, id->u.map_element->element_name);
 				break;
 			}
 		default: 
@@ -65,8 +65,8 @@ const char* IdentifierType_to_str(IdentifierType type)
 		case IDENTIFIER_TYPE_ARGUMENT:	return "arg";
 		case IDENTIFIER_TYPE_VARIABLE:	return "var";
 		case IDENTIFIER_TYPE_REGISTER:	return "reg";
-		case IDENTIFIER_TYPE_OBJECT:	return "object";
-		case IDENTIFIER_TYPE_MAP:		return "map";
+		case IDENTIFIER_TYPE_OBJECT:			return "object";
+		case IDENTIFIER_TYPE_MAP_ELEMENT:		return "map_element";
 		default: break;
 	}
 	return "NULL";
@@ -189,9 +189,9 @@ Identifier Identifier_NewRegister(const int number)
 Identifier Identifier_NewMap(const char *map_name, const char *element_name)
 {
 	Identifier i = Identifier_Create();
-	i->type = IDENTIFIER_TYPE_MAP;
-	i->u.map = Map_Create(map_name, element_name);
-	if(IS_NULL(i->u.map))
+	i->type = IDENTIFIER_TYPE_MAP_ELEMENT;
+	i->u.map_element = MapElement_Create(map_name, element_name);
+	if(IS_NULL(i->u.map_element))
 	{
 		Identifier_Destroy(i);
 		LOG_ERROR("Map_Create() failed");
@@ -264,12 +264,11 @@ Identifier Identifier_Clone(Identifier a)
 				i = Identifier_NewObject(a->u.obj);
 				break;
 			}
-		case IDENTIFIER_TYPE_MAP:
+		case IDENTIFIER_TYPE_MAP_ELEMENT:
 			{
 				i = Identifier_Create();
-				i->type = IDENTIFIER_TYPE_MAP;
-				i->u.map = a->u.map;
-				i->u.map->num_refs++;
+				i->type = IDENTIFIER_TYPE_MAP_ELEMENT;
+				i->u.map_element = MapElement_Create(a->u.map_element->map_name, a->u.map_element->element_name);
 				break;
 			}
 		default:
@@ -379,13 +378,9 @@ void Identifier_Free(Identifier t)
 			Free(t->u.obj);
 		}
 	}
-	else if(t->type == IDENTIFIER_TYPE_MAP)
+	else if(t->type == IDENTIFIER_TYPE_MAP_ELEMENT)
 	{
-		t->u.map->num_refs--;
-		if(0 == t->u.map->num_refs)
-		{
-			Map_Delete(t->u.map);
-		}
+		MapElement_Delete(t->u.map_element);
 	}
 	else if(t->type <= IDENTIFIER_TYPE_UNKNOWN_START || t->type >= IDENTIFIER_TYPE_UNKNOWN_END)
 	{
@@ -486,9 +481,9 @@ void IdentifierStack_Destroy(IdentifierStack is)
 	Free(is);
 }
 
-Map Map_Create(const char *map_name, const char *element_name)
+MapElement MapElement_Create(const char *map_name, const char *element_name)
 {
-	Map map = (Map)Malloc(sizeof(struct _Map));
+	MapElement map = (MapElement)Malloc(sizeof(struct _MapElement));
 	if(!IS_NULL(map))
 	{
 		map->map_name = (char*)Malloc(strlen(map_name));
@@ -503,7 +498,6 @@ Map Map_Create(const char *map_name, const char *element_name)
 		}
 		strcpy(map->map_name, map_name);
 		strcpy(map->element_name, element_name);
-		map->num_refs = 1;
 	}
 	else
 	{
@@ -512,7 +506,7 @@ Map Map_Create(const char *map_name, const char *element_name)
 	return map;
 }
 
-void Map_Delete(Map m)
+void MapElement_Delete(MapElement m)
 {
 	Free(m->map_name);
 	Free(m->element_name);
