@@ -8,8 +8,8 @@ The feature of the lanuage are
 5. Calling C functions from M.	:= Completed
 6. functions.					:= Completed. Recursive functions are supported. Passing arguments to functions are also supported
 7. global variables.			:= In progress.
-7. Objects.						:= Done.
-
+8. Objects.						:= Done.
+9. Structure					:= Dynamic structure done. (where elements can be added dynamically to the structure)
 Local variables are defined as and when they are encountered. (this will change soon).
 
 
@@ -47,7 +47,7 @@ How to use objects
 function GetKeyValue()
 	var  v;
 	v :=KeyValue();
-	if(typeof(v) == "object")
+	if(typeof(v) == "keyvalue")
 		KeyValueAdd(v, "version", "10");	
 		KeyValueAdd(v, "Path", "/home/kiran/root/bin");	
 		KeyValueAdd(v, "time", "10:30");
@@ -58,15 +58,15 @@ function GetKeyValue()
 endfunction
 
 function Main()
-	var v, c, d, a;
+	var v, a;
 	v := GetKeyValue();	
-	if(typeof(v) != "object")
+	if(typeof(v) != "keyvalue")
 		output("KeyValue() failed");
 		return (0);
 	endif
 	if(KeyValueIterator(v))
-		while(KeyValueNext(v))
-			output("Key: "+KeyValueGetKey(v)+ ", value : " + KeyValueGetValue(v));
+		while(typeof(a:=KeyValueNext(v)) == "struct")
+			output(a->key + " = " + a->value);
 		endwhile	
 	endif
 	return (1);

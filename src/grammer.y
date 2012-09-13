@@ -126,6 +126,9 @@ expr(A) ::= TOKEN_TYPE_ARGUMENT(B).					{A = Identifier_Clone(B); Identifier_Des
 expr(A) ::= TOKEN_TYPE_VARIABLE(B).					{A = Identifier_Clone(B); Identifier_Destroy(B);}
 expr(A) ::= function_call(B).						{A = Identifier_Clone(B); Identifier_Destroy(B);}
 expr(A) ::= object_refs(B).						    {A = Identifier_Clone(B); Identifier_Destroy(B);}
+
+/*Handle negative number*/
+expr(A) ::= OPERATOR_SUB TOKEN_TYPE_INTEGER(B).		{B->u.number = -B->u.number; A = Identifier_Clone(B); Identifier_Destroy(B);}
 /*
 	The defination of mathamatical operations supported
 	by this language. These operations can be performed on

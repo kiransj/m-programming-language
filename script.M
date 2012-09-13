@@ -2,18 +2,18 @@ function testIf()
 	var a := 1;
 	while(a < 6)
 		if(a < 2)
-			output("a<2");
+			output(a+"<2");
 		elif(a > 2)
-			output("a>2");
+			output(a+">2");
 			if(a > 5)	
-				output("a>5");
+				output(a + ">5");
 			elif(a < 5)
-				output("a<5)");
+				output(a + "<5");
 			else
-				output("a==5");
+				output(a + "==5");
 			endif
 		elif(a == 2)
-			output("a==2");
+			output(a + "==2");
 		endif
 		a := a + 1;
 	endwhile
@@ -55,7 +55,6 @@ function GetKeyValue()
 	return (0);
 endfunction
 
-
 function Main()
 	var v;
 	testif();
@@ -83,15 +82,18 @@ function printKeyValueList()
 		var v := $1;
 		#Setup the iterator
 		if(KeyValueIterator(v))
+			var a;
 			#for each element in the list print it.
-			while(KeyValueNext(v))
-				output("Key: "+KeyValueGetKey(v)+ ", value : " + KeyValueGetValue(v));
+			while(typeof(a:=KeyValueNext(v)) == "struct")
+				output(a->key+ " = " + a->value);
 			endwhile
 		else
 			output("KeyValueIterator() failed");
-		endif		
+		endif
 	else
 		output("object is of type '" + typeof($1) + "' insted it should be keyvalue");
 	endif
+	a:=-2;
+	output(a);
 endfunction	
 

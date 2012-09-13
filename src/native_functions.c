@@ -188,53 +188,18 @@ Identifier Function_KeyValueNext(Identifier *args, int num_args)
 			return Identifier_NewInteger(0);
 		}
 		keyValue->cur_ptr = keyValue->cur_ptr->next;
-		return Identifier_NewInteger((IS_NULL(keyValue->cur_ptr) ? 0 : 1));
-	}
-	return Identifier_NewInteger(0);
-}
-Identifier Function_KeyValueGetKey(Identifier *args, int num_args)
-{
-	KeyValue keyValue;
-	if(args[0]->u.number != 1 || args[1]->type != IDENTIFIER_TYPE_OBJECT)
-	{
-		LOG_ERROR("KeyValueGetKey(object) usage");
-		return Identifier_NewInteger(0);
-	}
-
-	keyValue = (KeyValue)args[1]->u.obj->priv_data;
-	if(!IS_NULL(keyValue))
-	{
-		if(IS_NULL(keyValue->cur_ptr) || IS_NULL(keyValue->cur_ptr->variable_name))
+		
+		if(!IS_NULL(keyValue->cur_ptr))
 		{
-			LOG_ERROR("First call KeyValueNext() and then KeyValueGetName()");
-			return Identifier_NewInteger(0);
+			Identifier obj = Map_Create();
+			Map_AddString(obj,"key", keyValue->cur_ptr->variable_name);
+			Map_AddElement(obj,"value", keyValue->cur_ptr->id);
+			return obj;
 		}
-		return Identifier_NewString(keyValue->cur_ptr->variable_name);
 	}
 	return Identifier_NewInteger(0);
 }
 
-Identifier Function_KeyValueGetValue(Identifier *args, int num_args)
-{
-	KeyValue keyValue;
-	if(args[0]->u.number != 1 || args[1]->type != IDENTIFIER_TYPE_OBJECT)
-	{
-		LOG_ERROR("KeyValueGetValue(object) usage");
-		return Identifier_NewInteger(0);
-	}
-
-	keyValue = (KeyValue)args[1]->u.obj->priv_data;
-	if(!IS_NULL(keyValue))
-	{
-		if(IS_NULL(keyValue->cur_ptr) || IS_NULL(keyValue->cur_ptr->variable_name))
-		{
-			LOG_ERROR("First call KeyValueNext() and then KeyValueGetName()");
-			return Identifier_NewInteger(0);
-		}
-		return Identifier_Clone(keyValue->cur_ptr->id);
-	}
-	return Identifier_NewInteger(0);
-}
 #endif
 
 
@@ -249,8 +214,6 @@ void Register_Native_Functions(Executable exe)
 	Executable_AddNativeFunction(exe, "KeyValueGet", Function_KeyValueGet);
 	Executable_AddNativeFunction(exe, "KeyValueIterator", Function_KeyValueIterator);
 	Executable_AddNativeFunction(exe, "KeyValueNext", Function_KeyValueNext);
-	Executable_AddNativeFunction(exe, "KeyValueGetKey", Function_KeyValueGetKey);
-	Executable_AddNativeFunction(exe, "KeyValueGetValue", Function_KeyValueGetValue);
 #endif
 
 }
