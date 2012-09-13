@@ -222,8 +222,6 @@ Identifier Identifier_NewObject(Object object)
 	return i;
 }
 
-
-
 Identifier Identifier_Clone(Identifier a)
 {
 	Identifier i = NULL;
@@ -486,8 +484,8 @@ MapElement MapElement_Create(const char *map_name, const char *element_name)
 	MapElement map = (MapElement)Malloc(sizeof(struct _MapElement));
 	if(!IS_NULL(map))
 	{
-		map->map_name = (char*)Malloc(strlen(map_name));
-		map->element_name = (char*)Malloc(strlen(element_name));
+		map->map_name = (char*)Malloc(strlen(map_name)+1);
+		map->element_name = (char*)Malloc(strlen(element_name)+1);
 		if(IS_NULL(map->map_name) || IS_NULL(map->element_name))
 		{
 			Free(map->map_name);		/*Free free's only if its not NULL*/

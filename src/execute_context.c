@@ -71,7 +71,7 @@ Identifier GetIdentifier(Executable exe, Identifier A)
 						RaiseException(exe, "VariableList_FindVariable('%s') failed hence stoping execution", A->u.map_element->map_name);
 						return NULL;
 					}
-					if(v->type != IDENTIFIER_TYPE_OBJECT || (strcmp(v->u.obj->type, "map") != 0))
+					if(v->type != IDENTIFIER_TYPE_OBJECT || (strcmp(v->u.obj->type, "struct") != 0))
 					{
 						Identifier i;
 						i = Map_Create();

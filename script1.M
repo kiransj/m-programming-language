@@ -1,15 +1,14 @@
 function PrintStruct()
-	var a := $1;
-	if(typeof($1) == "struct")
-		output("num : " + a->num);
-		a->count := 3;
-	endif
+	var a;
+	a->count := 10;
+	a->num := 3411;
+	return (a);
 endfunction
 function Main()  
-	var a;
-	a->num := 1100;
-	a->count := 1;
-	a->temp :=10;
-	output("type : " + typeof(a), " a->num : " + a->count + "a->temp : " + a->temp);
+	var b := PrintStruct(), a;	
+	a := b;
+	a->num := b->num - 3000;
+	output("type : " + typeof(a), " a->num : " + a->num + " a->count : " + a->count);
+	return (11);
 endfunction
 
