@@ -470,9 +470,9 @@ STATUS ExecutionContext_Execute(Executable exe, const char *func_name, Identifie
 		LOG_ERROR("func '%s' not found", func_name);
 		return STATUS_FAILURE; 
 	}
-	exe->ec->num_args = IS_NULL(i) ? 1 :2;
+	exe->ec->num_args = IS_NULL(i) ? 1 : 2;
 	exe->ec->args = (Identifier*)Malloc(sizeof(Identifier) * exe->ec->num_args);
-	exe->ec->args[0] = Identifier_NewInteger(exe->ec->num_args);
+	exe->ec->args[0] = Identifier_NewInteger(exe->ec->num_args-1);
 	if(!IS_NULL(i))
 	{
 		exe->ec->args[1] = Identifier_Clone(i);

@@ -26,6 +26,21 @@ Executable Execute(char *filename)
 
 int main(int argc, char *argv[])
 {
+	Executable exe;
+
+	exe = Execute(argv[1]);
+	if(!IS_NULL(exe))
+	{
+		if(ExecutionContext_Execute(exe, "Main", NULL) == STATUS_SUCCESS)
+		{
+
+		}
+		Executable_Destroy(exe);
+	}
+	return 0;
+}
+int main_ls(int argc, char *argv[])
+{
 	struct dirent *d;
 	DIR *dir;
 	Executable exe;
