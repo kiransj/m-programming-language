@@ -441,25 +441,23 @@ void Execute_Call(Executable exe, const char *fun_name, int num_args, Identifier
 
 STATUS Execute_Return(Executable exe, Identifier ret)
 {
-	Identifier ret_value = Identifier_Clone(ret);
 	ExecutionContext_Destroy(exe->ec);
 	exe->ec_top--;
 	if(-1 == exe->ec_top)
 	{
-		exe->ret_value = Identifier_Clone(ret_value);
+		Identifier_Copy(exe->ret_value, ret);
 		exe->ec = NULL;
 //		LOG_INFO("End of program");
 	}
 	else
 	{
 		exe->ec = exe->ec_list[exe->ec_top];
-		Identifier_Copy(GetIdentifier(exe, exe->ec->cur_ptr->C), ret_value);
+		Identifier_Copy(GetIdentifier(exe, exe->ec->cur_ptr->C), ret);
 	}
-	Identifier_Destroy(ret_value);
 	return STATUS_SUCCESS;
 }	
 
-STATUS ExecutionContext_Execute(Executable exe, const char *func_name)
+STATUS ExecutionContext_Execute(Executable exe, const char *func_name, Identifier i)
 {	
 	FunctionList func;
 
@@ -469,6 +467,13 @@ STATUS ExecutionContext_Execute(Executable exe, const char *func_name)
 	{
 		LOG_ERROR("func '%s' not found", func_name);
 		return STATUS_FAILURE; 
+	}
+	exe->ec->num_args = IS_NULL(i) ? 1 :2;
+	exe->ec->args = (Identifier*)Malloc(sizeof(Identifier) * exe->ec->num_args);
+	exe->ec->args[0] = Identifier_NewInteger(exe->ec->num_args);
+	if(!IS_NULL(i))
+	{
+		exe->ec->args[1] = Identifier_Clone(i);
 	}
 	exe->ec->func_name =func->func_name;
 	exe->ec->cur_ptr = ((ByteCode)(func->u.address))->next;

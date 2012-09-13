@@ -183,3 +183,34 @@ Identifier Map_FindElement(Identifier m, const char *element_name)
 	}
 	return i;
 }
+
+STATUS Map_AddElement(Identifier Obj, const char *element_name, Identifier value)
+{
+	Identifier i = Map_FindElement(Obj, element_name);
+	if(!IS_NULL(i))
+	{
+		Identifier_Copy(i, value);
+		return STATUS_SUCCESS;
+	}
+	return STATUS_FAILURE;
+}
+STATUS Map_AddString(Identifier Obj, const char *element_name, const char *string)
+{
+	Identifier i = Map_FindElement(Obj, element_name);
+	if(!IS_NULL(i))
+	{
+		Identifier_SetString(i, (char*)string);
+		return STATUS_SUCCESS;
+	}
+	return STATUS_FAILURE;
+}
+STATUS Map_AddInt(Identifier Obj, const char *element_name, const int num)
+{
+	Identifier i = Map_FindElement(Obj, element_name);
+	if(!IS_NULL(i))
+	{
+		Identifier_SetInt(i, num);
+		return STATUS_SUCCESS;
+	}
+	return STATUS_FAILURE;
+}

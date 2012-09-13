@@ -84,6 +84,7 @@ Executable Executable_Create(void)
 			Free(exe);
 			return NULL;
 		}
+		exe->ret_value = Identifier_Create();
 	}
 	else
 	{

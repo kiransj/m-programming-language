@@ -5,10 +5,9 @@ function PrintStruct()
 	return (a);
 endfunction
 function Main()  
-	var b := PrintStruct(), a;	
-	a := b;
-	a->num := b->num - 3000;
-	output("type : " + typeof(a), " a->num : " + a->num + " a->count : " + a->count);
-	return (11);
+	var b := $1;
+	if(b->size > 20000)	
+		output("name : " + b->name + ", size : " + b->size);
+	endif		
 endfunction
 
