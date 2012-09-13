@@ -441,19 +441,21 @@ void Execute_Call(Executable exe, const char *fun_name, int num_args, Identifier
 
 STATUS Execute_Return(Executable exe, Identifier ret)
 {
+	Identifier ret_value = Identifier_Clone(ret);
 	ExecutionContext_Destroy(exe->ec);
 	exe->ec_top--;
 	if(-1 == exe->ec_top)
 	{
-		Identifier_Copy(exe->ret_value, ret);
+		Identifier_Copy(exe->ret_value, ret_value);
 		exe->ec = NULL;
 //		LOG_INFO("End of program");
 	}
 	else
 	{
 		exe->ec = exe->ec_list[exe->ec_top];
-		Identifier_Copy(GetIdentifier(exe, exe->ec->cur_ptr->C), ret);
+		Identifier_Copy(GetIdentifier(exe, exe->ec->cur_ptr->C), ret_value);		
 	}
+	Identifier_Destroy(ret_value);
 	return STATUS_SUCCESS;
 }	
 
