@@ -1,13 +1,25 @@
 function Main()  
-	if($0 == 1)		
-		var b := $1;
-		if(b->size < 20000)	
-			output("name : " + b->name + ", size : " + b->size );
-		endif	
-		return 0;
+	var obj;
+	obj := FileListObject("/bin");
+	obj := FileListObject("/bin");
+	obj := FileListObject("/bin");
+	obj := FileListObject("/bin");
+	obj := FileListObject("/bin");
+	if(typeof(obj) != "filelist")
+		output("FileListObject() failed");
 	else
-		output("wrong usage");
-		return 1;
+		output("FileListObject() succeed");
+		var tmp;
+		while(typeof(tmp := FileListGet(obj))  == "struct")
+			output(tmp->name +  "   " + tmp->size);
+		endwhile
+		tmp := FileListGet(obj);
+		tmp := FileListGet(obj);
+		tmp := FileListGet(obj);
+		tmp := FileListGet(obj);
+		tmp := FileListGet(obj);
+		output("tmp := " + tmp);
 	endif
+	return 0;
 endfunction
 

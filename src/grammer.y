@@ -151,7 +151,7 @@ expr(A) ::= expr(B) OPERATOR_AND   expr(C).				{A = Command_Operation(compiler, 
 /*
 	Handle parenthisis in the expressions.
 */
-expr(A) ::= OPERATOR_OPEN_PAREN  expr(B) OPERATOR_CLOSE_PAREN.
+expr(A) ::= OPERATOR_OPEN_PAREN  expr(B) OPERATOR_CLOSE_PAREN.  {A = Identifier_Clone(B); Identifier_Destroy(B);}
 
 /*
 	The assignment operations has restrictions.

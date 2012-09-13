@@ -123,9 +123,18 @@ Identifier Function_KeyValueAdd(Identifier *args, int num_args)
 	keyValue = (KeyValue)args[1]->u.obj->priv_data;
 	if(!IS_NULL(keyValue))
 	{
-		if(STATUS_SUCCESS == VariableList_AddVariable(keyValue->vl, args[2]->u.str, args[3]))
+		Identifier i;
+		i = VariableList_FindVariable(keyValue->vl, args[2]->u.str);
+		if(IS_NULL(i))
 		{
-			return Identifier_NewInteger(1);
+			if(STATUS_SUCCESS == VariableList_AddVariable(keyValue->vl, args[2]->u.str, args[3]))
+			{
+				return Identifier_NewInteger(1);
+			}
+		}
+		else
+		{
+			Identifier_Copy(i, args[3]);
 		}
 	}
 	return Identifier_NewInteger(0);
@@ -203,6 +212,88 @@ Identifier Function_KeyValueNext(Identifier *args, int num_args)
 #endif
 
 
+
+
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <dirent.h>
+typedef struct _filelist_
+{
+	char *path;
+	struct dirent *d;
+	DIR *dir;
+}*FileList;
+
+void FileList_Delete(void *obj)
+{
+	FileList fl = (FileList)obj;
+	closedir(fl->dir);
+	Free(fl->path);
+	memset(fl, 0, sizeof(struct _filelist_));
+	Free(fl);
+}
+
+Identifier Function_FileListObject(Identifier *args, int num_args)
+{
+	Object obj = NULL;
+	FileList fl = NULL;
+	if(num_args != 1 && args[1]->type != IDENTIFIER_TYPE_STRING)
+	{
+		LOG_ERROR("Usage: FileListObject(pathname)");	
+		return Identifier_NewInteger(0);
+	}
+	fl = (FileList)Malloc(sizeof(struct _filelist_));
+
+	if(!IS_NULL(fl))
+	{
+		char *str = args[1]->u.str;
+		if(str[strlen(str)-1] == '/')
+			str[strlen(str)-1]=0;
+		fl->path = (char*)Malloc(strlen(args[1]->u.str)+1);
+		strcpy(fl->path, args[1]->u.str);
+		fl->dir = opendir(fl->path);
+		if(IS_NULL(fl->dir))
+		{
+			Free(fl->path);
+			Free(fl);
+			return Identifier_NewInteger(0);
+		}
+		obj = (Object)Malloc(sizeof(struct _Object));
+		memset(obj, 0, sizeof(struct _Object));
+		obj->priv_data = (void*)fl;
+		obj->obj_delete = FileList_Delete;
+		strcpy(obj->type, "filelist");
+		return Identifier_NewObject(obj);
+	}
+	return Identifier_NewInteger(0);
+}
+
+Identifier Function_FileListGet(Identifier *args, int num_args)
+{
+	FileList fl = NULL;
+	if(args[0]->u.number != 1 || args[1]->type != IDENTIFIER_TYPE_OBJECT || (strcmp(args[1]->u.obj->type, "filelist") != 0))
+	{
+		LOG_ERROR("KeyValueIterator(filelist Object) usage");
+		return Identifier_NewInteger(0);
+	}
+	fl = (FileList)args[1]->u.obj->priv_data;
+	fl->d = readdir(fl->dir);
+	if(!IS_NULL(fl->d))
+	{
+		struct stat st;			
+		char full_path[128];
+		snprintf(full_path, 128, "%s/%s", fl->path, fl->d->d_name);
+		if(stat(full_path, &st) == 0)
+		{
+			Identifier obj = Map_Create();			
+			Map_AddString(obj,"name", full_path);
+			Map_AddInt(obj,"size", (int)st.st_size);
+			return obj;
+		}
+	}
+	return Identifier_NewInteger(0);
+}
+
 void Register_Native_Functions(Executable exe)
 {
 	Executable_AddNativeFunction(exe, "output", Function_Output);
@@ -216,9 +307,7 @@ void Register_Native_Functions(Executable exe)
 	Executable_AddNativeFunction(exe, "KeyValueNext", Function_KeyValueNext);
 #endif
 
-}
 
-void UnRegister_Native_Functions(Executable exe)
-{
-	
+	Executable_AddNativeFunction(exe, "FileListObject", Function_FileListObject);
+	Executable_AddNativeFunction(exe, "FileListGet", Function_FileListGet);
 }

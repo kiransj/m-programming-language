@@ -49,6 +49,12 @@ function GetKeyValue()
 		KeyValueAdd(v, "version", "10");	
 		KeyValueAdd(v, "Path", "/home/kiran/root/bin");	
 		KeyValueAdd(v, "time", "10:30");
+		KeyValueAdd(v, "LANG", "en");	
+		KeyValueAdd(v, "PWD", "~");	
+		KeyValueAdd(v, "time", "10:31");
+		KeyValueAdd(v, "time", "10:31");
+		KeyValueAdd(v, "time", "10:31");
+		KeyValueAdd(v, "time", "1:45");
 		return v;
 	endif
 	output("KeyValue() failed");
