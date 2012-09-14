@@ -147,6 +147,7 @@ expr(A) ::= expr(B) OPERATOR_CMP   expr(C).				{A = Command_Operation(compiler, 
 expr(A) ::= expr(B) OPERATOR_NEQ   expr(C).				{A = Command_Operation(compiler, B, NEQ, C);	}
 expr(A) ::= expr(B) OPERATOR_OR    expr(C).				{A = Command_Operation(compiler, B, OR,  C);	}
 expr(A) ::= expr(B) OPERATOR_AND   expr(C).				{A = Command_Operation(compiler, B, AND, C);	}
+expr(A) ::= OPERATOR_NOT	expr(C).						{A = Command_Operation(compiler, NULL, NOT, C);	}
 
 /*
 	Handle parenthisis in the expressions.

@@ -1,13 +1,12 @@
 function Main()  
-	var obj;
-	obj := FileListObject(".");
+	var obj, tmp;
+	obj := FileListObject("/home/kiransj/");
 	if(typeof(obj) != "filelist")
 		output("FileListObject() failed");
 	else
 		output("FileListObject() succeed");
-		var tmp;
 		while(typeof(tmp := FileListGet(obj))  == "struct")
-			if(tmp->isdir)
+			if(!tmp->isdir && !tmp->executable)
 				output(tmp->name +  "   " );
 			endif
 		endwhile

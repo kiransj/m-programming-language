@@ -173,6 +173,13 @@ STATUS Executable_AddCmd(Executable exe, CompilerCmd cmd, Identifier a, Identifi
 				bc->C = C;
 				break;
 			}
+		case NOT:
+			{
+				bc->cmd = NOT;
+				bc->B = B;
+				bc->C = C;
+				break;
+			}
 		case JZ:
 			{
 				bc->cmd = JZ;

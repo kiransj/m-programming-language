@@ -33,6 +33,7 @@ typedef enum
 	NEQ,
 	OR, 
 	AND,
+	NOT,
 	EQU,
 
 	JUMP,

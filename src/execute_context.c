@@ -245,7 +245,7 @@ void Execute_Cmp(Executable exe, Identifier A, Identifier B, Identifier C)
 	int answer = 0;
 	if(exe->error_flag)
 	{
-		LOG_ERROR("Addition could not be completed due to error");
+		LOG_ERROR("Cmp could not be completed due to error");
 		return;
 	}
 	if(A->type == IDENTIFIER_TYPE_STRING && B->type == IDENTIFIER_TYPE_STRING)
@@ -268,7 +268,7 @@ void Execute_And(Executable exe, Identifier A, Identifier B, Identifier C)
 	int answer = 0;
 	if(exe->error_flag)
 	{
-		LOG_ERROR("Addition could not be completed due to error");
+		LOG_ERROR("And could not be completed due to error");
 		return;
 	}
 	if(A->type == IDENTIFIER_TYPE_NUMBER && B->type == IDENTIFIER_TYPE_NUMBER)
@@ -288,7 +288,7 @@ void Execute_Or(Executable exe, Identifier A, Identifier B, Identifier C)
 	int answer = 0;
 	if(exe->error_flag)
 	{
-		LOG_ERROR("Addition could not be completed due to error");
+		LOG_ERROR("OR could not be completed due to error");
 		return;
 	}
 	if(A->type == IDENTIFIER_TYPE_NUMBER && B->type == IDENTIFIER_TYPE_NUMBER)
@@ -308,7 +308,7 @@ void Execute_Neq(Executable exe, Identifier A, Identifier B, Identifier C)
 	int answer = 0;
 	if(exe->error_flag)
 	{
-		LOG_ERROR("Addition could not be completed due to error");
+		LOG_ERROR("NEQ could not be completed due to error");
 		return;
 	}
 	if(A->type == IDENTIFIER_TYPE_STRING && B->type == IDENTIFIER_TYPE_STRING)
@@ -331,7 +331,7 @@ void Execute_Equ(Executable exe, Identifier A, Identifier B, Identifier C)
 {
 	if(exe->error_flag)
 	{
-		LOG_ERROR("Addition could not be completed due to error");
+		LOG_ERROR("EQU could not be completed due to error");
 		return;
 	}
 	if(B->type == IDENTIFIER_TYPE_STRING)
@@ -361,6 +361,23 @@ void Execute_Equ(Executable exe, Identifier A, Identifier B, Identifier C)
 	}
 }
 
+void Execute_Not(Executable exe, Identifier B, Identifier C)
+{
+	if(exe->error_flag)
+	{
+		LOG_ERROR("NOT could not be completed due to error");
+		return;
+	}
+	if(B->type == IDENTIFIER_TYPE_NUMBER)
+	{
+		Identifier_SetInt(C, !B->u.number);
+	}
+	else
+	{
+		RaiseException(exe, "Unknown Id type %d for NOT operation. Stopping Execution", B->type);
+		return;
+	}
+}
 void Execute_Jz(Executable exe, Identifier A, int label_number)
 {
 	if(IS_NULL(A)) return;
@@ -542,6 +559,10 @@ STATUS ExecutionContext_Execute(Executable exe, const char *func_name, Identifie
 			case EQU:
 					Execute_Equ(exe, GetIdentifier(exe, exe->ec->cur_ptr->A),
 									 GetIdentifier(exe, exe->ec->cur_ptr->B),
+									 GetIdentifier(exe, exe->ec->cur_ptr->C));
+					break;
+			case NOT:
+					Execute_Not(exe, GetIdentifier(exe, exe->ec->cur_ptr->B),
 									 GetIdentifier(exe, exe->ec->cur_ptr->C));
 					break;
 			case JZ:

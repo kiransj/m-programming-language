@@ -38,6 +38,7 @@ const char* token_to_str(int token)
 		case DIV:			return "DIV";
 		case MUL:			return "MUL";
 		case MOD:			return "MOD";
+		case NOT:			return "NOT";
 		default:			return "NULL";
 	}
 }
@@ -291,6 +292,30 @@ Identifier Command_Operation(Compiler c, Identifier A, CompilerCmd oper, Identif
 				Identifier_to_str(res, buf3, 64);
 				Executable_AddCmd(exe, oper, A, B, res, 0);
 				LOG_INFO_NL("%s %s, %s, %s", token_to_str(oper), buf1, buf2, buf3);
+
+				Identifier_Destroy(A);
+				Identifier_Destroy(B);
+				return res;
+			}
+			break;
+		case NOT:
+			{
+				char buf2[64], buf3[64];
+				Identifier res = Identifier_NewRegister(c->reg_num++);
+				if(IS_NULL(res))
+				{
+					LOG_ERROR("Identifier_NewRegister() failed");
+					c->error_flag = 1;
+					return NULL;
+				}
+				if(c->max_num_reg < c->reg_num)
+				{
+					c->max_num_reg = c->reg_num;
+				}
+				Identifier_to_str(B, buf2, 64);
+				Identifier_to_str(res, buf3, 64);
+				Executable_AddCmd(exe, oper, NULL, B, res, 0);
+				LOG_INFO_NL("%s %s, %s", token_to_str(oper), buf2, buf3);
 
 				Identifier_Destroy(A);
 				Identifier_Destroy(B);

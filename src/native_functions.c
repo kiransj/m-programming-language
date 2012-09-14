@@ -289,6 +289,9 @@ Identifier Function_FileListGet(Identifier *args, int num_args)
 			Map_AddString(obj,"name", full_path);
 			Map_AddInt(obj,"size", (int)st.st_size);
 			Map_AddInt(obj, "isdir", (int)S_ISDIR(st.st_mode));
+			Map_AddInt(obj, "readable", (int)(st.st_mode & S_IRUSR));
+			Map_AddInt(obj, "writable", (int)(st.st_mode & S_IWUSR));
+			Map_AddInt(obj, "executable", (int)(st.st_mode & S_IXUSR));
 			return obj;
 		}
 	}
