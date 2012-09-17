@@ -473,3 +473,39 @@ void MapElement_Delete(MapElement m)
 	Free(m->element_name);
 	Free(m);
 }
+
+
+ArrayElement ArrayElement_Create(const char *array_name, Identifier idx)
+{
+	ArrayElement arr = (ArrayElement)Malloc(sizeof(struct _ArrayElement));
+	if(!IS_NULL(arr))
+	{
+		arr->array_name = (char*)Malloc(strlen(array_name)+1);
+		if(IS_NULL(arr->array_name) )
+		{
+			Free(arr);
+			LOG_ERROR("Malloc failed");
+			return NULL;
+		}
+		strcpy(arr->array_name, array_name);
+		arr->idx = Identifier_Clone(idx);
+		if(IS_NULL(arr->idx))
+		{
+			LOG_ERROR("Identifier_CLone() failed");
+			Free(arr->array_name);		/*Free free's only if its not NULL*/
+			Free(arr);
+		}
+	}
+	else
+	{
+		LOG_ERROR("Unable to create Map object");
+	}
+	return arr;
+}
+
+void ArrayElement_Delete(ArrayElement arr)
+{
+	Free(arr->array_name);
+	Identifier_Destroy(arr->idx);
+	Free(arr);
+}

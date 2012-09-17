@@ -8,50 +8,62 @@ extern unsigned int line_number;
 const char* token_to_str(int token);
 typedef enum
 {
-	IDENTIFIER_TYPE_UNKNOWN_START,
-	IDENTIFIER_TYPE_NUMBER,
-	IDENTIFIER_TYPE_STRING,
-	IDENTIFIER_TYPE_ARGUMENT,
-	IDENTIFIER_TYPE_VARIABLE,
-	IDENTIFIER_TYPE_REGISTER,
-	IDENTIFIER_TYPE_OBJECT,
-	IDENTIFIER_TYPE_MAP_ELEMENT,
-	IDENTIFIER_TYPE_UNKNOWN_END,
+    IDENTIFIER_TYPE_UNKNOWN_START,
+    IDENTIFIER_TYPE_NUMBER,
+    IDENTIFIER_TYPE_STRING,
+    IDENTIFIER_TYPE_ARGUMENT,
+    IDENTIFIER_TYPE_VARIABLE,
+    IDENTIFIER_TYPE_REGISTER,
+    IDENTIFIER_TYPE_OBJECT,
+    IDENTIFIER_TYPE_MAP_ELEMENT,
+    IDENTIFIER_TYPE_UNKNOWN_END,
 }IdentifierType;
 const char* IdentifierType_to_str(IdentifierType);
 
+struct _Identifier;
+typedef struct _Identifier *Identifier;
+
 typedef struct _Object
 {
-	char type[16];
-	int num_refs;
-	void (*obj_delete)(void *ptr);
-	void *priv_data;
+    char type[16];
+    int num_refs;
+    void (*obj_delete)(void *ptr);
+    void *priv_data;
 }*Object;
 
 typedef struct _MapElement
 {
-	char *map_name;
-	char *element_name;
+    char *map_name;
+    char *element_name;
 }*MapElement;
 
 MapElement MapElement_Create(const char *map_name, const char *element_name);
 void MapElement_Delete(MapElement m);
 
-
-typedef struct _Identifier
+typedef struct _ArrayElement
 {
-	IdentifierType type;
-	union
-	{
-		char 	*str;
-		char 	*variable_name;
-		int 	number;
-		int 	argument_number;
-		int		register_number;
-		Object	obj;
-		MapElement		map_element;
-	}u;
-}*Identifier;
+    char *array_name;
+    struct _Identifier *idx;
+}*ArrayElement;
+
+ArrayElement ArrayElement_Create(const char *array_name, Identifier idx);
+void ArrayElement_Delete(ArrayElement m);
+
+struct _Identifier
+{
+    IdentifierType type;
+    union
+    {
+        char            *str;
+        char            *variable_name;
+        int             number;
+        int             argument_number;
+        int             register_number;
+        Object          obj;
+        MapElement      map_element;
+        ArrayElement    array_element;
+    }u;
+};
 
 void Identifier_to_str(Identifier id, char * const buffer, const int size);
 
@@ -78,8 +90,8 @@ inline void Identifier_SetObject(Identifier dest, Object obj);
 
 typedef struct _IdentifierStack
 {
-	Identifier *list;
-	int top, size;
+    Identifier *list;
+    int top, size;
 }*IdentifierStack;
 
 IdentifierStack IdentifierStack_Create(void);
