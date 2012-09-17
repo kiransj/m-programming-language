@@ -90,7 +90,41 @@ Identifier GetIdentifier(Executable exe, Identifier A)
 					}
 					return i;
 				}
+		case IDENTIFIER_TYPE_ARRAY_ELEMENT:
+				{
+					Identifier i;
+					Identifier v = VariableList_FindVariable(exe->ec->local_variables, A->u.array_element->array_name);
+					if(IS_NULL(v))
+					{
+						RaiseException(exe, "VariableList_FindVariable('%s') failed hence stoping execution", A->u.array_element->array_name);
+						return NULL;
+					}
+					if(v->type != IDENTIFIER_TYPE_OBJECT || (strcmp(v->u.obj->type, "array") != 0))
+					{
+						Identifier i;
+						i = Array_Create();
+						if(IS_NULL(i))
+						{
+							RaiseException(exe, "Array_Create() failed hence stoping execution", A->u.variable_name);
+							return NULL;
+						}
+						Identifier_Copy(v, i);
+						Identifier_Destroy(i);
+					}
+					i = Array_FindIndex(v, A->u.array_element->idx);
+					if(IS_NULL(i))
+					{
+						if(STATUS_SUCCESS != Array_AddElement(v, A->u.array_element->idx, NULL))
+						{
+							RaiseException(exe, "Array_FindElement failed hence stoping execution");
+							return NULL;
+						}
+						i = Array_FindIndex(v, A->u.array_element->idx);
+					}
+					return i;
+				}
 		default:
+				LOG_ERROR("type %d not supported", A->type); 
 				abort();
 	}
 	return NULL;

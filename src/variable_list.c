@@ -214,3 +214,93 @@ STATUS Map_AddInt(Identifier Obj, const char *element_name, const int num)
 	}
 	return STATUS_FAILURE;
 }
+
+void array_delete(void *ptr)
+{
+	Array a = (Array)ptr, tmp;
+	while(!IS_NULL(a))
+	{
+		tmp = a->next;		
+		Identifier_Destroy(a->index);
+		Identifier_Destroy(a->value);
+		Free(a);
+		a = tmp;
+	}
+}
+Identifier Array_Create(void)
+{
+	Object o = (Object)Malloc(sizeof(struct _Object));
+	if(!IS_NULL(o))
+	{
+		Array a = (Array)Malloc(sizeof(struct _map));
+		memset(a, 0, sizeof(struct _map));
+		o->priv_data = (void*)a;
+		strcpy(o->type, "array");
+		o->obj_delete = array_delete;
+		return Identifier_NewObject(o);
+	}
+	else
+	{
+		LOG_ERROR("Malloc() failed");
+	}
+	return NULL;
+}
+
+Identifier Array_FindIndex(Identifier obj, Identifier index)
+{
+	Array a = (Array)obj->u.obj->priv_data;
+	while(!IS_NULL(a))
+	{
+		if(!IS_NULL(a->index) && (a->index->type == index->type))
+		{
+			switch(a->index->type)
+			{
+				case IDENTIFIER_TYPE_STRING:
+						if(0 == strcmp(a->index->u.str, index->u.str))
+						{
+							return a->value;
+						}
+						break;
+				case IDENTIFIER_TYPE_NUMBER:
+						if(a->index->u.number == index->u.number)
+						{
+							return a->value;
+						}
+						break;
+				default:
+						{
+							LOG_ERROR("unknown type %d in ArrayList", a->index->type);
+							abort();
+						}
+			}
+		}
+		a = a->next;
+	}
+	return NULL;
+}
+
+STATUS Array_AddElement(Identifier Obj, Identifier index, Identifier value)
+{
+	Array a = (Array)Obj->u.obj->priv_data, tmp;
+
+	if(index->type != IDENTIFIER_TYPE_STRING && index->type != IDENTIFIER_TYPE_NUMBER)
+	{
+		LOG_ERROR("invalid input type %d to ArrayAddElement()", index->type);
+		abort();
+	}
+
+	while(!IS_NULL(a))
+	{
+		tmp = a;
+		a = a->next;
+	}
+	tmp->next = (Array)Malloc(sizeof(struct _array));
+	if(IS_NULL(tmp->next))
+	{
+		LOG_ERROR("Malloc() failed");
+		return STATUS_FAILURE;
+	}
+	tmp->next->index = Identifier_Clone(index);
+	tmp->next->value = (IS_NULL(value)) ? Identifier_NewInteger(0) : Identifier_Clone(value);
+	return STATUS_SUCCESS;
+}

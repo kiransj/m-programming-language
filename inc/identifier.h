@@ -16,6 +16,7 @@ typedef enum
     IDENTIFIER_TYPE_REGISTER,
     IDENTIFIER_TYPE_OBJECT,
     IDENTIFIER_TYPE_MAP_ELEMENT,
+	IDENTIFIER_TYPE_ARRAY_ELEMENT,
     IDENTIFIER_TYPE_UNKNOWN_END,
 }IdentifierType;
 const char* IdentifierType_to_str(IdentifierType);
@@ -82,6 +83,7 @@ Identifier Identifier_NewInteger(const int number);
 Identifier Identifier_NewRegister(const int number);
 Identifier Identifier_NewObject(Object);
 Identifier Identifier_NewMap(const char *map_name, const char *element_name);
+Identifier Identifier_NewArray(const char *array_name, Identifier A);
 
 inline void Identifier_SetInt(Identifier a, int num);
 inline void Identifier_SetFloat(Identifier a, double num);
