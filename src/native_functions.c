@@ -17,9 +17,6 @@ Identifier Function_Output(Identifier *args, int num_args)
 			case IDENTIFIER_TYPE_NUMBER:
 					printf("%d", args[i]->u.number);
 					break;
-			case IDENTIFIER_TYPE_FLOAT:
-					printf("%lf", args[i]->u.real);
-					break;
 			case IDENTIFIER_TYPE_STRING:
 					printf("%s", args[i]->u.str);
 					break;
@@ -46,7 +43,6 @@ Identifier Function_Max(Identifier *args, int num_args)
 					}
 					break;
 
-			case IDENTIFIER_TYPE_FLOAT:
 			case IDENTIFIER_TYPE_STRING:
 					LOG_ERROR("invalid argument to Max() function of type string");
 					break;

@@ -112,12 +112,33 @@ simple_stmt ::= expr(A) stmt_end.                        {Identifier_Destroy(A);
     4. A combination of above 3 functions.
 */
 
+/*
+	Object refs Syntax.
+	obj->variable_name.
+
+	example Usage
+	var file;
+	file->name = "tmp.txt";
+	file->size = 100;
+
+	Recursive syntax is not allowed. That is
+
+	file->tmp->a; Syntax error
+
+*/
+
 %type object_refs {Identifier}
 object_refs(A) ::= TOKEN_TYPE_VARIABLE(B) OPERATOR_OBJECT_REF TOKEN_TYPE_VARIABLE(C).{
                                                                                         A=Identifier_NewMap(B->u.variable_name, C->u.variable_name);
                                                                                         Identifier_Destroy(B);
                                                                                         Identifier_Destroy(C);
                                                                                      }
+
+/*
+	Array feature implementation.
+	a[10] = "temp";
+	a["temp"] = 10;
+*/
 
 /*
     Primitive data type supported by M.
@@ -131,6 +152,13 @@ primitive_data_type(A) ::= TOKEN_TYPE_INTEGER(B).               {A = B;}
 primitive_data_type(A) ::= TOKEN_TYPE_STRING(B).                {A = B;}
 primitive_data_type(A) ::= TOKEN_TYPE_ARGUMENT(B).              {A = B;}
 primitive_data_type(A) ::= TOKEN_TYPE_VARIABLE(B).              {A = B;}
+
+/*
+	Syntax for array.
+	Array_name[primitive_data_type]. This syntax allows the following
+
+	a[10], system["time"], system[a]
+*/
 
 expr(A) ::= TOKEN_TYPE_FLOAT(B).                    {A = B;}
 expr(A) ::= function_call(B).                       {A = B;}
