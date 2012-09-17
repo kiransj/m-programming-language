@@ -29,7 +29,7 @@
 #define KEYWORD_ELSE                   29
 #define KEYWORD_ENDIF                  30
 #define KEYWORD_IF                     31
-#define KEYWORD_WHILE                  32
-#define KEYWORD_ENDWHILE               33
+#define KEYWORD_ENDWHILE               32
+#define KEYWORD_WHILE                  33
 #define KEYWORD_VAR                    34
 #define KEYWORD_RETURN                 35

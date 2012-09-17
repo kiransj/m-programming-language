@@ -13,32 +13,32 @@ void Identifier_to_str(Identifier id, char * const buffer, const int size)
 	switch(id->type)
 	{
 
-		case IDENTIFIER_TYPE_NUMBER:	
+		case IDENTIFIER_TYPE_NUMBER:
 			{
 				snprintf(buffer, size, "int(%d)", id->u.number);
 				break;
 			}
-		case IDENTIFIER_TYPE_FLOAT:		
+		case IDENTIFIER_TYPE_FLOAT:
 			{
 				snprintf(buffer, size, "float(%lf)", id->u.real);
 				break;
 			}
-		case IDENTIFIER_TYPE_STRING:	
-			{	
+		case IDENTIFIER_TYPE_STRING:
+			{
 				snprintf(buffer, size, "string(%s)", id->u.str);
 				break;
 			}
-		case IDENTIFIER_TYPE_ARGUMENT:	
+		case IDENTIFIER_TYPE_ARGUMENT:
 			{
 				snprintf(buffer, size, "arg(%d)", id->u.argument_number);
 				break;
 			}
-		case IDENTIFIER_TYPE_VARIABLE:	
+		case IDENTIFIER_TYPE_VARIABLE:
 			{
 				snprintf(buffer, size, "var(%s)", id->u.variable_name);
 				break;
 			}
-		case IDENTIFIER_TYPE_REGISTER:	
+		case IDENTIFIER_TYPE_REGISTER:
 			{
 				snprintf(buffer, size, "reg(%d)", id->u.register_number);
 				break;
@@ -48,8 +48,8 @@ void Identifier_to_str(Identifier id, char * const buffer, const int size)
 				snprintf(buffer, size, "map(%s->%s)", id->u.map_element->map_name, id->u.map_element->element_name);
 				break;
 			}
-		default: 
-			strcpy(buffer, "unknown"); 
+		default:
+			strcpy(buffer, "unknown");
 			return;
 	}
 	return;
@@ -88,7 +88,7 @@ Identifier Identifier_NewString(const char *str)
 		{
 			Identifier_Destroy(i);
 			i = NULL;
-		}	
+		}
 	}
 	else
 	{
@@ -315,7 +315,7 @@ void Identifier_Copy(Identifier dest, Identifier src)
 }
 
 void Identifier_SetObject(Identifier dest, Object obj)
-{	
+{
 	Identifier_Free(dest);
 	dest->type = IDENTIFIER_TYPE_OBJECT;
 	dest->u.obj = obj;
@@ -367,7 +367,7 @@ void Identifier_Free(Identifier t)
 	{
 		Free(t->u.variable_name);
 	}
-	else if(t->type == IDENTIFIER_TYPE_OBJECT)	
+	else if(t->type == IDENTIFIER_TYPE_OBJECT)
 	{
 		t->u.obj->num_refs--;
 		if(t->u.obj->num_refs == 0)

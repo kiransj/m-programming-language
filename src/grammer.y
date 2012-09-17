@@ -49,7 +49,7 @@ program ::= program    function_body.
 
 function_decl_start ::= KEYWORD_FUNCTION TOKEN_TYPE_VARIABLE(A)  OPERATOR_OPEN_PAREN   OPERATOR_CLOSE_PAREN.  {Command_NewFunction(compiler, A);}
 function_decl_end   ::= KEYWORD_ENDFUNCTION.                                                                  {Command_EndFunction(compiler);}
-function_body        ::= function_decl_start stmt function_decl_end.
+function_body       ::= function_decl_start stmt function_decl_end.
 
 /*
     Statments can consists of the following.

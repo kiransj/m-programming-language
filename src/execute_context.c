@@ -107,13 +107,13 @@ void Execute_Mul(Identifier A, Identifier B, Identifier C)
 	Identifier_SetInt(C, answer);
 }
 void Execute_Add(Executable exe, Identifier A, Identifier B, Identifier C)
-{	
+{
 	if(exe->error_flag)
 	{
 		LOG_ERROR("Addition could not be completed due to error");
 		return;
 	}
-	
+
 	if(A->type == IDENTIFIER_TYPE_NUMBER)
 	{
 		if(B->type == IDENTIFIER_TYPE_NUMBER)
@@ -139,7 +139,7 @@ void Execute_Add(Executable exe, Identifier A, Identifier B, Identifier C)
 				RaiseException(exe, "Malloc() failed");
 				return;
 			}
-		
+
 		}
 		else
 		{
@@ -254,7 +254,7 @@ void Execute_Cmp(Executable exe, Identifier A, Identifier B, Identifier C)
 	}
 	else if(A->type == IDENTIFIER_TYPE_NUMBER && B->type == IDENTIFIER_TYPE_NUMBER)
 	{
-		answer = A->u.number == B->u.number;	
+		answer = A->u.number == B->u.number;
 	}
 	else
 	{
@@ -347,12 +347,12 @@ void Execute_Equ(Executable exe, Identifier A, Identifier B, Identifier C)
 	else if(B->type == IDENTIFIER_TYPE_FLOAT)
 	{
 		Identifier_SetFloat(A, B->u.real);
-		Identifier_SetFloat(C, B->u.real);	
+		Identifier_SetFloat(C, B->u.real);
 	}
 	else if(B->type == IDENTIFIER_TYPE_OBJECT)
 	{
 		Identifier_SetObject(A, B->u.obj);
-		Identifier_SetObject(C, B->u.obj);	
+		Identifier_SetObject(C, B->u.obj);
 	}
 	else
 	{
@@ -402,7 +402,7 @@ void Execute_Call(Executable exe, const char *fun_name, int num_args, Identifier
 	if(IS_NULL(func))
 	{
 		RaiseException(exe, "func '%s' not found", fun_name);
-		return; 
+		return;
 	}
 
 	if(exe->ec_top == (exe->ec_size-1))
@@ -470,14 +470,14 @@ STATUS Execute_Return(Executable exe, Identifier ret)
 	else
 	{
 		exe->ec = exe->ec_list[exe->ec_top];
-		Identifier_Copy(GetIdentifier(exe, exe->ec->cur_ptr->C), ret_value);		
+		Identifier_Copy(GetIdentifier(exe, exe->ec->cur_ptr->C), ret_value);
 	}
 	Identifier_Destroy(ret_value);
 	return STATUS_SUCCESS;
-}	
+}
 
 STATUS ExecutionContext_Execute(Executable exe, const char *func_name, Identifier i)
-{	
+{
 	FunctionList func;
 
 	exe->ec = exe->ec_list[++exe->ec_top] = ExecutionContext_Create(NULL);
@@ -485,7 +485,7 @@ STATUS ExecutionContext_Execute(Executable exe, const char *func_name, Identifie
 	if(IS_NULL(func) || (func->type != FUNCTION_TYPE_LOCAL))
 	{
 		LOG_ERROR("func '%s' not found", func_name);
-		return STATUS_FAILURE; 
+		return STATUS_FAILURE;
 	}
 	exe->ec->num_args = IS_NULL(i) ? 1 : 2;
 	exe->ec->args = (Identifier*)Malloc(sizeof(Identifier) * exe->ec->num_args);
@@ -577,7 +577,7 @@ STATUS ExecutionContext_Execute(Executable exe, const char *func_name, Identifie
 						if(!IS_NULL(id))
 						{
 							IdentifierStack_Push(exe->is, id);
-						}						
+						}
 						break;
 					}
 			case CALL:

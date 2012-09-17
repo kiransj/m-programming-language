@@ -11,7 +11,7 @@
 unsigned int line_number = 1;
 
 /*Comment the below code to print the byte code*/
-#ifndef PRINT_BYTE_CODE 
+#ifndef PRINT_BYTE_CODE
 
 #ifdef LOG_INFO_NL
 #undef LOG_INFO_NL
@@ -110,8 +110,8 @@ int Command_ConditionStmt(Compiler c, CompilerCmd cmd, Identifier A)
 			c->label_stack = (int*)ReAlloc(c->label_stack, sizeof(int) * c->label_size);
 		}
 
-		c->label_stack[++c->label_top] = c->label_number++;	
-		c->label_stack[++c->label_top] = c->label_number++;		
+		c->label_stack[++c->label_top] = c->label_number++;
+		c->label_stack[++c->label_top] = c->label_number++;
 
 		Identifier_to_str(A, buf1, 64);
 		LOG_INFO_NL("JZ %s, %d", buf1, c->label_stack[c->label_top]);
@@ -127,9 +127,9 @@ int Command_ConditionStmt(Compiler c, CompilerCmd cmd, Identifier A)
 
 		c->label_stack[++c->label_top] = c->label_number++;
 		LOG_INFO_NL("JUMP %d",  label_number);
-		LOG_INFO_NL("LABEL_%d:", label_number_tmp);		
+		LOG_INFO_NL("LABEL_%d:", label_number_tmp);
 
-		Executable_AddCmd(exe, JUMP, NULL, NULL, NULL, label_number);						
+		Executable_AddCmd(exe, JUMP, NULL, NULL, NULL, label_number);
 		Executable_AddCmd(exe, LABEL, NULL, NULL, NULL, label_number_tmp);
 	}
 	else if(STMT_ELIF_KEYWORD == cmd)
@@ -138,9 +138,9 @@ int Command_ConditionStmt(Compiler c, CompilerCmd cmd, Identifier A)
 		int label_number     = c->label_stack[c->label_top];
 
 		LOG_INFO_NL("JUMP %d",  label_number);
-		LOG_INFO_NL("LABEL_%d:", label_number_tmp);		
+		LOG_INFO_NL("LABEL_%d:", label_number_tmp);
 
-		Executable_AddCmd(exe, JUMP, NULL, NULL, NULL, label_number);						
+		Executable_AddCmd(exe, JUMP, NULL, NULL, NULL, label_number);
 		Executable_AddCmd(exe, LABEL, NULL, NULL, NULL, label_number_tmp);
 	}
 	else if(STMT_ELIF_CONDITION == cmd)
@@ -149,7 +149,7 @@ int Command_ConditionStmt(Compiler c, CompilerCmd cmd, Identifier A)
 		c->label_stack[++c->label_top] = label_number;
 		Identifier_to_str(A, buf1, 64);
 		LOG_INFO_NL("JZ %s, %d", buf1, label_number);
-		
+
 		Executable_AddCmd(exe, JZ, A, NULL, NULL, label_number);
 		Identifier_Destroy(A);
 	}
@@ -215,7 +215,7 @@ Identifier Command_function_call(Compiler c, Identifier A, int num_args)
 	if(c->max_num_reg < c->reg_num)
 	{
 		c->max_num_reg = c->reg_num;
-	}	
+	}
 	Identifier_to_str(res, buf2, 64);
 	LOG_INFO_NL("CALL %s, %d, %s", A->u.variable_name, num_args, buf2);
 	Executable_AddCmd(exe, CALL, A, NULL, res, num_args);
@@ -375,7 +375,7 @@ STATUS Compile(Executable exe, const char *filename)
 			fprintf(stderr, "stopping parsing due to syntax error\n");
 			break;
 		}
-	}	
+	}
 	Parse(pParser, 0, yylval, c);
 	ParseFree(pParser, Free);
 

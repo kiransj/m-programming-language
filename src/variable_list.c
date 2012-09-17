@@ -167,7 +167,7 @@ Identifier Map_FindElement(Identifier m, const char *element_name)
 {
 	Identifier i;
 	Map map = (Map)m->u.obj->priv_data;
-	
+
 	i = VariableList_FindVariable(map->list,element_name);
 	if(IS_NULL(i))
 	{
@@ -176,7 +176,7 @@ Identifier Map_FindElement(Identifier m, const char *element_name)
 		{
 			LOG_ERROR("VariableList_AddVariable() failed");
 			Identifier_Destroy(i);
-			return NULL; 
+			return NULL;
 		}
 		Identifier_Destroy(i);
 		i = VariableList_FindVariable(map->list, element_name);

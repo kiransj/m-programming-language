@@ -2,7 +2,7 @@
 #include <string.h>
 #include "native_functions.h"
 #include "variable_list.h"
-/* 
+/*
  * To avoid memory leaks please follow the following rules.
  * Every return value should be created here or cloned here
  */
@@ -19,7 +19,7 @@ Identifier Function_Output(Identifier *args, int num_args)
 					break;
 			case IDENTIFIER_TYPE_FLOAT:
 					printf("%lf", args[i]->u.real);
-					break;				
+					break;
 			case IDENTIFIER_TYPE_STRING:
 					printf("%s", args[i]->u.str);
 					break;
@@ -47,7 +47,7 @@ Identifier Function_Max(Identifier *args, int num_args)
 					break;
 
 			case IDENTIFIER_TYPE_FLOAT:
-			case IDENTIFIER_TYPE_STRING:					
+			case IDENTIFIER_TYPE_STRING:
 					LOG_ERROR("invalid argument to Max() function of type string");
 					break;
 			default:
@@ -107,7 +107,7 @@ Identifier Function_KeyValue(Identifier *args, int num_args)
 		obj->priv_data = (void*)keyValue;
 		obj->obj_delete = KeyValue_delete;
 		strcpy(obj->type, "keyvalue");
-		i = Identifier_NewObject(obj); 
+		i = Identifier_NewObject(obj);
 	}
 	return i;
 }
@@ -197,7 +197,7 @@ Identifier Function_KeyValueNext(Identifier *args, int num_args)
 			return Identifier_NewInteger(0);
 		}
 		keyValue->cur_ptr = keyValue->cur_ptr->next;
-		
+
 		if(!IS_NULL(keyValue->cur_ptr))
 		{
 			Identifier obj = Map_Create();
@@ -239,7 +239,7 @@ Identifier Function_FileListObject(Identifier *args, int num_args)
 	FileList fl = NULL;
 	if(num_args != 1 && args[1]->type != IDENTIFIER_TYPE_STRING)
 	{
-		LOG_ERROR("Usage: FileListObject(pathname)");	
+		LOG_ERROR("Usage: FileListObject(pathname)");
 		return Identifier_NewInteger(0);
 	}
 	fl = (FileList)Malloc(sizeof(struct _filelist_));
@@ -280,12 +280,12 @@ Identifier Function_FileListGet(Identifier *args, int num_args)
 	fl->d = readdir(fl->dir);
 	if(!IS_NULL(fl->d))
 	{
-		struct stat st;			
+		struct stat st;
 		char full_path[128];
 		snprintf(full_path, 128, "%s/%s", fl->path, fl->d->d_name);
 		if(stat(full_path, &st) == 0)
 		{
-			Identifier obj = Map_Create();			
+			Identifier obj = Map_Create();
 			Map_AddString(obj,"name", full_path);
 			Map_AddInt(obj,"size", (int)st.st_size);
 			Map_AddInt(obj, "isdir", (int)S_ISDIR(st.st_mode));
