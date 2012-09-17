@@ -21,9 +21,9 @@
 #define OPERATOR_SEMI_COLON            21
 #define OPERATOR_OBJECT_REF            22
 #define TOKEN_TYPE_INTEGER             23
-#define TOKEN_TYPE_FLOAT               24
-#define TOKEN_TYPE_STRING              25
-#define TOKEN_TYPE_ARGUMENT            26
+#define TOKEN_TYPE_STRING              24
+#define TOKEN_TYPE_ARGUMENT            25
+#define TOKEN_TYPE_FLOAT               26
 #define OPERATOR_COMMA                 27
 #define KEYWORD_ELIF                   28
 #define KEYWORD_ELSE                   29

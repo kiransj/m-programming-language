@@ -119,16 +119,26 @@ object_refs(A) ::= TOKEN_TYPE_VARIABLE(B) OPERATOR_OBJECT_REF TOKEN_TYPE_VARIABL
 																						Identifier_Destroy(C);
 																					 }
 
-expr(A) ::= TOKEN_TYPE_INTEGER(B).					{A = Identifier_Clone(B); Identifier_Destroy(B);}
-expr(A) ::= TOKEN_TYPE_FLOAT(B).					{A = Identifier_Clone(B); Identifier_Destroy(B);}
-expr(A) ::= TOKEN_TYPE_STRING(B).					{A = Identifier_Clone(B); Identifier_Destroy(B);}
-expr(A) ::= TOKEN_TYPE_ARGUMENT(B).					{A = Identifier_Clone(B); Identifier_Destroy(B);}
-expr(A) ::= TOKEN_TYPE_VARIABLE(B).					{A = Identifier_Clone(B); Identifier_Destroy(B);}
-expr(A) ::= function_call(B).						{A = Identifier_Clone(B); Identifier_Destroy(B);}
-expr(A) ::= object_refs(B).						    {A = Identifier_Clone(B); Identifier_Destroy(B);}
+/*
+	Primitive data type supported by M.
+	Integers : 0, 1 etc
+	Strings  : "string", "str" etc
+	Arguments : $0 => number of arguments, $1, $2 etc...
+	Variable  : a, b etc, which are decalared using the var keyword
+*/
+
+primitive_data_type(A) ::= TOKEN_TYPE_INTEGER(B).				{A = B;}
+primitive_data_type(A) ::= TOKEN_TYPE_STRING(B).				{A = B;}
+primitive_data_type(A) ::= TOKEN_TYPE_ARGUMENT(B).				{A = B;}
+primitive_data_type(A) ::= TOKEN_TYPE_VARIABLE(B).				{A = B;}
+
+expr(A) ::= TOKEN_TYPE_FLOAT(B).				    {A = B;}
+expr(A) ::= function_call(B).						{A = B;}
+expr(A) ::= object_refs(B).						    {A = B;}
+expr(A) ::= primitive_data_type(B).				    {A = B;}
 
 /*Handle negative number*/
-expr(A) ::= OPERATOR_SUB TOKEN_TYPE_INTEGER(B).		{B->u.number = -B->u.number; A = Identifier_Clone(B); Identifier_Destroy(B);}
+expr(A) ::= OPERATOR_SUB TOKEN_TYPE_INTEGER(B).		{B->u.number = -B->u.number; A = B;}
 /*
 	The defination of mathamatical operations supported
 	by this language. These operations can be performed on
@@ -147,12 +157,12 @@ expr(A) ::= expr(B) OPERATOR_CMP   expr(C).				{A = Command_Operation(compiler, 
 expr(A) ::= expr(B) OPERATOR_NEQ   expr(C).				{A = Command_Operation(compiler, B, NEQ, C);	}
 expr(A) ::= expr(B) OPERATOR_OR    expr(C).				{A = Command_Operation(compiler, B, OR,  C);	}
 expr(A) ::= expr(B) OPERATOR_AND   expr(C).				{A = Command_Operation(compiler, B, AND, C);	}
-expr(A) ::= OPERATOR_NOT	expr(C).						{A = Command_Operation(compiler, NULL, NOT, C);	}
+expr(A) ::= OPERATOR_NOT	expr(C).					{A = Command_Operation(compiler, NULL, NOT, C);	}
 
 /*
 	Handle parenthisis in the expressions.
 */
-expr(A) ::= OPERATOR_OPEN_PAREN  expr(B) OPERATOR_CLOSE_PAREN.  {A = Identifier_Clone(B); Identifier_Destroy(B);}
+expr(A) ::= OPERATOR_OPEN_PAREN  expr(B) OPERATOR_CLOSE_PAREN.  {A = B;}
 
 /*
 	The assignment operations has restrictions.
@@ -204,7 +214,7 @@ argument_list(A) ::= argument_list(B) OPERATOR_COMMA expr(C).       { A=B+1; Com
 	The stmts are executed if the expression returns a non zero value.
 */
 
-conditional_expression(A) ::= OPERATOR_OPEN_PAREN expr(B) OPERATOR_CLOSE_PAREN. 		{ A = Identifier_Clone(B); Identifier_Destroy(B);}
+conditional_expression(A) ::= OPERATOR_OPEN_PAREN expr(B) OPERATOR_CLOSE_PAREN. 		{ A = B;}
 
 elif_keyword		 ::= KEYWORD_ELIF.												{Command_ConditionStmt(compiler, STMT_ELIF_KEYWORD, NULL);} 
 elif_condition       ::= elif_keyword conditional_expression(B). 					{Command_ConditionStmt(compiler, STMT_ELIF_CONDITION, B);} 
