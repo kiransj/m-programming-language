@@ -232,8 +232,9 @@ Identifier Array_Create(void)
 	Object o = (Object)Malloc(sizeof(struct _Object));
 	if(!IS_NULL(o))
 	{
-		Array a = (Array)Malloc(sizeof(struct _map));
+		Array a = (Array)Malloc(sizeof(struct _array));
 		memset(a, 0, sizeof(struct _map));
+		a->value = NULL;
 		o->priv_data = (void*)a;
 		strcpy(o->type, "array");
 		o->obj_delete = array_delete;
