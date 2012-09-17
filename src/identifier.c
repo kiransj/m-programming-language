@@ -18,11 +18,6 @@ void Identifier_to_str(Identifier id, char * const buffer, const int size)
 				snprintf(buffer, size, "int(%d)", id->u.number);
 				break;
 			}
-		case IDENTIFIER_TYPE_FLOAT:
-			{
-				snprintf(buffer, size, "float(%lf)", id->u.real);
-				break;
-			}
 		case IDENTIFIER_TYPE_STRING:
 			{
 				snprintf(buffer, size, "string(%s)", id->u.str);
@@ -60,7 +55,6 @@ const char* IdentifierType_to_str(IdentifierType type)
 	{
 
 		case IDENTIFIER_TYPE_NUMBER:	return "int";
-		case IDENTIFIER_TYPE_FLOAT:		return "float";
 		case IDENTIFIER_TYPE_STRING:	return "string";
 		case IDENTIFIER_TYPE_ARGUMENT:	return "arg";
 		case IDENTIFIER_TYPE_VARIABLE:	return "var";
@@ -123,20 +117,6 @@ Identifier Identifier_NewVariable(const char *variable_name)
 	return i;
 }
 
-Identifier Identifier_NewFloat(const double real)
-{
-	Identifier i = Identifier_Create();
-	if(!IS_NULL(i))
-	{
-		i->type = IDENTIFIER_TYPE_FLOAT;
-		i->u.real = real;
-	}
-	else
-	{
-		LOG_ERROR("Identifier_Create() failed");
-	}
-	return i;
-}
 
 Identifier Identifier_NewArgument(const int argument_number)
 {
@@ -247,11 +227,6 @@ Identifier Identifier_Clone(Identifier a)
 				i = Identifier_NewRegister(a->u.register_number);
 				break;
 			}
-		case IDENTIFIER_TYPE_FLOAT:
-			{
-				i = Identifier_NewFloat(a->u.real);
-				break;
-			}
 		case IDENTIFIER_TYPE_ARGUMENT:
 			{
 				i = Identifier_NewArgument(a->u.argument_number);
@@ -294,11 +269,6 @@ void Identifier_Copy(Identifier dest, Identifier src)
 				Identifier_SetInt(dest, src->u.number);
 				break;
 			}
-		case IDENTIFIER_TYPE_FLOAT:
-			{
-				Identifier_SetFloat(dest, src->u.real);
-				break;
-			}
 		case IDENTIFIER_TYPE_OBJECT:
 			{
 				Identifier_SetObject(dest, src->u.obj);
@@ -334,13 +304,6 @@ void Identifier_SetString(Identifier a, char *str)
 	a->u.str = (char*)Malloc(strlen(str)+1);
 	strcpy(a->u.str, str);
 }
-void Identifier_SetFloat(Identifier a, double num)
-{
-	Identifier_Free(a);
-	a->type = IDENTIFIER_TYPE_FLOAT;
-	a->u.real = num;
-}
-
 Identifier Identifier_Create(void)
 {
 	Identifier id = NULL;

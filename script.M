@@ -75,7 +75,7 @@ function Main()
 
 	v := 14;		
 	output("Fibonacci("+v+") := " + Fibonacci(v));
-	output("Fact(10) = " + Factorial(10));
+	output("Fact(10) = " + Factorial(10) + " ");
 	return (11);
 endfunction
 

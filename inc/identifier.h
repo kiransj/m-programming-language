@@ -10,7 +10,6 @@ typedef enum
 {
 	IDENTIFIER_TYPE_UNKNOWN_START,
 	IDENTIFIER_TYPE_NUMBER,
-	IDENTIFIER_TYPE_FLOAT,	
 	IDENTIFIER_TYPE_STRING,
 	IDENTIFIER_TYPE_ARGUMENT,
 	IDENTIFIER_TYPE_VARIABLE,
@@ -46,7 +45,6 @@ typedef struct _Identifier
 	{
 		char 	*str;
 		char 	*variable_name;
-		double 	real;
 		int 	number;
 		int 	argument_number;
 		int		register_number;

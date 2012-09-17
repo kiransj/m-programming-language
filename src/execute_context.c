@@ -32,7 +32,6 @@ Identifier GetIdentifier(Executable exe, Identifier A)
 {
 	switch(A->type)
 	{
-		case IDENTIFIER_TYPE_FLOAT:
 		case IDENTIFIER_TYPE_STRING:
 		case IDENTIFIER_TYPE_NUMBER:
 		case IDENTIFIER_TYPE_OBJECT:
@@ -343,11 +342,6 @@ void Execute_Equ(Executable exe, Identifier A, Identifier B, Identifier C)
 	{
 		Identifier_SetInt(A, B->u.number);
 		Identifier_SetInt(C, B->u.number);
-	}
-	else if(B->type == IDENTIFIER_TYPE_FLOAT)
-	{
-		Identifier_SetFloat(A, B->u.real);
-		Identifier_SetFloat(C, B->u.real);
 	}
 	else if(B->type == IDENTIFIER_TYPE_OBJECT)
 	{
@@ -685,8 +679,6 @@ int ExecutionContext_GetReturnValue(Executable exe)
 	{
 		case IDENTIFIER_TYPE_NUMBER:
 				return exe->ret_value->u.number;
-		case IDENTIFIER_TYPE_FLOAT:
-				return (int)exe->ret_value->u.real;
 		case IDENTIFIER_TYPE_STRING:
 				return atoi(exe->ret_value->u.str);
 		default:
