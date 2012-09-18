@@ -92,7 +92,7 @@ Identifier GetIdentifier(Executable exe, Identifier A)
 				}
 		case IDENTIFIER_TYPE_ARRAY_ELEMENT:
 				{
-					Identifier i;
+					Identifier i, tmp;
 					Identifier v = VariableList_FindVariable(exe->ec->local_variables, A->u.array_element->array_name);
 					if(IS_NULL(v))
 					{
@@ -111,16 +111,21 @@ Identifier GetIdentifier(Executable exe, Identifier A)
 						Identifier_Copy(v, i);
 						Identifier_Destroy(i);
 					}
-					i = Array_FindIndex(v, A->u.array_element->idx);
+					tmp = A->u.array_element->idx;
+					if(!(A->u.array_element->idx->type == IDENTIFIER_TYPE_STRING || A->u.array_element->idx->type == IDENTIFIER_TYPE_NUMBER))
+					{
+						tmp = GetIdentifier(exe,A->u.array_element->idx);
+					}
+					i = Array_FindIndex(v, tmp);
 					if(IS_NULL(i))
 					{
-						if(STATUS_SUCCESS != Array_AddElement(v, A->u.array_element->idx, NULL))
+						if(STATUS_SUCCESS != Array_AddElement(v, tmp, NULL))
 						{
 							RaiseException(exe, "Array_FindElement failed hence stoping execution");
 							return NULL;
 						}
-						i = Array_FindIndex(v, A->u.array_element->idx);
-					}
+						i = Array_FindIndex(v, tmp);
+					}					
 					return i;
 				}
 		default:
