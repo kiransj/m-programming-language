@@ -2,7 +2,7 @@ GCC=gcc
 AR=ar
 CFLAGS := -g 
 WARNINGS:= -Wall
-LEMON:=lemon
+LEMON:=./lemon/lemon.out
 
 FEATURES := -DENABLE_KEY_VALUE #-DPRINT_BYTE_CODE
 
@@ -44,7 +44,7 @@ $(M_LIB):$(COMPILER_OBJECTS)
 	@echo "building $(M_LIB)"
 	@rm -f $(M_LIB)
 	@$(AR) -q $(M_LIB) $(COMPILER_OBJECTS)
-	
+
 %.o:%.l
 	@echo "compiling $^"
 	@flex --outfile=`dirname $^`/`basename $^ .l`.c $(LEXER_FILE)
