@@ -47,6 +47,8 @@
 "&&"       {  return OPERATOR_AND;}
 "("        {  return OPERATOR_OPEN_PAREN;}
 ")"        {  return OPERATOR_CLOSE_PAREN;}
+"["        {  return OPERATOR_OPEN_SQUARE;}
+"]"        {  return OPERATOR_CLOSE_SQUARE;}
 ";"        {  return OPERATOR_SEMI_COLON;}
 ","        {  return OPERATOR_COMMA;}
 

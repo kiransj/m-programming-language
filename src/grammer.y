@@ -113,17 +113,17 @@ simple_stmt ::= expr(A) stmt_end.                        {Identifier_Destroy(A);
 */
 
 /*
-	Object refs Syntax.
-	obj->variable_name.
+    Object refs Syntax.
+    obj->variable_name.
 
-	example Usage
-	var file;
-	file->name = "tmp.txt";
-	file->size = 100;
+    example Usage
+    var file;
+    file->name = "tmp.txt";
+    file->size = 100;
 
-	Recursive syntax is not allowed. That is
+    Recursive syntax is not allowed. That is
 
-	file->tmp->a; Syntax error
+    file->tmp->a; Syntax error
 
 */
 
@@ -135,11 +135,16 @@ object_refs(A) ::= TOKEN_TYPE_VARIABLE(B) OPERATOR_OBJECT_REF TOKEN_TYPE_VARIABL
                                                                                      }
 
 /*
-	Array feature implementation.
-	a[10] = "temp";
-	a["temp"] = 10;
+    Array feature implementation.
+    a[10] = "temp";
+    a["temp"] = 10;
 */
-
+%type array_refs {Identifier}
+array_refs(A) ::= TOKEN_TYPE_VARIABLE(B) OPERATOR_OPEN_SQUARE expr(C) OPERATOR_CLOSE_SQUARE.{
+                                                                                               A=Identifier_NewArray(B->u.variable_name, C);
+                                                                                               Identifier_Destroy(B);
+                                                                                               Identifier_Destroy(C);
+                                                                                           }
 /*
     Primitive data type supported by M.
     Integers : 0, 1 etc
@@ -154,16 +159,16 @@ primitive_data_type(A) ::= TOKEN_TYPE_ARGUMENT(B).              {A = B;}
 primitive_data_type(A) ::= TOKEN_TYPE_VARIABLE(B).              {A = B;}
 
 /*
-	Syntax for array.
-	Array_name[primitive_data_type]. This syntax allows the following
+    Syntax for array.
+    Array_name[primitive_data_type]. This syntax allows the following
 
-	a[10], system["time"], system[a]
+    a[10], system["time"], system[a]
 */
 
-expr(A) ::= TOKEN_TYPE_FLOAT(B).                    {A = B;}
+expr(A) ::= primitive_data_type(B).                 {A = B;}
 expr(A) ::= function_call(B).                       {A = B;}
 expr(A) ::= object_refs(B).                         {A = B;}
-expr(A) ::= primitive_data_type(B).                 {A = B;}
+expr(A) ::= array_refs(B).                          {A = B;}
 
 /*Handle negative number*/
 expr(A) ::= OPERATOR_SUB TOKEN_TYPE_INTEGER(B).        {B->u.number = -B->u.number; A = B;}
@@ -206,6 +211,7 @@ expr(A) ::= OPERATOR_OPEN_PAREN  expr(B) OPERATOR_CLOSE_PAREN.  {A = B;}
 
 expr(A) ::= TOKEN_TYPE_VARIABLE(B) OPERATOR_EQU   expr(C).    { A = Command_Operation(compiler, B, EQU, C); }
 expr(A) ::= object_refs(B)         OPERATOR_EQU   expr(C).    { A = Command_Operation(compiler, B, EQU, C); }
+expr(A) ::= array_refs(B)          OPERATOR_EQU   expr(C).    { A = Command_Operation(compiler, B, EQU, C); }
 
 /*
     Function call grammer.

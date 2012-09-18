@@ -43,6 +43,13 @@ void Identifier_to_str(Identifier id, char * const buffer, const int size)
 				snprintf(buffer, size, "map(%s->%s)", id->u.map_element->map_name, id->u.map_element->element_name);
 				break;
 			}
+		case IDENTIFIER_TYPE_ARRAY_ELEMENT:
+			{
+				char buffer1[1024];
+				Identifier_to_str(id->u.array_element->idx, buffer1, 1024);
+				snprintf(buffer, size, "%s[%s]", id->u.array_element->array_name, buffer1);
+				break;
+			}		
 		default:
 			strcpy(buffer, "unknown");
 			return;
@@ -174,12 +181,24 @@ Identifier Identifier_NewMap(const char *map_name, const char *element_name)
 	if(IS_NULL(i->u.map_element))
 	{
 		Identifier_Destroy(i);
-		LOG_ERROR("Map_Create() failed");
+		LOG_ERROR("MapElement_Create() failed");
 		i = NULL;
 	}
 	return i;
 }
-
+Identifier Identifier_NewArray(const char *array_name, Identifier A)
+{
+	Identifier i = Identifier_Create();
+	i->type = IDENTIFIER_TYPE_ARRAY_ELEMENT;
+	i->u.array_element = ArrayElement_Create(array_name, A);
+	if(IS_NULL(i->u.array_element))
+	{
+		Identifier_Destroy(i);
+		LOG_ERROR("ArrayElement_Create() failed");
+		i = NULL;
+	}
+	return i;
+}
 Identifier Identifier_NewObject(Object object)
 {
 	Identifier i = Identifier_Create();
@@ -244,6 +263,13 @@ Identifier Identifier_Clone(Identifier a)
 				i->u.map_element = MapElement_Create(a->u.map_element->map_name, a->u.map_element->element_name);
 				break;
 			}
+		case IDENTIFIER_TYPE_ARRAY_ELEMENT:
+			{
+				i = Identifier_Create();
+				i->type = IDENTIFIER_TYPE_ARRAY_ELEMENT;
+				i->u.array_element = ArrayElement_Create(a->u.array_element->array_name, a->u.array_element->idx);
+				break;
+			}		
 		default:
 			{
 				LOG_ERROR("unkown type %u", a->type);
@@ -343,8 +369,13 @@ void Identifier_Free(Identifier t)
 	{
 		MapElement_Delete(t->u.map_element);
 	}
+	else if(t->type == IDENTIFIER_TYPE_ARRAY_ELEMENT)
+	{
+		ArrayElement_Delete(t->u.array_element);
+	}
 	else if(t->type <= IDENTIFIER_TYPE_UNKNOWN_START || t->type >= IDENTIFIER_TYPE_UNKNOWN_END)
 	{
+		LOG_ERROR("type %d not supported", t->type);
 		abort();
 	}
 	return;
@@ -472,4 +503,40 @@ void MapElement_Delete(MapElement m)
 	Free(m->map_name);
 	Free(m->element_name);
 	Free(m);
+}
+
+
+ArrayElement ArrayElement_Create(const char *array_name, Identifier idx)
+{
+	ArrayElement arr = (ArrayElement)Malloc(sizeof(struct _ArrayElement));
+	if(!IS_NULL(arr))
+	{
+		arr->array_name = (char*)Malloc(strlen(array_name)+1);
+		if(IS_NULL(arr->array_name) )
+		{
+			Free(arr);
+			LOG_ERROR("Malloc failed");
+			return NULL;
+		}
+		strcpy(arr->array_name, array_name);
+		arr->idx = Identifier_Clone(idx);
+		if(IS_NULL(arr->idx))
+		{
+			LOG_ERROR("Identifier_CLone() failed");
+			Free(arr->array_name);		/*Free free's only if its not NULL*/
+			Free(arr);
+		}
+	}
+	else
+	{
+		LOG_ERROR("Unable to create Map object");
+	}
+	return arr;
+}
+
+void ArrayElement_Delete(ArrayElement arr)
+{
+	Free(arr->array_name);
+	Identifier_Destroy(arr->idx);
+	Free(arr);
 }

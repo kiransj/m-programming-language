@@ -30,4 +30,17 @@ Identifier Map_FindElement(Identifier m, const char *element_name);
 STATUS Map_AddElement(Identifier Obj, const char *element_name, Identifier value);
 STATUS Map_AddInt(Identifier Obj, const char *element_name, const int num);
 STATUS Map_AddString(Identifier Obj, const char *element_name, const char *string);
+
+typedef struct _array
+{
+	Identifier index;
+	Identifier value;
+	struct _array *next;
+}*Array;
+
+Identifier Array_Create(void);
+Identifier Array_FindIndex(Identifier obj, Identifier index);
+
+STATUS Array_AddElement(Identifier Obj, Identifier index, Identifier value);
+
 #endif
