@@ -384,7 +384,14 @@ void Execute_Equ(Executable exe, Identifier A, Identifier B, Identifier C)
 	}
 	else if(B->type == IDENTIFIER_TYPE_OBJECT)
 	{
-		Identifier_SetObject(A, B->u.obj);
+        /*if A==B then a crash will happen because that corrsponds to
+         * a==a if a is object then before assigning a to a we first free a 
+         * and the copy a to a. So copy operation becomes invalid and might lead
+         * to crash*/
+        if(A != B)
+        {            
+            Identifier_SetObject(A, B->u.obj);
+        }
 		Identifier_SetObject(C, B->u.obj);
 	}
 	else
