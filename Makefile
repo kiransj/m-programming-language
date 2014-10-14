@@ -1,6 +1,6 @@
 GCC=gcc
 AR=ar
-CFLAGS := -g 
+CFLAGS := -g -m32 
 WARNINGS:= -Wall
 LEMON:=./lemon/lemon.out
 
@@ -17,18 +17,15 @@ SOURCE += src/execute_context.c
 SOURCE += src/function.c
 SOURCE += src/variable_list.c
 SOURCE += src/native_functions.c
+SOURCE += test/main.c
 
 M_LIB:=libM.a
-LD_FLAGS := -L. -lM 
-
-TEST_FILES := test/main.c
+LD_FLAGS := -m32 -L.  
 
 COMPILER_OBJECTS :=
 COMPILER_OBJECTS += $(GRAMMER_FILE:.y=.o)
 COMPILER_OBJECTS += $(LEXER_FILE:.l=.o)
 COMPILER_OBJECTS += $(SOURCE:.c=.o)
-
-TEST_OBJECTS := $(TEST_FILES:.c=.o)	
 
 INCLUDES:=  -Iinc -Isrc 
 
@@ -36,9 +33,9 @@ OUTPUT:=a.out
 
 all: $(OUTPUT)
 
-$(OUTPUT): $(M_LIB) $(TEST_OBJECTS)
+$(OUTPUT): $(COMPILER_OBJECTS) 
 	@echo "building $@"
-	@$(GCC) $(CLFAGS) $(TEST_OBJECTS) $(LD_FLAGS)  -o $@
+	@$(GCC) $(CFLAGS) $(COMPILER_OBJECTS) $(LD_FLAGS)  -o $@
 
 $(M_LIB):$(COMPILER_OBJECTS)
 	@echo "building $(M_LIB)"
@@ -54,7 +51,7 @@ $(M_LIB):$(COMPILER_OBJECTS)
 %.o:%.y
 	echo "compiling $^"
 	@$(LEMON) -q $^
-	@$(GCC) -g $(INCLUDES) -c `dirname $^`/`basename $^ .y`.c -o $@
+	@$(GCC) $(CFLAGS)  $(INCLUDES) -c `dirname $^`/`basename $^ .y`.c -o $@
 	@rm `dirname $^`/`basename $^ .y`.c
 
 %.o:%.c
@@ -62,5 +59,5 @@ $(M_LIB):$(COMPILER_OBJECTS)
 	@$(GCC) $(CFLAGS) $(FEATURES) $(WARNINGS) $(INCLUDES) -c $^  -o $@
 
 clean:
-	@rm -f $(COMPILER_OBJECTS) $(OUTPUT) $(TEST_OBJECTS) $(M_LIB) *core*
+	@rm -f $(COMPILER_OBJECTS) $(OUTPUT) $(M_LIB) *core*
 

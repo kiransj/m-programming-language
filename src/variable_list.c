@@ -31,7 +31,7 @@ void VariableList_Destroy(VariableList vl)
 Identifier  VariableList_FindVariable(VariableList vl, const char *variable_name)
 {
 	int flag;
-	VariableList tmp_vl = vl->next, tmp1_vl;
+	VariableList tmp_vl = vl->next ;
 
 	if(strlen(variable_name) < 1)
 	{
@@ -59,7 +59,6 @@ Identifier  VariableList_FindVariable(VariableList vl, const char *variable_name
 			flag = 0;
 			break;
 		}
-		tmp1_vl = tmp_vl;
 		tmp_vl = tmp_vl->next;
 	}
 	while(!IS_NULL(tmp_vl));

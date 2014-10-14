@@ -347,7 +347,7 @@ STATUS Compile(Executable exe, const char *filename)
 
 
 	c = (Compiler)Malloc(sizeof(struct _Compiler));
-	memset(c, 0, sizeof(Compiler));
+	memset(c, 0, sizeof(struct _Compiler));
 	c->label_number = 1;
 	c->label_size = 100;
 	c->label_top = -1;

@@ -1,4 +1,4 @@
 all: lemon.out
 
 lemon.out: lemon.c	
-	gcc lemon.c -o lemon.out
+	gcc -m32 lemon.c -o lemon.out
