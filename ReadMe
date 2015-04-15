@@ -1,4 +1,10 @@
 This code is simple programming lanuage named M.
+This programming language supports objects, conditional statements, 
+dynamic structures, arrays, loops, variable declaration, functions, 
+recursion and support to call ‘C’ function from M. The objective of 
+this projects is to have a compiler and runtime in less than 100KB 
+so it could be embedded into other projects. Once embedded this 
+language can be used to take decision on behalf of the program. 
 
 
 The feature of the lanuage are
